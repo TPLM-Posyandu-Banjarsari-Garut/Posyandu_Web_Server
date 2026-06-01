@@ -1,30 +1,34 @@
-import "dotenv-flow/config";
-import { z } from "zod";
+import { logger } from '@/utils/logger'
+import dotenvFlow from 'dotenv-flow'
+import { z } from 'zod'
+
+dotenvFlow.config()
 
 export const envSchema = z.object({
-  NODE_ENV: z
-    .enum(["development", "test", "production"])
-    .default("development"),
+    NODE_ENV: z
+        .enum(['development', 'test', 'production'])
+        .default('development'),
 
-  PORT: z.string().regex(/^\d+$/, "PORT must be a number").transform(Number),
+    PORT: z.string().regex(/^\d+$/, 'PORT must be a number').transform(Number),
 
-  LOG_LEVEL: z
-    .enum(["fatal", "error", "warn", "info", "debug", "trace"])
-    .default("info"),
+    LOG_LEVEL: z
+        .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
+        .default('info'),
 
-  CORS_ORIGIN: z.url()
-});
+    CORS_ORIGIN: z.url()
+})
 
-export type Env = z.infer<typeof envSchema>;
+export type Env = z.infer<typeof envSchema>
 
-const result = envSchema.safeParse(process.env);
+const result = envSchema.safeParse(process.env)
 
 if (!result.success) {
-  console.error("❌ Invalid environment configuration");
-  console.error(z.prettifyError(result.error));
-  process.exit(1);
+    logger.error(
+        '❌ Invalid environment configuration' + z.prettifyError(result.error)
+    )
+    process.exit(1)
 }
 
-export const env: Readonly<Env> = Object.freeze(result.data);
+export const env: Readonly<Env> = Object.freeze(result.data)
 
-export default env;
+export default env

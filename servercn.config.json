@@ -1,11 +1,11 @@
 {
-  "$schema": "https://servercn.vercel.app/schema/servercn.config.json",
-  "version": "2.0.5",
-  "rootDir": "Posyandu_Web_Server",
-  "packageManager": "bun",
-  "runtime": "node",
-  "language": "typescript",
-  "framework": "express",
-  "architecture": "mvc",
-  "database": null
+    "$schema": "https://servercn.vercel.app/schema/servercn.config.json",
+    "version": "2.0.5",
+    "rootDir": "Posyandu_Web_Server",
+    "packageManager": "bun",
+    "runtime": "node",
+    "language": "typescript",
+    "framework": "express",
+    "architecture": "mvc",
+    "database": null
 }
