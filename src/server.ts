@@ -6,11 +6,14 @@ import { configureGracefulShutdown } from '@/utils/shutdown'
 const port = env.PORT || 9000
 
 const server = app.listen(port, () => {
-    logger.info(`[server]: Server is running at http://localhost:${port}`)
-    logger.info(`[server]: Environment: ${env.NODE_ENV}`)
-    logger.info(
-        `[server]: Swagger docs are available at http://localhost:${port}/api/docs`
-    )
+    const divider = '─'.repeat(50)
+
+    logger.info('🚀 Sampurasun! Posyandu Server Mode On 🚀')
+    logger.info(divider)
+    logger.info(`📡 Local URL    : http://localhost:${port}`)
+    logger.info(`🌍 Environment  : ${env.NODE_ENV.toUpperCase()}`)
+    logger.info(`📖 Swagger Docs : http://localhost:${port}/api/docs`)
+    logger.info(divider)
 })
 
 configureGracefulShutdown(server)
