@@ -31,6 +31,8 @@ app.use(morgan(env.NODE_ENV === 'development' ? 'dev' : 'combined'))
 setupSwagger(app)
 
 //? Routes
+app.get('/favicon.ico', (req, res) => res.status(204).end())
+
 app.get('/', (req: Request, res: Response) => {
     res.redirect('/api/health')
 })

@@ -1,8 +1,4 @@
-import { logger } from '@/utils/logger'
-import dotenvFlow from 'dotenv-flow'
 import { z } from 'zod'
-
-dotenvFlow.config()
 
 export const envSchema = z.object({
     NODE_ENV: z
@@ -23,9 +19,8 @@ export type Env = z.infer<typeof envSchema>
 const result = envSchema.safeParse(process.env)
 
 if (!result.success) {
-    logger.error(
-        '❌ Invalid environment configuration' + z.prettifyError(result.error)
-    )
+    console.error('❌ [Config Error] Invalid environment configuration:')
+    console.error(z.prettifyError(result.error))
     process.exit(1)
 }
 

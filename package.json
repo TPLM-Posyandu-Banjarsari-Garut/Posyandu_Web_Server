@@ -4,9 +4,9 @@
     "main": "dist/server.js",
     "type": "module",
     "scripts": {
-        "dev": "cross-env NODE_ENV=development npx tsx watch src/server.ts",
-        "build": "rm -rf dist &&&& tsc &&&& tsc-alias",
-        "start": "cross-env NODE_ENV=production node dist/server.js",
+        "dev": "NODE_ENV=development bun --watch src/server.ts",
+        "start": "NODE_ENV=production bun dist/server.js",
+        "build": "rm -rf dist && tsc && tsc-alias",
         "typecheck": "tsc --noEmit",
         "lint:check": "eslint .",
         "lint:fix": "eslint . --fix",
@@ -15,7 +15,7 @@
         "db:studio": "bunx drizzle-kit studio",
         "format:check": "npx prettier . --check",
         "format:fix": "npx prettier . --write && npx eslint . --fix",
-        "docs": "npx tsx swagger.config.ts",
+        "docs": "bun swagger.config.ts",
         "prepare": "husky"
     },
     "lint-staged": {
