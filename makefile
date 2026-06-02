@@ -63,10 +63,11 @@ db-studio:
 	$(BUN) run db:studio
 
 dc-up:
-	DOCKER_BUILDKIT=1 $(DOCKER_COMPOSE) up --build app-dev --remove-orphans
+	DOCKER_BUILDKIT=1 $(DOCKER_COMPOSE) up --build app-dev postgres
  
 dc-bg:
 	DOCKER_BUILDKIT=1 $(DOCKER_COMPOSE) up -d
+	
 dc-down:
 	$(DOCKER_COMPOSE) down --remove-orphans
 

@@ -11,7 +11,9 @@ export const envSchema = z.object({
         .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
         .default('info'),
 
-    CORS_ORIGIN: z.url()
+    CORS_ORIGIN: z.url('Format Cors salah'),
+
+    DATABASE_URL: z.url('Database URL Salah').min(3, 'Database URL is required')
 })
 
 export type Env = z.infer<typeof envSchema>
