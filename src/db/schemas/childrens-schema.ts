@@ -1,4 +1,4 @@
-import { bloodTypeEnum, genderEnum } from '@/constants/enum'
+import { bloodTypeEnum, childCategoryEnum, genderEnum } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
 import { timestamps } from '@/db/helpers/timestamps'
 import { posyandus } from '@/db/schemas/posyandus-schema'
@@ -12,12 +12,14 @@ export const childrens = pgTable('childrens', {
         .references(() => posyandus.id),
 
     name: varchar('name', { length: 100 }).notNull(),
-    identitiy_number: varchar('identity_number', { length: 20 })
+    identity_number: varchar('identity_number', { length: 20 })
         .notNull()
         .unique(),
 
     gender: genderEnum('gender').notNull(),
+    child_category: childCategoryEnum('child_category'),
 
+    place_of_birth: varchar('place_of_birth', { length: 100 }),
     birth_date: date('birth_date', { mode: 'date' }),
     birth_order: integer('birth_order'),
     blood_type: bloodTypeEnum('blood_type'),
