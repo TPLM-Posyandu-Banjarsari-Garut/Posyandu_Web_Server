@@ -21,6 +21,13 @@ export const GENDER_VALUES = ['male', 'female'] as const
 
 export const FAMILY_RELATION_VALUES = ['father', 'mother', 'guardian'] as const
 
+export const CADRE_POSITION_VALUES = [
+    'leader',
+    'secretary',
+    'treasurer',
+    'member'
+] as const
+
 export const CONSULTATION_STATUS_VALUES = [
     'pending',
     'confirmed',
@@ -96,6 +103,7 @@ export type AccountStatus = (typeof ACCOUNT_STATUS_VALUES)[number]
 export type AccountRole = (typeof ACCOUNT_ROLE_VALUES)[number]
 export type Gender = (typeof GENDER_VALUES)[number]
 export type FamilyRelation = (typeof FAMILY_RELATION_VALUES)[number]
+export type CadrePosition = (typeof CADRE_POSITION_VALUES)[number]
 export type ConsultationStatus = (typeof CONSULTATION_STATUS_VALUES)[number]
 export type InventoryCondition = (typeof INVENTORY_CONDITION_VALUES)[number]
 export type AdminType = (typeof ADMIN_TYPE_VALUES)[number]
@@ -118,6 +126,8 @@ export const familyRelationEnum = pgEnum(
     'family_relation',
     FAMILY_RELATION_VALUES
 )
+
+export const cadrePositionEnum = pgEnum('cadre_position', CADRE_POSITION_VALUES)
 
 export const consultationStatusEnum = pgEnum(
     'consultation_status',
@@ -174,6 +184,7 @@ export const pgEnums = {
     account_role: accountRoleEnum,
     gender: genderEnum,
     family_relation: familyRelationEnum,
+    cadre_position: cadrePositionEnum,
     consultation_status: consultationStatusEnum,
     inventory_condition: inventoryConditionEnum,
     admin_type: adminTypeEnum,
@@ -202,6 +213,7 @@ export const allPgEnumSql = Object.entries({
     account_role: ACCOUNT_ROLE_VALUES,
     gender: GENDER_VALUES,
     family_relation: FAMILY_RELATION_VALUES,
+    cadre_position: CADRE_POSITION_VALUES,
     consultation_status: CONSULTATION_STATUS_VALUES,
     inventory_condition: INVENTORY_CONDITION_VALUES,
     admin_type: ADMIN_TYPE_VALUES,
