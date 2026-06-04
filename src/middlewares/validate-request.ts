@@ -1,12 +1,17 @@
 import { Request, Response, NextFunction } from 'express'
-import z, { ZodError, type ZodObject, type ZodRawShape } from 'zod'
+import z, { ZodError, type ZodType } from 'zod'
 
 import { ApiError } from '@/utils/api-error'
 
-export const validateRequest = (schema: ZodObject<ZodRawShape>) => {
+type ValidateTarget = 'body' | 'query' | 'params'
+
+export const validateRequest = (
+    schema: ZodType,
+    target: ValidateTarget = 'body'
+) => {
     return (req: Request, res: Response, next: NextFunction) => {
         try {
-            schema.parse(req.body)
+            schema.parse(req[target])
 
             next()
         } catch (error) {
@@ -16,7 +21,7 @@ export const validateRequest = (schema: ZodObject<ZodRawShape>) => {
 
             throw ApiError.badRequest(
                 'Invalid request data',
-                z.flattenError(error).fieldErrors || z.flattenError(error)
+                z.flattenError(error).fieldErrors
             )
         }
     }
