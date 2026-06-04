@@ -105,4 +105,22 @@ export class UserRepository {
             .returning()
         return user
     }
+
+    async existsByEmail(email: string): Promise<boolean> {
+        const [user] = await this.db
+            .select({ id: users.id })
+            .from(users)
+            .where(eq(users.email, email))
+            .limit(1)
+        return !!user
+    }
+
+    async existsByPhoneNumber(phone_number: string): Promise<boolean> {
+        const [user] = await this.db
+            .select({ id: users.id })
+            .from(users)
+            .where(eq(users.phone_number, phone_number))
+            .limit(1)
+        return !!user
+    }
 }
