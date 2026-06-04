@@ -1,26 +1,18 @@
-import { User } from '@/db'
+import { NewUser, User } from '@/db'
 import {
     UserRepository,
     UserQueryFilters
 } from '@/repositories/user-repository'
-import {
-    createUserSchema,
-    updateUserSchema,
-    CreateUserInput,
-    UpdateUserInput
-} from '@/validations/user-validation'
 
 export class UserService {
     constructor(private readonly user_repository: UserRepository) {}
 
-    async createUser(user_payload: CreateUserInput): Promise<User> {
-        const validated = createUserSchema.parse(user_payload)
-
+    async createUser(user_payload: NewUser): Promise<User> {
         const [email_exists, phone_exists] = await Promise.all([
-            this.user_repository.existsByEmail(validated.email),
-            validated.phone_number
+            this.user_repository.existsByEmail(user_payload.email),
+            user_payload.phone_number
                 ? this.user_repository.existsByPhoneNumber(
-                      validated.phone_number
+                      user_payload.phone_number
                   )
                 : false
         ])
@@ -28,7 +20,7 @@ export class UserService {
         if (email_exists) throw new Error('Email already registered')
         if (phone_exists) throw new Error('Phone number already registered')
 
-        return this.user_repository.create(validated)
+        return this.user_repository.create(user_payload)
     }
 
     async getUsers(query_filters?: UserQueryFilters) {
@@ -55,13 +47,14 @@ export class UserService {
 
     async updateUser(
         public_id: string,
-        user_payload: UpdateUserInput
+        user_payload: Partial<NewUser>
     ): Promise<User> {
         await this.getUserById(public_id)
 
-        const validated = updateUserSchema.parse(user_payload)
-
-        const updated = await this.user_repository.update(public_id, validated)
+        const updated = await this.user_repository.update(
+            public_id,
+            user_payload
+        )
         if (!updated) throw new Error('Failed to update user')
         return updated
     }
