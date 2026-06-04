@@ -5,7 +5,7 @@ import userRoutes from '@/routes/user-routes'
 
 const router = Router()
 
-router.use('/health', healthRoutes)
-router.use('/users', userRoutes)
+router.use('/api/health', healthRoutes)
+router.use('/api/users', userRoutes)
 
 export default router

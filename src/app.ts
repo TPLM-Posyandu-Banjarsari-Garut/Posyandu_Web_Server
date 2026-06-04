@@ -35,7 +35,7 @@ app.get('/', (req: Request, res: Response) => {
     res.redirect('/api/health')
 })
 
-app.use('/api', apiRoutes)
+app.use(apiRoutes)
 
 app.use(notFoundHandler)
 app.use(errorHandler)

@@ -24,11 +24,9 @@ router.post(
     AsyncHandler(user_controller.createUser)
 )
 
-router.get(
-    '/',
-    validateRequest(getUsersQuerySchema, 'query'),
-    AsyncHandler(user_controller.getUsers)
-)
+router.get('/', AsyncHandler(user_controller.getUsers))
+
+router.get('/search', AsyncHandler(user_controller.getUsers))
 
 router.get(
     '/:public_id',

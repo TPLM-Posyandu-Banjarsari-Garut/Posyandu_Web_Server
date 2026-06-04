@@ -11,8 +11,12 @@ export const validateRequest = (
 ) => {
     return (req: Request, res: Response, next: NextFunction) => {
         try {
-            req[target] = schema.parse(req[target])
-            return next()
+            const parsedData = schema.parse(req[target])
+
+            // SOLUSI: Jika target adalah body, aman untuk langsung ditimpa
+            if (target === 'body') {
+                req.body = parsedData
+            }
         } catch (error) {
             if (!(error instanceof ZodError)) {
                 return next(error)
