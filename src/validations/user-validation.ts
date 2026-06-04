@@ -1,4 +1,4 @@
-import { accountRoleEnum } from '@/constants/enum'
+import { accountRoleEnum, accountStatusEnum } from '@/constants/enum'
 import { z } from 'zod'
 
 export const createUserSchema = z.object({
@@ -23,7 +23,7 @@ export const createUserSchema = z.object({
 
     role: z.enum(accountRoleEnum.enumValues).default('parent'),
 
-    status: z.enum(['active', 'inactive', 'suspended']).default('active')
+    status: z.enum(accountStatusEnum.enumValues).default('active')
 })
 
 export const updateUserSchema = createUserSchema.partial().omit({
