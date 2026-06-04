@@ -32,7 +32,7 @@ setupSwagger(app)
 app.get('/favicon.ico', (req, res) => res.status(204).end())
 
 app.get('/', (req: Request, res: Response) => {
-    res.redirect('/api/health')
+    res.redirect('/api/docs')
 })
 
 app.use(apiRoutes)
