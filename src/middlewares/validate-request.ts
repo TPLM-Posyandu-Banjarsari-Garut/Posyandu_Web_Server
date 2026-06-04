@@ -11,9 +11,8 @@ export const validateRequest = (
 ) => {
     return (req: Request, res: Response, next: NextFunction) => {
         try {
-            schema.parse(req[target])
-
-            next()
+            req[target] = schema.parse(req[target])
+            return next()
         } catch (error) {
             if (!(error instanceof ZodError)) {
                 return next(error)
