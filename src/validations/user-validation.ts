@@ -46,6 +46,10 @@ export const getUsersQuerySchema = z.object({
     search: z.string().optional()
 })
 
+export const userParamsSchema = z.object({
+    public_id: z.string().min(1, 'Public ID wajib diisi')
+})
+
 export const updateUserSchema = createUserSchema.partial().omit({
     email: true
 })
@@ -53,3 +57,4 @@ export const updateUserSchema = createUserSchema.partial().omit({
 export type CreateUserInput = z.infer<typeof createUserSchema>
 export type UpdateUserInput = z.infer<typeof updateUserSchema>
 export type GetUsersQueryInput = z.infer<typeof getUsersQuerySchema>
+export type UserParamInput = z.infer<typeof userParamsSchema>
