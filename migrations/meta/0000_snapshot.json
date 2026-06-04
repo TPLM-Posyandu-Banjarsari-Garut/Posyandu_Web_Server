@@ -1,0 +1,1133 @@
+{
+    "id": "f47dddd2-9183-4047-887e-278252df5618",
+    "prevId": "00000000-0000-0000-0000-000000000000",
+    "version": "7",
+    "dialect": "postgresql",
+    "tables": {
+        "public.users": {
+            "name": "users",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "public_id": {
+                    "name": "public_id",
+                    "type": "uuid",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "gen_random_uuid()"
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "email": {
+                    "name": "email",
+                    "type": "varchar(255)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "password": {
+                    "name": "password",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "phone_number": {
+                    "name": "phone_number",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "role": {
+                    "name": "role",
+                    "type": "account_role",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'parent'"
+                },
+                "status": {
+                    "name": "status",
+                    "type": "account_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'active'"
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "users_public_id_unique": {
+                    "name": "users_public_id_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["public_id"]
+                },
+                "users_email_unique": {
+                    "name": "users_email_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["email"]
+                },
+                "users_phone_number_unique": {
+                    "name": "users_phone_number_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["phone_number"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.parents": {
+            "name": "parents",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "public_id": {
+                    "name": "public_id",
+                    "type": "uuid",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "gen_random_uuid()"
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "identity_number": {
+                    "name": "identity_number",
+                    "type": "varchar(16)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "place_of_birth": {
+                    "name": "place_of_birth",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "date_of_birth": {
+                    "name": "date_of_birth",
+                    "type": "date",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "blood_type": {
+                    "name": "blood_type",
+                    "type": "blood_type",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "education": {
+                    "name": "education",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "occupation": {
+                    "name": "occupation",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "address_line": {
+                    "name": "address_line",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "rt": {
+                    "name": "rt",
+                    "type": "varchar(5)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "rw": {
+                    "name": "rw",
+                    "type": "varchar(5)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "village_name": {
+                    "name": "village_name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'Banjarsari'"
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "parents_user_id_users_id_fk": {
+                    "name": "parents_user_id_users_id_fk",
+                    "tableFrom": "parents",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "parents_public_id_unique": {
+                    "name": "parents_public_id_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["public_id"]
+                },
+                "parents_identity_number_unique": {
+                    "name": "parents_identity_number_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["identity_number"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.cadres": {
+            "name": "cadres",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "public_id": {
+                    "name": "public_id",
+                    "type": "uuid",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "gen_random_uuid()"
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "posyandu_id": {
+                    "name": "posyandu_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "position": {
+                    "name": "position",
+                    "type": "cadre_position",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'member'"
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "cadres_user_id_users_id_fk": {
+                    "name": "cadres_user_id_users_id_fk",
+                    "tableFrom": "cadres",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "cadres_posyandu_id_posyandus_id_fk": {
+                    "name": "cadres_posyandu_id_posyandus_id_fk",
+                    "tableFrom": "cadres",
+                    "tableTo": "posyandus",
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "cadres_public_id_unique": {
+                    "name": "cadres_public_id_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["public_id"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.midwifes": {
+            "name": "midwifes",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "public_id": {
+                    "name": "public_id",
+                    "type": "uuid",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "gen_random_uuid()"
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "posyandu_id": {
+                    "name": "posyandu_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "license_number": {
+                    "name": "license_number",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "midwifes_user_id_users_id_fk": {
+                    "name": "midwifes_user_id_users_id_fk",
+                    "tableFrom": "midwifes",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "midwifes_posyandu_id_posyandus_id_fk": {
+                    "name": "midwifes_posyandu_id_posyandus_id_fk",
+                    "tableFrom": "midwifes",
+                    "tableTo": "posyandus",
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "midwifes_public_id_unique": {
+                    "name": "midwifes_public_id_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["public_id"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.posyandus": {
+            "name": "posyandus",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "public_id": {
+                    "name": "public_id",
+                    "type": "uuid",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "gen_random_uuid()"
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "health_center_id": {
+                    "name": "health_center_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "address_line": {
+                    "name": "address_line",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "rt": {
+                    "name": "rt",
+                    "type": "varchar(5)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "rw": {
+                    "name": "rw",
+                    "type": "varchar(5)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "village_name": {
+                    "name": "village_name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'Banjarsari'"
+                },
+                "contact_number": {
+                    "name": "contact_number",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "posyandus_health_center_id_health_centers_id_fk": {
+                    "name": "posyandus_health_center_id_health_centers_id_fk",
+                    "tableFrom": "posyandus",
+                    "tableTo": "health_centers",
+                    "columnsFrom": ["health_center_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "posyandus_public_id_unique": {
+                    "name": "posyandus_public_id_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["public_id"]
+                },
+                "posyandus_name_unique": {
+                    "name": "posyandus_name_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["name"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.childrens": {
+            "name": "childrens",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "public_id": {
+                    "name": "public_id",
+                    "type": "uuid",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "gen_random_uuid()"
+                },
+                "posyandu_id": {
+                    "name": "posyandu_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "identity_number": {
+                    "name": "identity_number",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "gender": {
+                    "name": "gender",
+                    "type": "gender",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "child_category": {
+                    "name": "child_category",
+                    "type": "child_category",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "place_of_birth": {
+                    "name": "place_of_birth",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "birth_date": {
+                    "name": "birth_date",
+                    "type": "date",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "birth_order": {
+                    "name": "birth_order",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "blood_type": {
+                    "name": "blood_type",
+                    "type": "blood_type",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "birth_weight": {
+                    "name": "birth_weight",
+                    "type": "numeric(5.2)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "birth_length": {
+                    "name": "birth_length",
+                    "type": "numeric(5.2)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "birth_head_circumference": {
+                    "name": "birth_head_circumference",
+                    "type": "numeric(5.2)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "childrens_posyandu_id_posyandus_id_fk": {
+                    "name": "childrens_posyandu_id_posyandus_id_fk",
+                    "tableFrom": "childrens",
+                    "tableTo": "posyandus",
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "childrens_public_id_unique": {
+                    "name": "childrens_public_id_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["public_id"]
+                },
+                "childrens_identity_number_unique": {
+                    "name": "childrens_identity_number_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["identity_number"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.relation_childrens": {
+            "name": "relation_childrens",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "public_id": {
+                    "name": "public_id",
+                    "type": "uuid",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "gen_random_uuid()"
+                },
+                "parent_id": {
+                    "name": "parent_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "children_id": {
+                    "name": "children_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "relation": {
+                    "name": "relation",
+                    "type": "family_relation",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "relation_childrens_parent_id_parents_id_fk": {
+                    "name": "relation_childrens_parent_id_parents_id_fk",
+                    "tableFrom": "relation_childrens",
+                    "tableTo": "parents",
+                    "columnsFrom": ["parent_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "relation_childrens_children_id_childrens_id_fk": {
+                    "name": "relation_childrens_children_id_childrens_id_fk",
+                    "tableFrom": "relation_childrens",
+                    "tableTo": "childrens",
+                    "columnsFrom": ["children_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "relation_childrens_public_id_unique": {
+                    "name": "relation_childrens_public_id_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["public_id"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.vaccines": {
+            "name": "vaccines",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "public_id": {
+                    "name": "public_id",
+                    "type": "uuid",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "gen_random_uuid()"
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "target_age_months": {
+                    "name": "target_age_months",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "vaccines_public_id_unique": {
+                    "name": "vaccines_public_id_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["public_id"]
+                },
+                "vaccines_name_unique": {
+                    "name": "vaccines_name_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["name"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.vitamins": {
+            "name": "vitamins",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "public_id": {
+                    "name": "public_id",
+                    "type": "uuid",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "gen_random_uuid()"
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "target_age_months": {
+                    "name": "target_age_months",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "vitamins_public_id_unique": {
+                    "name": "vitamins_public_id_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["public_id"]
+                },
+                "vitamins_name_unique": {
+                    "name": "vitamins_name_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["name"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.immunization_records": {
+            "name": "immunization_records",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "public_id": {
+                    "name": "public_id",
+                    "type": "uuid",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "gen_random_uuid()"
+                },
+                "children_id": {
+                    "name": "children_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "vaccine_id": {
+                    "name": "vaccine_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "cadre_id": {
+                    "name": "cadre_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "date_given": {
+                    "name": "date_given",
+                    "type": "date",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "status": {
+                    "name": "status",
+                    "type": "immunization_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'scheduled'"
+                },
+                "notes": {
+                    "name": "notes",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "immunization_records_children_id_childrens_id_fk": {
+                    "name": "immunization_records_children_id_childrens_id_fk",
+                    "tableFrom": "immunization_records",
+                    "tableTo": "childrens",
+                    "columnsFrom": ["children_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "immunization_records_vaccine_id_vaccines_id_fk": {
+                    "name": "immunization_records_vaccine_id_vaccines_id_fk",
+                    "tableFrom": "immunization_records",
+                    "tableTo": "vaccines",
+                    "columnsFrom": ["vaccine_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "immunization_records_cadre_id_cadres_id_fk": {
+                    "name": "immunization_records_cadre_id_cadres_id_fk",
+                    "tableFrom": "immunization_records",
+                    "tableTo": "cadres",
+                    "columnsFrom": ["cadre_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "immunization_records_public_id_unique": {
+                    "name": "immunization_records_public_id_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["public_id"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.health_centers": {
+            "name": "health_centers",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "public_id": {
+                    "name": "public_id",
+                    "type": "uuid",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "gen_random_uuid()"
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "address_line": {
+                    "name": "address_line",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "village_name": {
+                    "name": "village_name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "contact_number": {
+                    "name": "contact_number",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "head_name": {
+                    "name": "head_name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "health_centers_public_id_unique": {
+                    "name": "health_centers_public_id_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["public_id"]
+                },
+                "health_centers_name_unique": {
+                    "name": "health_centers_name_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["name"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        }
+    },
+    "enums": {},
+    "schemas": {},
+    "sequences": {},
+    "roles": {},
+    "policies": {},
+    "views": {},
+    "_meta": {
+        "columns": {},
+        "schemas": {},
+        "tables": {}
+    }
+}
