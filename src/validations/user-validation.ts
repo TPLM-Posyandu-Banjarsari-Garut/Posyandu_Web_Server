@@ -1,4 +1,4 @@
-import { users } from '@/db'
+import { accountRoleEnum, accountStatusEnum, users } from '@/db'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
 
@@ -23,7 +23,10 @@ export const createUserSchema = createInsertSchema(users, {
         .max(20, 'Phone number cannot exceed 20 characters')
         .regex(/^[0-9\-+\s]*$/, 'Invalid phone number format')
         .optional()
-        .nullable()
+        .nullable(),
+    role: z.enum(accountRoleEnum.enumValues).default('parent'),
+
+    status: z.enum(accountStatusEnum.enumValues).default('active')
 }).omit({
     id: true,
     public_id: true,

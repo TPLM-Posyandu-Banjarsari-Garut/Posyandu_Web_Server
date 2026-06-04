@@ -24,14 +24,17 @@ export const validateRequest = (schemas: ValidationSchemas) => {
             })
 
             if (schemas.body) req.body = parsed.body
-            if (schemas.query) req.query = parsed.query as typeof req.query
-            if (schemas.params) req.params = parsed.params as typeof req.params
+            if (schemas.query) Object.assign(req.query, parsed.query)
+            if (schemas.params) Object.assign(req.params, parsed.params)
 
             next()
         } catch (error) {
             if (error instanceof ZodError) {
                 return next(
-                    ApiError.validation('Invalid request data', z.flattenError)
+                    ApiError.validation(
+                        'Invalid request data',
+                        z.flattenError(error).fieldErrors
+                    )
                 )
             }
             next(error)

@@ -10,7 +10,8 @@ services:
             - '${PORT:-3000}:3000'
         environment:
             - NODE_ENV=development
-            - TZ=Asia/Jakarta   
+            - TZ=Asia/Jakarta
+            - DATABASE_URL=postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@postgres:5432/${DATABASE_NAME}
         env_file:
             - .env
         volumes:
