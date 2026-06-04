@@ -32,9 +32,24 @@ export const createUserSchema = createInsertSchema(users, {
     deleted_at: true
 })
 
+export const getUsersQuerySchema = z.object({
+    page: z
+        .string()
+        .optional()
+        .transform(val => (val ? Number.parseInt(val, 10) : 1)),
+
+    limit: z
+        .string()
+        .optional()
+        .transform(val => (val ? Number.parseInt(val, 10) : 10)),
+
+    search: z.string().optional()
+})
+
 export const updateUserSchema = createUserSchema.partial().omit({
     email: true
 })
 
 export type CreateUserInput = z.infer<typeof createUserSchema>
 export type UpdateUserInput = z.infer<typeof updateUserSchema>
+export type GetUsersQueryInput = z.infer<typeof getUsersQuerySchema>

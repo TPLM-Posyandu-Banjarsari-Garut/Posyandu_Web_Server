@@ -4,8 +4,8 @@ import type { Response } from 'express'
 export type PaginationMeta = {
     page: number
     limit: number
-    totalItems: number
-    totalPages: number
+    total_items: number
+    total_pages: number
 }
 
 export class ApiResponse {
