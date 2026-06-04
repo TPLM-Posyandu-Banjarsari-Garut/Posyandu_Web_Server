@@ -6,7 +6,7 @@ import morgan from 'morgan'
 import { notFoundHandler } from '@/middlewares/not-found-handler'
 import { errorHandler } from '@/middlewares/error-handler'
 import { setupSwagger } from '@/configs/swagger'
-import healthRoutes from '@/routes/health-routes'
+import apiRoutes from '@/routes/index-routes'
 import env from '@/configs/env'
 import sourceMapSupport from 'source-map-support'
 sourceMapSupport.install()
@@ -27,22 +27,17 @@ app.use(helmet())
 app.use(cookieParser())
 app.use(morgan(env.NODE_ENV === 'development' ? 'dev' : 'combined'))
 
-//? Swagger Setup
 setupSwagger(app)
 
-//? Routes
 app.get('/favicon.ico', (req, res) => res.status(204).end())
 
 app.get('/', (req: Request, res: Response) => {
     res.redirect('/api/health')
 })
 
-app.use('/api/health', healthRoutes)
+app.use('/api', apiRoutes)
 
-// Not found handler (should be after routes)
 app.use(notFoundHandler)
-
-// Global error handler (should be last)
 app.use(errorHandler)
 
 export default app

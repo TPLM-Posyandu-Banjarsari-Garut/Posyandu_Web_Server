@@ -19,32 +19,32 @@ const user_service = new UserService(user_repository)
 const user_controller = new UserController(user_service)
 
 router.post(
-    '/users',
+    '/',
     validateRequest(createUserSchema, 'body'),
     AsyncHandler(user_controller.createUser)
 )
 
 router.get(
-    '/users',
+    '/',
     validateRequest(getUsersQuerySchema, 'query'),
     AsyncHandler(user_controller.getUsers)
 )
 
 router.get(
-    '/users/:public_id',
+    '/:public_id',
     validateRequest(userParamsSchema, 'params'),
     AsyncHandler(user_controller.getUserById)
 )
 
 router.put(
-    '/users/:public_id',
+    '/:public_id',
     validateRequest(userParamsSchema, 'params'),
     validateRequest(updateUserSchema, 'body'),
     AsyncHandler(user_controller.updateUser)
 )
 
 router.delete(
-    '/users/:public_id',
+    '/:public_id',
     validateRequest(userParamsSchema, 'params'),
     AsyncHandler(user_controller.deleteUser)
 )
