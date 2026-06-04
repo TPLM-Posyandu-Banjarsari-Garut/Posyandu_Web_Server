@@ -77,6 +77,15 @@ export class UserRepository {
         return user
     }
 
+    async findByEmail(email: string): Promise<User | undefined> {
+        const [user] = await this.db
+            .select()
+            .from(users)
+            .where(eq(users.email, email))
+            .limit(1)
+        return user
+    }
+
     async update(
         public_id: string,
         updated_user: Partial<NewUser>
