@@ -1,3 +1,21 @@
+CREATE TYPE "public"."account_role" AS ENUM('posyandu_admin', 'village_admin', 'parent', 'cadre', 'midwife');--> statement-breakpoint
+CREATE TYPE "public"."account_status" AS ENUM('active', 'inactive', 'disabled', 'pending_verification');--> statement-breakpoint
+CREATE TYPE "public"."admin_type" AS ENUM('posyandu_admin', 'village_admin', 'super_admin');--> statement-breakpoint
+CREATE TYPE "public"."age_unit" AS ENUM('day', 'month', 'year');--> statement-breakpoint
+CREATE TYPE "public"."blood_type" AS ENUM('A', 'B', 'AB', 'O', 'UNKNOWN');--> statement-breakpoint
+CREATE TYPE "public"."cadre_position" AS ENUM('leader', 'secretary', 'treasurer', 'member');--> statement-breakpoint
+CREATE TYPE "public"."child_category" AS ENUM('infant', 'young_child', 'toddler');--> statement-breakpoint
+CREATE TYPE "public"."consultation_status" AS ENUM('pending', 'confirmed', 'completed', 'cancelled', 'rescheduled');--> statement-breakpoint
+CREATE TYPE "public"."examination_status" AS ENUM('pending', 'processing', 'completed', 'cancelled');--> statement-breakpoint
+CREATE TYPE "public"."examination_type" AS ENUM('infant', 'pregnant_mother', 'toddler', 'young_child');--> statement-breakpoint
+CREATE TYPE "public"."family_relation" AS ENUM('father', 'mother', 'guardian');--> statement-breakpoint
+CREATE TYPE "public"."gender" AS ENUM('male', 'female');--> statement-breakpoint
+CREATE TYPE "public"."immunization_status" AS ENUM('not_yet', 'scheduled', 'completed', 'missed');--> statement-breakpoint
+CREATE TYPE "public"."inventory_condition" AS ENUM('good', 'minor_damage', 'major_damage', 'out_of_stock', 'under_repair');--> statement-breakpoint
+CREATE TYPE "public"."notification_status" AS ENUM('unread', 'read');--> statement-breakpoint
+CREATE TYPE "public"."notification_type" AS ENUM('immunization', 'consultation', 'examination', 'education', 'system');--> statement-breakpoint
+CREATE TYPE "public"."pregnancy_status" AS ENUM('first_trimester', 'second_trimester', 'third_trimester', 'delivered');--> statement-breakpoint
+CREATE TYPE "public"."status" AS ENUM('active', 'inactive');--> statement-breakpoint
 CREATE TABLE "users" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
@@ -89,9 +107,9 @@ CREATE TABLE "childrens" (
 	"birth_date" date,
 	"birth_order" integer,
 	"blood_type" "blood_type",
-	"birth_weight" numeric(5.2),
-	"birth_length" numeric(5.2),
-	"birth_head_circumference" numeric(5.2),
+	"birth_weight" numeric(5, 2),
+	"birth_length" numeric(5, 2),
+	"birth_head_circumference" numeric(5, 2),
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp with time zone,
