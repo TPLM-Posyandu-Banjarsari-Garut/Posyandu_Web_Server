@@ -36,18 +36,22 @@ export const getUsersQuerySchema = z.object({
     page: z
         .string()
         .optional()
-        .transform(val => (val ? Number.parseInt(val, 10) : 1)),
+        .default('1')
+        .transform(val => Number.parseInt(val, 10)),
 
     limit: z
         .string()
         .optional()
-        .transform(val => (val ? Number.parseInt(val, 10) : 10)),
+        .default('10')
+        .transform(val => Number.parseInt(val, 10)),
 
-    search: z.string().optional()
+    search: z.string().optional(),
+    role: z.string().optional(),
+    status: z.string().optional()
 })
 
 export const userParamsSchema = z.object({
-    public_id: z.string().min(1, 'Public ID wajib diisi')
+    public_id: z.string().min(1, 'Public ID is required')
 })
 
 export const updateUserSchema = createUserSchema.partial().omit({

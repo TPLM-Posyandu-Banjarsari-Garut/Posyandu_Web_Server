@@ -1,5 +1,5 @@
 import { NewUser, User, users } from '@/db'
-import { and, eq, ilike, sql } from 'drizzle-orm'
+import { and, eq, ilike, or, sql } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface UserQueryFilters {
@@ -18,18 +18,20 @@ export class UserRepository {
         return user
     }
 
-    async ragsAll(): Promise<User[]> {
+    async findAll(): Promise<User[]> {
         return this.db.select().from(users)
     }
 
-    async findManyPaginated(
-        filters?: UserQueryFilters
-    ): Promise<{ data: User[]; totalItems: number }> {
+    async getUsers(filters?: UserQueryFilters) {
         const { search, role, status, page = 1, limit = 10 } = filters || {}
-        const offset = (page - 1) * limit
 
         const whereClause = and(
-            search ? ilike(users.name, `%${search}%`) : undefined,
+            search
+                ? or(
+                      ilike(users.name, `%${search}%`),
+                      ilike(users.email, `%${search}%`)
+                  )
+                : undefined,
             role ? eq(users.role, role) : undefined,
             status ? eq(users.status, status) : undefined
         )
@@ -40,16 +42,17 @@ export class UserRepository {
                 .from(users)
                 .where(whereClause)
                 .limit(limit)
-                .offset(offset),
+                .offset((page - 1) * limit),
             this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(users)
                 .where(whereClause)
         ])
 
-        const totalItems = Number(countResult[0]?.count || 0)
-
-        return { data, totalItems }
+        return {
+            data,
+            totalItems: Number(countResult[0]?.count || 0)
+        }
     }
 
     async findById(public_id: string): Promise<User | undefined> {

@@ -20,30 +20,31 @@ const user_controller = new UserController(user_service)
 
 router.post(
     '/',
-    validateRequest(createUserSchema, 'body'),
+    validateRequest({ body: createUserSchema }),
     AsyncHandler(user_controller.createUser)
 )
 
-router.get('/', AsyncHandler(user_controller.getUsers))
-
-router.get('/search', AsyncHandler(user_controller.getUsers))
+router.get(
+    '/',
+    validateRequest({ query: getUsersQuerySchema }),
+    AsyncHandler(user_controller.getUsers)
+)
 
 router.get(
     '/:public_id',
-    validateRequest(userParamsSchema, 'params'),
+    validateRequest({ params: userParamsSchema }),
     AsyncHandler(user_controller.getUserById)
 )
 
 router.put(
     '/:public_id',
-    validateRequest(userParamsSchema, 'params'),
-    validateRequest(updateUserSchema, 'body'),
+    validateRequest({ params: userParamsSchema, body: updateUserSchema }),
     AsyncHandler(user_controller.updateUser)
 )
 
 router.delete(
     '/:public_id',
-    validateRequest(userParamsSchema, 'params'),
+    validateRequest({ params: userParamsSchema }),
     AsyncHandler(user_controller.deleteUser)
 )
 

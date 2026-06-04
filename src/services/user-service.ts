@@ -26,7 +26,7 @@ export class UserService {
     async getUsers(query_filters?: UserQueryFilters) {
         const { page = 1, limit = 10 } = query_filters || {}
         const { data, totalItems } =
-            await this.user_repository.findManyPaginated(query_filters)
+            await this.user_repository.getUsers(query_filters)
 
         return {
             data,

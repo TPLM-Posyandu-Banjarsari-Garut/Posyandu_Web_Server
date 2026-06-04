@@ -1,31 +1,40 @@
 import { Request, Response, NextFunction } from 'express'
-import z, { ZodError, type ZodType } from 'zod'
-
+import { ZodError, type ZodType, z } from 'zod'
 import { ApiError } from '@/utils/api-error'
 
-type ValidateTarget = 'body' | 'query' | 'params'
+type ValidationSchemas = {
+    body?: ZodType
+    query?: ZodType
+    params?: ZodType
+}
 
-export const validateRequest = (
-    schema: ZodType,
-    target: ValidateTarget = 'body'
-) => {
-    return (req: Request, res: Response, next: NextFunction) => {
+export const validateRequest = (schemas: ValidationSchemas) => {
+    const combinedSchema = z.object({
+        ...(schemas.body && { body: schemas.body }),
+        ...(schemas.query && { query: schemas.query }),
+        ...(schemas.params && { params: schemas.params })
+    })
+
+    return async (req: Request, _res: Response, next: NextFunction) => {
         try {
-            const parsedData = schema.parse(req[target])
+            const parsed = await combinedSchema.parseAsync({
+                body: req.body,
+                query: req.query,
+                params: req.params
+            })
 
-            // SOLUSI: Jika target adalah body, aman untuk langsung ditimpa
-            if (target === 'body') {
-                req.body = parsedData
-            }
+            if (schemas.body) req.body = parsed.body
+            if (schemas.query) req.query = parsed.query as typeof req.query
+            if (schemas.params) req.params = parsed.params as typeof req.params
+
+            next()
         } catch (error) {
-            if (!(error instanceof ZodError)) {
-                return next(error)
+            if (error instanceof ZodError) {
+                return next(
+                    ApiError.validation('Invalid request data', z.flattenError)
+                )
             }
-
-            throw ApiError.badRequest(
-                'Invalid request data',
-                z.flattenError(error).fieldErrors
-            )
+            next(error)
         }
     }
 }

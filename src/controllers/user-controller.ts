@@ -17,16 +17,11 @@ export class UserController {
     }
 
     getUsers = async (req: Request, res: Response) => {
-        const filters = req.query as unknown as UserQueryFilters
-        logger.info({ filters }, 'Incoming request: Get Users List')
+        const query = req.query as unknown as UserQueryFilters
+        logger.info({ query }, 'Incoming request: Get Users')
 
-        const { data, meta } = await this.user_service.getUsers(filters)
-        return ApiResponse.paginated(
-            res,
-            data,
-            meta,
-            'Users retrieved successfully'
-        )
+        const result = await this.user_service.getUsers(query)
+        return ApiResponse.ok(res, 'Users retrieved successfully', result)
     }
 
     getUserById = async (req: Request, res: Response) => {
