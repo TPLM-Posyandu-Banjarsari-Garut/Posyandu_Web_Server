@@ -27,10 +27,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
         fields: [users.id],
         references: [parents.user_id]
     }),
-    cadre: one(cadres, {
-        fields: [users.id],
-        references: [cadres.user_id]
-    }),
+    cadreAssignments: many(cadres),
     midwifeAssignments: many(midwifes),
     educations: many(educations)
 }))
