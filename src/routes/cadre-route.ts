@@ -8,7 +8,8 @@ import {
     createCadreSchema,
     updateCadreSchema,
     getCadresQuerySchema,
-    cadreParamsSchema
+    cadreParamsSchema,
+    deleteCadreQuerySchema
 } from '@/validations/cadre-validation'
 import db from '@/configs/db'
 
@@ -44,8 +45,17 @@ router.put(
 
 router.delete(
     '/:public_id',
-    validateRequest({ params: cadreParamsSchema }),
+    validateRequest({
+        params: cadreParamsSchema,
+        query: deleteCadreQuerySchema
+    }),
     AsyncHandler(cadre_controller.deleteCadre)
+)
+
+router.post(
+    '/:public_id/restore',
+    validateRequest({ params: cadreParamsSchema }),
+    AsyncHandler(cadre_controller.restoreCadre)
 )
 
 export default router

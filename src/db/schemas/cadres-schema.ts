@@ -1,4 +1,4 @@
-import { cadrePositionEnum, statusEnum } from '@/constants/enum'
+import { accountStatusEnum, cadrePositionEnum } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
 import { timestamps } from '@/db/helpers/timestamps'
 import { posyandus } from '@/db/schemas/posyandus-schema'
@@ -24,21 +24,16 @@ export const cadres = pgTable(
             .notNull()
             .references(() => posyandus.id),
 
-        /** NIK kader — identitas administratif (FR-A-01: akun dibuat admin) */
         identity_number: varchar('identity_number', { length: 16 }),
 
-        /** Jabatan struktural Posyandu: ketua, sekretaris, bendahara, anggota */
         position: cadrePositionEnum('position').notNull().default('member'),
 
-        /** Penugasan utama jika kader ditugaskan di lebih dari satu posyandu */
         is_primary_assignment: boolean('is_primary_assignment')
             .notNull()
             .default(true),
-        /** Catatan wilayah tugas (desa/dusun) — FR-K: pengelolaan berdasarkan wilayah */
         duty_area_notes: text('duty_area_notes'),
-        assignment_status: statusEnum('assignment_status')
-            .notNull()
-            .default('active'),
+
+        status: accountStatusEnum('status').notNull().default('active'),
 
         ...timestamps
     },

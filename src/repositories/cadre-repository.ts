@@ -6,8 +6,10 @@ export interface CadreQueryFilters {
     user_id?: number
     posyandu_id?: number
     position?: Cadre['position']
+    status?: Cadre['status']
     page?: number
     limit?: number
+    includeDeleted?: boolean
 }
 
 export class CadreRepository {
@@ -22,7 +24,7 @@ export class CadreRepository {
     }
 
     async findAll(): Promise<Cadre[]> {
-        return this.db.select().from(cadres)
+        return this.db.select().from(cadres).where(eq(cadres.status, 'active'))
     }
 
     async getCadres(filters?: CadreQueryFilters) {
@@ -30,14 +32,24 @@ export class CadreRepository {
             user_id,
             posyandu_id,
             position,
+            status,
             page = 1,
-            limit = 10
+            limit = 10,
+            includeDeleted = false
         } = filters || {}
+
+        let statusCondition = undefined
+        if (status) {
+            statusCondition = eq(cadres.status, status)
+        } else if (!includeDeleted) {
+            statusCondition = eq(cadres.status, 'active')
+        }
 
         const whereClause = and(
             user_id ? eq(cadres.user_id, user_id) : undefined,
             posyandu_id ? eq(cadres.posyandu_id, posyandu_id) : undefined,
-            position ? eq(cadres.position, position) : undefined
+            position ? eq(cadres.position, position) : undefined,
+            statusCondition
         )
 
         const [data, countResult] = await Promise.all([
@@ -63,20 +75,35 @@ export class CadreRepository {
         const [cadre] = await this.db
             .select()
             .from(cadres)
-            .where(eq(cadres.public_id, public_id))
+            .where(
+                and(
+                    eq(cadres.public_id, public_id),
+                    eq(cadres.status, 'active')
+                )
+            )
             .limit(1)
         return cadre
     }
 
     async findByUserId(user_id: number): Promise<Cadre[]> {
-        return this.db.select().from(cadres).where(eq(cadres.user_id, user_id))
+        return this.db
+            .select()
+            .from(cadres)
+            .where(
+                and(eq(cadres.user_id, user_id), eq(cadres.status, 'active'))
+            )
     }
 
     async findByPosyanduId(posyandu_id: number): Promise<Cadre[]> {
         return this.db
             .select()
             .from(cadres)
-            .where(eq(cadres.posyandu_id, posyandu_id))
+            .where(
+                and(
+                    eq(cadres.posyandu_id, posyandu_id),
+                    eq(cadres.status, 'active')
+                )
+            )
     }
 
     async update(
@@ -91,9 +118,31 @@ export class CadreRepository {
         return cadre
     }
 
-    async delete(public_id: string): Promise<Cadre | undefined> {
+    async softDelete(public_id: string): Promise<Cadre | undefined> {
+        const [cadre] = await this.db
+            .update(cadres)
+            .set({
+                status: 'inactive'
+            })
+            .where(eq(cadres.public_id, public_id))
+            .returning()
+        return cadre
+    }
+
+    async hardDelete(public_id: string): Promise<Cadre | undefined> {
         const [cadre] = await this.db
             .delete(cadres)
+            .where(eq(cadres.public_id, public_id))
+            .returning()
+        return cadre
+    }
+
+    async restore(public_id: string): Promise<Cadre | undefined> {
+        const [cadre] = await this.db
+            .update(cadres)
+            .set({
+                status: 'active'
+            })
             .where(eq(cadres.public_id, public_id))
             .returning()
         return cadre
