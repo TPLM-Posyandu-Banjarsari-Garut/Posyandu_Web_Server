@@ -52,11 +52,11 @@ export class MidwifeRepository {
             search
                 ? or(
                       ilike(midwifes.identity_number, `%${search}%`),
-                      ilike(midwifes.str_number, `%${search}%`)
+                      ilike(midwifes.license_number, `%${search}%`)
                   )
                 : undefined,
             user_id ? eq(midwifes.user_id, user_id) : undefined,
-            str_number ? eq(midwifes.str_number, str_number) : undefined,
+            str_number ? eq(midwifes.license_number, str_number) : undefined,
             statusCondition
         )
 
@@ -169,7 +169,7 @@ export class MidwifeRepository {
         const [midwife] = await this.db
             .select({ id: midwifes.id })
             .from(midwifes)
-            .where(eq(midwifes.str_number, str_number))
+            .where(eq(midwifes.license_number, str_number))
             .limit(1)
         return !!midwife
     }

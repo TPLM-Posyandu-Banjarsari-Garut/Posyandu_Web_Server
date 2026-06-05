@@ -13,7 +13,7 @@ import {
 } from 'drizzle-orm/pg-core'
 
 export const midwifes = pgTable(
-    'midwives',
+    'midwifes',
     {
         ...createBaseColumns('midwives'),
 
@@ -26,7 +26,7 @@ export const midwifes = pgTable(
 
         identity_number: varchar('identity_number', { length: 16 }).notNull(),
         employee_number: varchar('employee_number', { length: 32 }),
-        str_number: varchar('str_number', { length: 50 }),
+        license_number: varchar('license_number', { length: 50 }),
 
         is_mtbs_trained: boolean('is_mtbs_trained').notNull().default(false),
         is_kelas_ibu_balita_facilitator: boolean(
@@ -53,7 +53,7 @@ export const midwifes = pgTable(
             table.user_id,
             table.posyandu_id
         ),
-        uniqueIndex('midwives_str_number_unique').on(table.str_number)
+        uniqueIndex('midwives_str_number_unique').on(table.license_number)
     ]
 )
 

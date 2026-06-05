@@ -18,7 +18,7 @@ export const createMidwifeSchema = createInsertSchema(midwifes, {
         .optional()
         .nullable(),
 
-    str_number: z
+    license_number: z
         .string()
         .max(50, 'STR number cannot exceed 50 characters')
         .optional()

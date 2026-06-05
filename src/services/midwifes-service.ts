@@ -25,9 +25,9 @@ export class MidwifeService {
             throw new Error('Identity number (NIK) is already registered')
         }
 
-        if (midwife_payload.str_number) {
+        if (midwife_payload.license_number) {
             const isStrUsed = await this.midwife_repository.existsByStrNumber(
-                midwife_payload.str_number
+                midwife_payload.license_number
             )
             if (isStrUsed) {
                 throw new Error('STR number is already registered')
@@ -97,11 +97,11 @@ export class MidwifeService {
         }
 
         if (
-            midwife_payload.str_number &&
-            midwife_payload.str_number !== existingMidwife.str_number
+            midwife_payload.license_number &&
+            midwife_payload.license_number !== existingMidwife.license_number
         ) {
             const isStrUsed = await this.midwife_repository.existsByStrNumber(
-                midwife_payload.str_number
+                midwife_payload.license_number
             )
             if (isStrUsed) {
                 throw new Error(
