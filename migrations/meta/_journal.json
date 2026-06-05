@@ -1,34 +1,41 @@
 {
-    "version": "7",
-    "dialect": "postgresql",
-    "entries": [
-        {
-            "idx": 0,
-            "version": "7",
-            "when": 1780665892570,
-            "tag": "0000_spicy_nova",
-            "breakpoints": true
-        },
-        {
-            "idx": 1,
-            "version": "7",
-            "when": 1780678146532,
-            "tag": "0001_lean_thunderbolt",
-            "breakpoints": true
-        },
-        {
-            "idx": 2,
-            "version": "7",
-            "when": 1780678476709,
-            "tag": "0002_warm_molly_hayes",
-            "breakpoints": true
-        },
-        {
-            "idx": 3,
-            "version": "7",
-            "when": 1780679544688,
-            "tag": "0003_thin_war_machine",
-            "breakpoints": true
-        }
-    ]
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1780665892570,
+      "tag": "0000_spicy_nova",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1780678146532,
+      "tag": "0001_lean_thunderbolt",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780678476709,
+      "tag": "0002_warm_molly_hayes",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1780679544688,
+      "tag": "0003_thin_war_machine",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1780684773396,
+      "tag": "0004_flashy_spencer_smythe",
+      "breakpoints": true
+    }
+  ]
 }
