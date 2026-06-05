@@ -8,6 +8,7 @@ export interface ParentQueryFilters {
     blood_type?: Parent['blood_type']
     page?: number
     limit?: number
+    includeDeleted?: boolean
 }
 
 export class ParentRepository {
@@ -105,9 +106,31 @@ export class ParentRepository {
         return parent
     }
 
-    async delete(public_id: string): Promise<Parent | undefined> {
+    async softDelete(public_id: string): Promise<Parent | undefined> {
+        const [parent] = await this.db
+            .update(parents)
+            .set({
+                status: 'inactive'
+            })
+            .where(eq(parents.public_id, public_id))
+            .returning()
+        return parent
+    }
+
+    async hardDelete(public_id: string): Promise<Parent | undefined> {
         const [parent] = await this.db
             .delete(parents)
+            .where(eq(parents.public_id, public_id))
+            .returning()
+        return parent
+    }
+
+    async restore(public_id: string): Promise<Parent | undefined> {
+        const [parent] = await this.db
+            .update(parents)
+            .set({
+                status: 'active'
+            })
             .where(eq(parents.public_id, public_id))
             .returning()
         return parent

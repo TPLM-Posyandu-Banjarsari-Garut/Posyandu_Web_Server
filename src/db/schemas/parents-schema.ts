@@ -1,4 +1,4 @@
-import { bloodTypeEnum } from '@/constants/enum'
+import { accountStatusEnum, bloodTypeEnum } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
 import { timestamps } from '@/db/helpers/timestamps'
 import { users } from '@/db/schemas/users-schema'
@@ -26,6 +26,8 @@ export const parents = pgTable('parents', {
     village_name: varchar('village_name', { length: 100 }).default(
         'Banjarsari'
     ),
+
+    status: accountStatusEnum('status').notNull().default('active'),
 
     ...timestamps
 })

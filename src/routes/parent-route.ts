@@ -8,7 +8,8 @@ import {
     createParentSchema,
     updateParentSchema,
     getParentsQuerySchema,
-    parentParamsSchema
+    parentParamsSchema,
+    deleteParentQuerySchema
 } from '@/validations/parent-validation'
 import db from '@/configs/db'
 
@@ -44,8 +45,17 @@ router.put(
 
 router.delete(
     '/:public_id',
-    validateRequest({ params: parentParamsSchema }),
+    validateRequest({
+        params: parentParamsSchema,
+        query: deleteParentQuerySchema
+    }),
     AsyncHandler(parent_controller.deleteParent)
+)
+
+router.post(
+    '/:public_id/restore',
+    validateRequest({ params: parentParamsSchema }),
+    AsyncHandler(parent_controller.restoreParent)
 )
 
 export default router
