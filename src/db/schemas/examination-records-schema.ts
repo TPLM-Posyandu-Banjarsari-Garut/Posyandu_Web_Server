@@ -36,8 +36,12 @@ export const examinationRecords = pgTable(
         children_id: integer('children_id').references(() => childrens.id),
         parent_id: integer('parent_id').references(() => parents.id),
 
-        cadre_id: integer('cadre_id').references(() => cadres.id),
-        midwife_id: integer('midwife_id').references(() => midwifes.id),
+        cadre_id: integer('cadre_id')
+            .notNull()
+            .references(() => cadres.id),
+        midwife_id: integer('midwife_id')
+            .notNull()
+            .references(() => midwifes.id),
 
         examination_date: date('examination_date', { mode: 'date' }).notNull(),
         status: examinationStatusEnum('status').notNull().default('pending'),
