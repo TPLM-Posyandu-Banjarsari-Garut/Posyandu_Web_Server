@@ -45,9 +45,21 @@ export class UserController {
 
     deleteUser = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
-        logger.warn({ public_id }, 'Incoming request: Delete User')
+        const is_permanent = req.query.permanent === 'true'
+        logger.warn(
+            { public_id, is_permanent },
+            'Incoming request: Delete User'
+        )
 
-        const user = await this.user_service.deleteUser(public_id)
+        const user = await this.user_service.deleteUser(public_id, is_permanent)
         return ApiResponse.ok(res, 'User deleted successfully', user)
+    }
+
+    restoreUser = async (req: Request, res: Response) => {
+        const public_id = req.params.public_id as string
+        logger.info({ public_id }, 'Incoming request: Restore User')
+
+        const user = await this.user_service.restoreUser(public_id)
+        return ApiResponse.ok(res, 'User restored successfully', user)
     }
 }

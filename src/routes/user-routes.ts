@@ -48,4 +48,10 @@ router.delete(
     AsyncHandler(user_controller.deleteUser)
 )
 
+router.post(
+    '/:public_id/restore',
+    validateRequest({ params: userParamsSchema }),
+    AsyncHandler(user_controller.restoreUser)
+)
+
 export default router
