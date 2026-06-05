@@ -52,21 +52,17 @@ export class UserService {
         const existing_user = await this.getUserById(public_id)
 
         const checks: Promise<boolean>[] = []
-        const check_email =
-            user_payload.email && user_payload.email !== existing_user.email
-        const check_phone =
-            user_payload.phone_number &&
-            user_payload.phone_number !== existing_user.phone_number
+        const email = user_payload.email
+        const phone = user_payload.phone_number
 
-        if (check_email) {
-            checks.push(this.user_repository.existsByEmail(user_payload.email!))
+        const check_email = email && email !== existing_user.email
+        const check_phone = phone && phone !== existing_user.phone_number
+
+        if (check_email && email) {
+            checks.push(this.user_repository.existsByEmail(email))
         }
-        if (check_phone) {
-            checks.push(
-                this.user_repository.existsByPhoneNumber(
-                    user_payload.phone_number!
-                )
-            )
+        if (check_phone && phone) {
+            checks.push(this.user_repository.existsByPhoneNumber(phone))
         }
 
         if (checks.length > 0) {
