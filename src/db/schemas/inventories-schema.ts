@@ -1,4 +1,8 @@
-import { inventoryConditionEnum, inventoryUnitEnum } from '@/constants/enum'
+import {
+    inventoryConditionEnum,
+    inventoryItemTypeEnum,
+    inventoryUnitEnum
+} from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
 import { timestamps } from '@/db/helpers/timestamps'
 import { posyandus } from '@/db/schemas/posyandus-schema'
@@ -12,10 +16,13 @@ export const inventories = pgTable('inventories', {
         .references(() => posyandus.id),
 
     item_name: varchar('item_name', { length: 100 }).notNull(),
+    item_type: inventoryItemTypeEnum('item_type').notNull().default('general'),
     description: text('description'),
     quantity: integer('quantity').notNull().default(0),
     unit: inventoryUnitEnum('unit').notNull().default('pcs'),
     condition: inventoryConditionEnum('condition').notNull().default('good'),
+    batch_number: varchar('batch_number', { length: 50 }),
+    expiry_date: date('expiry_date', { mode: 'date' }),
     last_checked_date: date('last_checked_date', { mode: 'date' }),
     notes: text('notes'),
 

@@ -10,6 +10,7 @@ import { examinations } from '@/db/schemas/examinations-schema'
 import { healthCenters } from '@/db/schemas/health-centers-schema'
 import { immunizationRecords } from '@/db/schemas/immunization-records'
 import { inventories } from '@/db/schemas/inventories-schema'
+import { kipiDetails } from '@/db/schemas/kipi-details-schema'
 import { midwifes } from '@/db/schemas/midwifes-schema'
 import { nutritionRecords } from '@/db/schemas/nutrition-records-schema'
 import { parents } from '@/db/schemas/parents-schema'
@@ -93,6 +94,7 @@ export const posyandusRelations = relations(posyandus, ({ one, many }) => ({
     midwifes: many(midwifes),
     childrens: many(childrens),
     immunizationRecords: many(immunizationRecords),
+    vitaminRecords: many(vitaminRecords),
     examinations: many(examinations),
     examinationSchedules: many(examinationSchedules),
     examinationRecords: many(examinationRecords),
@@ -157,6 +159,14 @@ export const immunizationRecordsRelations = relations(
         posyandu: one(posyandus, {
             fields: [immunizationRecords.posyandu_id],
             references: [posyandus.id]
+        }),
+        inventory: one(inventories, {
+            fields: [immunizationRecords.inventory_id],
+            references: [inventories.id]
+        }),
+        kipiDetail: one(kipiDetails, {
+            fields: [immunizationRecords.id],
+            references: [kipiDetails.immunization_record_id]
         })
     })
 )
@@ -177,6 +187,10 @@ export const vitaminRecordsRelations = relations(vitaminRecords, ({ one }) => ({
     midwife: one(midwifes, {
         fields: [vitaminRecords.midwife_id],
         references: [midwifes.id]
+    }),
+    posyandu: one(posyandus, {
+        fields: [vitaminRecords.posyandu_id],
+        references: [posyandus.id]
     })
 }))
 
@@ -304,9 +318,17 @@ export const educationsRelations = relations(educations, ({ one }) => ({
     })
 }))
 
-export const inventoriesRelations = relations(inventories, ({ one }) => ({
+export const inventoriesRelations = relations(inventories, ({ one, many }) => ({
     posyandu: one(posyandus, {
         fields: [inventories.posyandu_id],
         references: [posyandus.id]
+    }),
+    immunizationRecords: many(immunizationRecords)
+}))
+
+export const kipiDetailsRelations = relations(kipiDetails, ({ one }) => ({
+    immunizationRecord: one(immunizationRecords, {
+        fields: [kipiDetails.immunization_record_id],
+        references: [immunizationRecords.id]
     })
 }))

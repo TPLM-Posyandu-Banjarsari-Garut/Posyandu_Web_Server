@@ -123,6 +123,46 @@ export const INVENTORY_UNIT_VALUES = [
     'set'
 ] as const
 
+export const CAPSULE_COLOR_VALUES = ['blue', 'red'] as const
+
+export const DISTRIBUTION_PERIOD_VALUES = ['february', 'august'] as const
+
+export const SCHEDULE_COMPLIANCE_VALUES = [
+    'on_time',
+    'late',
+    'non_compliant'
+] as const
+
+export const SYNC_STATUS_VALUES = ['pending', 'synced', 'failed'] as const
+
+export const SERVICE_LOCATION_TYPE_VALUES = [
+    'posyandu',
+    'puskesmas',
+    'pustu',
+    'home',
+    'school',
+    'paud',
+    'kindergarten',
+    'daycare'
+] as const
+
+export const VITAMIN_RECORD_STATUS_VALUES = [
+    'not_yet',
+    'given',
+    'missed',
+    'sweeping'
+] as const
+
+export const KIPI_SEVERITY_VALUES = ['mild', 'moderate', 'severe'] as const
+
+export const VACCINE_ROUTE_VALUES = ['injection', 'oral'] as const
+
+export const INVENTORY_ITEM_TYPE_VALUES = [
+    'vaccine',
+    'vitamin',
+    'general'
+] as const
+
 export type Status = (typeof STATUS_VALUES)[number]
 export type AccountStatus = (typeof ACCOUNT_STATUS_VALUES)[number]
 export type AccountRole = (typeof ACCOUNT_ROLE_VALUES)[number]
@@ -144,6 +184,15 @@ export type BloodType = (typeof BLOOD_TYPE_VALUES)[number]
 export type NutritionStatus = (typeof NUTRITION_STATUS_VALUES)[number]
 export type EducationCategory = (typeof EDUCATION_CATEGORY_VALUES)[number]
 export type InventoryUnit = (typeof INVENTORY_UNIT_VALUES)[number]
+export type CapsuleColor = (typeof CAPSULE_COLOR_VALUES)[number]
+export type DistributionPeriod = (typeof DISTRIBUTION_PERIOD_VALUES)[number]
+export type ScheduleCompliance = (typeof SCHEDULE_COMPLIANCE_VALUES)[number]
+export type SyncStatus = (typeof SYNC_STATUS_VALUES)[number]
+export type ServiceLocationType = (typeof SERVICE_LOCATION_TYPE_VALUES)[number]
+export type VitaminRecordStatus = (typeof VITAMIN_RECORD_STATUS_VALUES)[number]
+export type KipiSeverity = (typeof KIPI_SEVERITY_VALUES)[number]
+export type VaccineRoute = (typeof VACCINE_ROUTE_VALUES)[number]
+export type InventoryItemType = (typeof INVENTORY_ITEM_TYPE_VALUES)[number]
 
 export const statusEnum = pgEnum('status', STATUS_VALUES)
 export const accountStatusEnum = pgEnum('account_status', ACCOUNT_STATUS_VALUES)
@@ -217,6 +266,39 @@ export const educationCategoryEnum = pgEnum(
 
 export const inventoryUnitEnum = pgEnum('inventory_unit', INVENTORY_UNIT_VALUES)
 
+export const capsuleColorEnum = pgEnum('capsule_color', CAPSULE_COLOR_VALUES)
+
+export const distributionPeriodEnum = pgEnum(
+    'distribution_period',
+    DISTRIBUTION_PERIOD_VALUES
+)
+
+export const scheduleComplianceEnum = pgEnum(
+    'schedule_compliance',
+    SCHEDULE_COMPLIANCE_VALUES
+)
+
+export const syncStatusEnum = pgEnum('sync_status', SYNC_STATUS_VALUES)
+
+export const serviceLocationTypeEnum = pgEnum(
+    'service_location_type',
+    SERVICE_LOCATION_TYPE_VALUES
+)
+
+export const vitaminRecordStatusEnum = pgEnum(
+    'vitamin_record_status',
+    VITAMIN_RECORD_STATUS_VALUES
+)
+
+export const kipiSeverityEnum = pgEnum('kipi_severity', KIPI_SEVERITY_VALUES)
+
+export const vaccineRouteEnum = pgEnum('vaccine_route', VACCINE_ROUTE_VALUES)
+
+export const inventoryItemTypeEnum = pgEnum(
+    'inventory_item_type',
+    INVENTORY_ITEM_TYPE_VALUES
+)
+
 /** All pgEnum definitions for Drizzle schema & migrations */
 export const pgEnums = {
     status: statusEnum,
@@ -239,7 +321,16 @@ export const pgEnums = {
     blood_type: bloodTypeEnum,
     nutrition_status: nutritionStatusEnum,
     education_category: educationCategoryEnum,
-    inventory_unit: inventoryUnitEnum
+    inventory_unit: inventoryUnitEnum,
+    capsule_color: capsuleColorEnum,
+    distribution_period: distributionPeriodEnum,
+    schedule_compliance: scheduleComplianceEnum,
+    sync_status: syncStatusEnum,
+    service_location_type: serviceLocationTypeEnum,
+    vitamin_record_status: vitaminRecordStatusEnum,
+    kipi_severity: kipiSeverityEnum,
+    vaccine_route: vaccineRouteEnum,
+    inventory_item_type: inventoryItemTypeEnum
 } as const
 
 export const toPgEnumSql = (
@@ -271,7 +362,16 @@ export const allPgEnumSql = Object.entries({
     blood_type: BLOOD_TYPE_VALUES,
     nutrition_status: NUTRITION_STATUS_VALUES,
     education_category: EDUCATION_CATEGORY_VALUES,
-    inventory_unit: INVENTORY_UNIT_VALUES
+    inventory_unit: INVENTORY_UNIT_VALUES,
+    capsule_color: CAPSULE_COLOR_VALUES,
+    distribution_period: DISTRIBUTION_PERIOD_VALUES,
+    schedule_compliance: SCHEDULE_COMPLIANCE_VALUES,
+    sync_status: SYNC_STATUS_VALUES,
+    service_location_type: SERVICE_LOCATION_TYPE_VALUES,
+    vitamin_record_status: VITAMIN_RECORD_STATUS_VALUES,
+    kipi_severity: KIPI_SEVERITY_VALUES,
+    vaccine_route: VACCINE_ROUTE_VALUES,
+    inventory_item_type: INVENTORY_ITEM_TYPE_VALUES
 } as const)
     .map(([name, values]) => toPgEnumSql(name, values))
     .join('\n')
