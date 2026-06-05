@@ -15,7 +15,7 @@ export const createParentSchema = createInsertSchema(parents, {
         .max(50, 'Place of birth cannot exceed 50 characters')
         .optional()
         .nullable(),
-    date_of_birth: z.string().or(z.date()).optional().nullable(),
+    date_of_birth: z.coerce.date().optional().nullable(),
 
     blood_type: z.enum(bloodTypeEnum.enumValues).optional().nullable(),
     education: z

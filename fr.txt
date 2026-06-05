@@ -1,0 +1,72 @@
+Berikut adalah ekstraksi tabel **Kebutuhan Fungsional (Functional Requirements)** dari dokumen sumber, yang dikategorikan berdasarkan peran pengguna:
+
+### **1. Tabel FR Orang Tua (Tabel 4)**
+Orang tua menggunakan aplikasi untuk memantau kesehatan anak dan mengakses informasi terkait.
+
+| ID FR | Nama Fungsional | Deskripsi Kebutuhan |
+| :--- | :--- | :--- |
+| **FR-OT-01** | Autentikasi Pengguna | Orang tua harus dapat melakukan login ke dalam sistem menggunakan akun (CRUD). |
+| **FR-OT-02** | Mengelola Akun | Orang tua harus dapat membuat dan mengakses akun yang sudah dibuat (CRUD). |
+| **FR-OT-03** | Melihat Data Imunisasi | Orang tua harus dapat melihat daftar imunisasi dan vitamin. |
+| **FR-OT-04** | Melihat Riwayat Imunisasi | Orang tua harus dapat melihat riwayat imunisasi bayi. |
+| **FR-OT-05** | Melihat Status Gizi | Orang tua harus dapat melihat riwayat status gizi bayi. |
+| **FR-OT-06** | Booking Konsultasi | Orang tua harus dapat melakukan pemesanan jadwal konsultasi kehamilan (CRUD). |
+| **FR-OT-07** | Melihat Riwayat Pemeriksaan | Orang tua harus dapat melihat riwayat pemeriksaan kesehatan. |
+| **FR-OT-08** | Melihat Daftar Pemeriksaan | Orang tua harus dapat melihat daftar pemeriksaan yang tersedia. |
+| **FR-OT-09** | Pendaftaran Bayi | Orang tua harus dapat mendaftarkan bayi baru ke dalam sistem (CRUD). |
+| **FR-OT-10** | Akses Edukasi | Orang tua harus dapat mengakses informasi edukasi kesehatan. |
+
+---
+
+### **2. Tabel FR Kader Posyandu (Tabel 5)**
+Kader bertanggung jawab atas pengelolaan data operasional dan administratif di lapangan.
+
+| ID FR | Nama Fungsional | Deskripsi Kebutuhan |
+| :--- | :--- | :--- |
+| **FR-K-01** | Mengelola Data Imunisasi | Kader harus dapat mengelola data imunisasi berdasarkan wilayah (CRUD). |
+| **FR-K-02** | Melihat Data Imunisasi | Kader harus dapat melihat daftar imunisasi dan vitamin. |
+| **FR-K-03** | Mengelola Riwayat Imunisasi | Kader harus dapat mengelola riwayat imunisasi bayi (CRUD). |
+| **FR-K-04** | Melihat Riwayat Imunisasi | Kader harus dapat melihat riwayat imunisasi bayi. |
+| **FR-K-05** | Mengelola Status Gizi | Kader harus dapat membuat, memperbarui, dan menghapus data status gizi (CRUD). |
+| **FR-K-06** | Melihat Status Gizi | Kader harus dapat melihat riwayat status gizi bayi. |
+| **FR-K-07** | Mengelola Jadwal Konsultasi | Kader harus dapat melihat jadwal konsultasi kehamilan (CRUD). |
+| **FR-K-08** | Mengelola Pemeriksaan | Kader harus dapat mengelola riwayat pemeriksaan kesehatan (CRUD). |
+| **FR-K-09** | Melihat Riwayat Pemeriksaan | Kader harus dapat melihat riwayat pemeriksaan. |
+| **FR-K-10** | Mengelola Data Pemeriksaan | Kader harus dapat mengelola daftar pemeriksaan orang tua. |
+| **FR-K-11** | Melihat Data Pemeriksaan | Kader harus dapat melihat daftar pemeriksaan orang tua. |
+| **FR-K-12** | Pendaftaran Bayi | Kader harus dapat mendaftarkan bayi baru ke dalam sistem (CRUD). |
+| **FR-K-13** | Mengelola Data Bayi | Kader harus dapat melihat dan mengelola data bayi (CRUD). |
+| **FR-K-14** | Mengelola Edukasi | Kader harus dapat membuat, membaca, memperbarui, dan menghapus konten edukasi (CRUD). |
+| **FR-K-15** | Mengelola Inventaris | Kader harus dapat mengelola data inventaris Posyandu (CRUD). |
+
+---
+
+### **3. Tabel FR Bidan (Tabel 6)**
+Bidan berperan dalam validasi medis dan pemeriksaan kesehatan profesional.
+
+| ID FR | Nama Fungsional | Deskripsi Kebutuhan |
+| :--- | :--- | :--- |
+| **FR-B-01** | Mengelola Data Imunisasi | Bidan harus dapat mengelola data imunisasi berdasarkan wilayah (CRUD). |
+| **FR-B-02** | Melihat Data Imunisasi | Bidan harus dapat melihat daftar imunisasi dan vitamin. |
+| **FR-B-03** | Mengelola Riwayat Imunisasi | Bidan harus dapat mengelola riwayat imunisasi bayi (CRUD). |
+| **FR-B-04** | Melihat Riwayat Imunisasi | Bidan harus dapat melihat riwayat imunisasi bayi. |
+| **FR-B-05** | Mengelola Status Gizi | Bidan harus dapat membuat, memperbarui, dan menghapus data status gizi (CRUD). |
+| **FR-B-06** | Melihat Status Gizi | Bidan harus dapat melihat riwayat status gizi bayi. |
+| **FR-B-07** | Mengelola Jadwal Konsultasi | Bidan harus dapat melihat jadwal konsultasi kehamilan (CRUD). |
+| **FR-B-08** | Mengelola Pemeriksaan | Bidan harus dapat mengelola riwayat pemeriksaan kesehatan (CRUD). |
+| **FR-B-09** | Melihat Riwayat Pemeriksaan | Bidan harus dapat melihat riwayat pemeriksaan. |
+| **FR-B-10** | Mengelola Data Pemeriksaan | Bidan harus dapat mengelola daftar pemeriksaan orang tua. |
+| **FR-B-11** | Melihat Data Pemeriksaan | Bidan harus dapat melihat daftar pemeriksaan orang tua. |
+| **FR-B-12** | Pendaftaran Bayi | Bidan harus dapat mendaftarkan bayi baru ke dalam sistem (CRUD). |
+| **FR-B-13** | Mengelola Data Bayi | Bidan harus dapat melihat dan mengelola data bayi (CRUD). |
+| **FR-B-14** | Mengelola Edukasi | Bidan harus dapat membuat, membaca, memperbarui, dan menghapus konten edukasi (CRUD). |
+| **FR-B-15** | Mengelola Inventaris | Bidan harus dapat mengelola data inventaris Posyandu (CRUD). |
+
+---
+
+### **4. Kebutuhan Fungsional Admin**
+Admin memiliki hak akses untuk pengelolaan pengguna di tingkat sistem.
+
+| ID FR | Nama Fungsional | Deskripsi Kebutuhan |
+| :--- | :--- | :--- |
+| **FR-A-01** | Mengelola Akun | Admin harus dapat membuat akun untuk Kader Posyandu dan Bidan untuk digunakan masing-masing kategori user (CRUD). |
