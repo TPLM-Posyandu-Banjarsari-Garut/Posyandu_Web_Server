@@ -60,8 +60,17 @@ export class ApiError extends Error {
         return new ApiError(STATUS_CODES.TOO_MANY_REQUESTS, message)
     }
 
-    static server(message = 'Internal Server Error') {
-        return new ApiError(STATUS_CODES.INTERNAL_SERVER_ERROR, message)
+    static server(
+        message = 'Internal Server Error',
+        isOperational = false,
+        errors?: unknown
+    ) {
+        return new ApiError(
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
+            message,
+            errors,
+            isOperational
+        )
     }
 }
 

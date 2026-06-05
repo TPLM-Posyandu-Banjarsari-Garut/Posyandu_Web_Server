@@ -23,10 +23,11 @@ export const childrens = pgTable('childrens', {
     birth_date: date('birth_date', { mode: 'date' }),
     birth_order: integer('birth_order'),
     blood_type: bloodTypeEnum('blood_type'),
-    birth_weight: decimal('birth_weight', { precision: 5.2 }),
-    birth_length: decimal('birth_length', { precision: 5.2 }),
+    birth_weight: decimal('birth_weight', { precision: 5, scale: 2 }),
+    birth_length: decimal('birth_length', { precision: 5, scale: 2 }),
     birth_head_circumference: decimal('birth_head_circumference', {
-        precision: 5.2
+        precision: 5,
+        scale: 2
     }),
 
     ...timestamps

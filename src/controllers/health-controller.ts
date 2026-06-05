@@ -8,7 +8,7 @@ import { AsyncHandler } from '@/utils/async-handler'
  */
 export const healthCheck = AsyncHandler(
     async (_req: Request, res: Response) => {
-        return ApiResponse.Success(res, 'Service is healthy', {
+        return ApiResponse.ok(res, 'Service is healthy', {
             status: 'healthy',
             timestamp: new Date().toISOString(),
             uptime: process.uptime()
@@ -44,6 +44,6 @@ export const detailedHealthCheck = AsyncHandler(
             }
         }
 
-        return ApiResponse.Success(res, 'Service is healthy', healthData)
+        return ApiResponse.ok(res, 'Service is healthy', healthData)
     }
 )

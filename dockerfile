@@ -4,9 +4,11 @@ WORKDIR /app
 COPY package.json bun.lock* ./
 RUN bun install --frozen-lockfile
 
-FROM deps AS builder
+FROM deps AS development
 WORKDIR /app
 COPY . .
+
+FROM development AS builder
 RUN bun run build
 
 FROM oven/bun:1.3-slim AS prod

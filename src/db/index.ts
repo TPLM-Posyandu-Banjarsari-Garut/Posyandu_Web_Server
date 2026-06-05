@@ -11,3 +11,5 @@ export * from '@/db/schemas/vaccines-schema'
 export * from '@/db/schemas/vitamins-schema'
 export * from '@/db/schemas/immunization-records'
 export * from '@/db/schemas/health-centers-schema'
+
+export * from '@/constants/enum'
