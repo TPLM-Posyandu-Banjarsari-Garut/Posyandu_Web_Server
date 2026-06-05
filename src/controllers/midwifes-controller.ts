@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { MidwifeService } from '@/services/midwife-service'
-import { MidwifeQueryFilters } from '@/repositories/midwife-repository'
+import { MidwifeService } from '@/services/midwifes-service'
+import { MidwifeQueryFilters } from '@/repositories/midwifes-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
 
@@ -16,12 +16,12 @@ export class MidwifeController {
         return ApiResponse.created(res, 'Midwife created successfully', midwife)
     }
 
-    getMidwifes = async (req: Request, res: Response) => {
+    getmidwifes = async (req: Request, res: Response) => {
         const query = req.query as unknown as MidwifeQueryFilters
-        logger.info({ query }, 'Incoming request: Get Midwifes')
+        logger.info({ query }, 'Incoming request: Get midwifes')
 
         const result = await this.midwife_service.getMidwifes(query)
-        return ApiResponse.ok(res, 'Midwifes retrieved successfully', result)
+        return ApiResponse.ok(res, 'midwifes retrieved successfully', result)
     }
 
     getMidwifeById = async (req: Request, res: Response) => {
@@ -48,9 +48,24 @@ export class MidwifeController {
 
     deleteMidwife = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
-        logger.warn({ public_id }, 'Incoming request: Delete Midwife')
+        const is_permanent = req.query.permanent === 'true'
+        logger.warn(
+            { public_id, is_permanent },
+            'Incoming request: Delete Midwife'
+        )
 
-        const midwife = await this.midwife_service.deleteMidwife(public_id)
+        const midwife = await this.midwife_service.deleteMidwife(
+            public_id,
+            is_permanent
+        )
         return ApiResponse.ok(res, 'Midwife deleted successfully', midwife)
+    }
+
+    restoreMidwife = async (req: Request, res: Response) => {
+        const public_id = req.params.public_id as string
+        logger.info({ public_id }, 'Incoming request: Restore Midwife')
+
+        const midwife = await this.midwife_service.restoreMidwife(public_id)
+        return ApiResponse.ok(res, 'Midwife restored successfully', midwife)
     }
 }

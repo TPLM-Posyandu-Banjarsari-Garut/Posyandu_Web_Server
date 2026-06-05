@@ -1,4 +1,4 @@
-import { bloodTypeEnum, parents } from '@/db'
+import { accountStatusEnum, bloodTypeEnum, parents } from '@/db'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
 
@@ -43,7 +43,9 @@ export const createParentSchema = createInsertSchema(parents, {
     village_name: z
         .string()
         .max(100, 'Village name cannot exceed 100 characters')
-        .default('Banjarsari')
+        .default('Banjarsari'),
+
+    status: z.enum(accountStatusEnum.enumValues).default('active')
 }).omit({
     id: true,
     public_id: true,
@@ -71,11 +73,23 @@ export const getParentsQuerySchema = z.object({
         .transform(val => (val ? Number.parseInt(val, 10) : undefined)),
 
     search: z.string().optional(),
-    blood_type: z.enum(bloodTypeEnum.enumValues).optional()
+    blood_type: z.enum(bloodTypeEnum.enumValues).optional(),
+    status: z.enum(accountStatusEnum.enumValues).optional(),
+    includeDeleted: z
+        .string()
+        .optional()
+        .transform(val => val === 'true')
 })
 
 export const parentParamsSchema = z.object({
     public_id: z.string().min(1, 'Public ID is required')
+})
+
+export const deleteParentQuerySchema = z.object({
+    permanent: z
+        .string()
+        .optional()
+        .transform(val => val === 'true')
 })
 
 export const updateParentSchema = createParentSchema.partial()
@@ -84,3 +98,4 @@ export type CreateParentInput = z.infer<typeof createParentSchema>
 export type UpdateParentInput = z.infer<typeof updateParentSchema>
 export type GetParentsQueryInput = z.infer<typeof getParentsQuerySchema>
 export type ParentParamInput = z.infer<typeof parentParamsSchema>
+export type DeleteParentQueryInput = z.infer<typeof deleteParentQuerySchema>

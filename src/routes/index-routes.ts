@@ -1,11 +1,11 @@
 import { Router } from 'express'
 
 import healthRoutes from '@/routes/health-routes'
-import userRoutes from '@/routes/user-routes'
+import userRoutes from '@/routes/users-routes'
 
-import cadreRoutes from '@/routes/cadre-route'
-import parentRoutes from '@/routes/parent-route'
-import midwifeRoutes from '@/routes/midwife-route'
+import cadreRoutes from '@/routes/cadres-route'
+import parentRoutes from '@/routes/parents-route'
+import midwifeRoutes from '@/routes/midwifes-route'
 
 const router = Router()
 

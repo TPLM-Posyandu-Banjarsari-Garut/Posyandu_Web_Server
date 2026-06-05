@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import { ParentController } from '@/controllers/parent-controller'
-import { ParentService } from '@/services/parent-service'
+import { ParentController } from '@/controllers/parents-controller'
+import { ParentService } from '@/services/parents-service'
 import { ParentRepository } from '@/repositories/parents-repository'
 import { AsyncHandler } from '@/utils/async-handler'
 import { validateRequest } from '@/middlewares/validate-request'
@@ -8,8 +8,9 @@ import {
     createParentSchema,
     updateParentSchema,
     getParentsQuerySchema,
-    parentParamsSchema
-} from '@/validations/parent-validation'
+    parentParamsSchema,
+    deleteParentQuerySchema
+} from '@/validations/parents-validation'
 import db from '@/configs/db'
 
 const router = Router()
@@ -44,8 +45,17 @@ router.put(
 
 router.delete(
     '/:public_id',
-    validateRequest({ params: parentParamsSchema }),
+    validateRequest({
+        params: parentParamsSchema,
+        query: deleteParentQuerySchema
+    }),
     AsyncHandler(parent_controller.deleteParent)
+)
+
+router.post(
+    '/:public_id/restore',
+    validateRequest({ params: parentParamsSchema }),
+    AsyncHandler(parent_controller.restoreParent)
 )
 
 export default router

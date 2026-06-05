@@ -49,12 +49,23 @@ export const getUsersQuerySchema = z.object({
         .transform(val => Number.parseInt(val, 10)),
 
     search: z.string().optional(),
-    role: z.string().optional(),
-    status: z.string().optional()
+    role: z.enum(accountRoleEnum.enumValues).optional(),
+    status: z.enum(accountStatusEnum.enumValues).optional(),
+    includeDeleted: z
+        .string()
+        .optional()
+        .transform(val => val === 'true')
 })
 
 export const userParamsSchema = z.object({
     public_id: z.string().min(1, 'Public ID is required')
+})
+
+export const deleteUserQuerySchema = z.object({
+    permanent: z
+        .string()
+        .optional()
+        .transform(val => val === 'true')
 })
 
 export const updateUserSchema = createUserSchema.partial().omit({
@@ -65,3 +76,4 @@ export type CreateUserInput = z.infer<typeof createUserSchema>
 export type UpdateUserInput = z.infer<typeof updateUserSchema>
 export type GetUsersQueryInput = z.infer<typeof getUsersQuerySchema>
 export type UserParamInput = z.infer<typeof userParamsSchema>
+export type DeleteUserQueryInput = z.infer<typeof deleteUserQuerySchema>

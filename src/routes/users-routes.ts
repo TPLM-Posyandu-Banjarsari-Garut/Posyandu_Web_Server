@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import { UserController } from '@/controllers/user-controller'
-import { UserService } from '@/services/user-service'
+import { UserController } from '@/controllers/users-controller'
+import { UserService } from '@/services/users-service'
 import { UserRepository } from '@/repositories/user-repository'
 import { AsyncHandler } from '@/utils/async-handler'
 import { validateRequest } from '@/middlewares/validate-request'
@@ -9,7 +9,7 @@ import {
     updateUserSchema,
     getUsersQuerySchema,
     userParamsSchema
-} from '@/validations/user-validation'
+} from '@/validations/users-validation'
 import db from '@/configs/db'
 
 const router = Router()
@@ -46,6 +46,12 @@ router.delete(
     '/:public_id',
     validateRequest({ params: userParamsSchema }),
     AsyncHandler(user_controller.deleteUser)
+)
+
+router.post(
+    '/:public_id/restore',
+    validateRequest({ params: userParamsSchema }),
+    AsyncHandler(user_controller.restoreUser)
 )
 
 export default router

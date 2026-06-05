@@ -2,13 +2,12 @@ import { NewCadre, Cadre } from '@/db'
 import {
     CadreRepository,
     CadreQueryFilters
-} from '@/repositories/cadre-repository'
+} from '@/repositories/cadres-repository'
 
 export class CadreService {
     constructor(private readonly cadre_repository: CadreRepository) {}
 
     async createCadre(cadre_payload: NewCadre): Promise<Cadre> {
-        // Business logic: Ensure the user is not already a cadre in the same posyandu
         const existingCadres = await this.cadre_repository.findByUserId(
             cadre_payload.user_id
         )
@@ -49,12 +48,9 @@ export class CadreService {
         public_id: string,
         cadre_payload: Partial<NewCadre>
     ): Promise<Cadre> {
-        // Ensure the cadre exists before updating
-        await this.getCadreById(public_id)
+        const existingCadre = await this.getCadreById(public_id)
 
-        // If they are trying to change posyandu_id or user_id, we might want to check for duplicates again
         if (cadre_payload.user_id || cadre_payload.posyandu_id) {
-            const existingCadre = await this.getCadreById(public_id)
             const targetUserId = cadre_payload.user_id || existingCadre.user_id
             const targetPosyanduId =
                 cadre_payload.posyandu_id || existingCadre.posyandu_id
@@ -85,12 +81,23 @@ export class CadreService {
         return updated
     }
 
-    async deleteCadre(public_id: string): Promise<Cadre> {
-        // Ensure the cadre exists before deleting
+    async deleteCadre(
+        public_id: string,
+        is_permanent: boolean = false
+    ): Promise<Cadre> {
         await this.getCadreById(public_id)
 
-        const deleted = await this.cadre_repository.delete(public_id)
+        const deleted = is_permanent
+            ? await this.cadre_repository.hardDelete(public_id)
+            : await this.cadre_repository.softDelete(public_id)
+
         if (!deleted) throw new Error('Failed to delete cadre')
         return deleted
+    }
+
+    async restoreCadre(public_id: string): Promise<Cadre> {
+        const restored = await this.cadre_repository.restore(public_id)
+        if (!restored) throw new Error('Failed to restore cadre')
+        return restored
     }
 }
