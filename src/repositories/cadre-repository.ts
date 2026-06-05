@@ -1,8 +1,9 @@
 import { NewCadre, Cadre, cadres } from '@/db'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, ilike, or, sql } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface CadreQueryFilters {
+    search?: string
     user_id?: number
     posyandu_id?: number
     position?: Cadre['position']
@@ -29,6 +30,7 @@ export class CadreRepository {
 
     async getCadres(filters?: CadreQueryFilters) {
         const {
+            search,
             user_id,
             posyandu_id,
             position,
@@ -46,6 +48,12 @@ export class CadreRepository {
         }
 
         const whereClause = and(
+            search
+                ? or(
+                      ilike(cadres.identity_number, `%${search}%`),
+                      ilike(cadres.duty_area_notes, `%${search}%`)
+                  )
+                : undefined,
             user_id ? eq(cadres.user_id, user_id) : undefined,
             posyandu_id ? eq(cadres.posyandu_id, posyandu_id) : undefined,
             position ? eq(cadres.position, position) : undefined,

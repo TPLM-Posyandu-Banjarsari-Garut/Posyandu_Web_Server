@@ -53,6 +53,7 @@ export const getCadresQuerySchema = z.object({
 
     position: z.enum(cadrePositionEnum.enumValues).optional(),
     status: z.enum(accountStatusEnum.enumValues).optional(),
+    search: z.string().optional(),
     includeDeleted: z
         .string()
         .optional()
