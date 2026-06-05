@@ -1,1 +1,1 @@
-make format
+bunx prettier . --write && bunx eslint . --fix
