@@ -1,28 +1,65 @@
-import { immunizationStatusEnum } from '@/constants/enum'
+import {
+    immunizationStatusEnum,
+    scheduleComplianceEnum,
+    serviceLocationTypeEnum,
+    syncStatusEnum
+} from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
 import { timestamps } from '@/db/helpers/timestamps'
-import { childrens } from '@/db/schemas/childrens-schema'
-import { vaccines } from '@/db/schemas/vaccines-schema'
 import { cadres } from '@/db/schemas/cadres-schema'
-import { date, integer, pgTable, text } from 'drizzle-orm/pg-core'
+import { childrens } from '@/db/schemas/childrens-schema'
+import { inventories } from '@/db/schemas/inventories-schema'
+import { midwifes } from '@/db/schemas/midwifes-schema'
+import { posyandus } from '@/db/schemas/posyandus-schema'
+import { vaccines } from '@/db/schemas/vaccines-schema'
+import {
+    boolean,
+    date,
+    integer,
+    pgTable,
+    text,
+    unique,
+    varchar
+} from 'drizzle-orm/pg-core'
 
-export const immunizationRecords = pgTable('immunization_records', {
-    ...createBaseColumns('immunization_records'),
+export const immunizationRecords = pgTable(
+    'immunization_records',
+    {
+        ...createBaseColumns('immunization_records'),
 
-    children_id: integer('children_id')
-        .notNull()
-        .references(() => childrens.id),
-    vaccine_id: integer('vaccine_id')
-        .notNull()
-        .references(() => vaccines.id),
-    cadre_id: integer('cadre_id').references(() => cadres.id),
+        children_id: integer('children_id')
+            .notNull()
+            .references(() => childrens.id),
+        vaccine_id: integer('vaccine_id')
+            .notNull()
+            .references(() => vaccines.id),
+        cadre_id: integer('cadre_id').references(() => cadres.id),
+        midwife_id: integer('midwife_id').references(() => midwifes.id),
+        posyandu_id: integer('posyandu_id').references(() => posyandus.id),
+        inventory_id: integer('inventory_id').references(() => inventories.id),
 
-    date_given: date('date_given', { mode: 'date' }),
-    status: immunizationStatusEnum('status').notNull().default('scheduled'),
-    notes: text('notes'),
+        dose_number: integer('dose_number').notNull(),
+        date_given: date('date_given', { mode: 'date' }),
+        batch_number: varchar('batch_number', { length: 50 }),
+        status: immunizationStatusEnum('status').notNull().default('scheduled'),
+        kipi_status: boolean('kipi_status').notNull().default(false),
+        schedule_compliance: scheduleComplianceEnum('schedule_compliance'),
+        status_dofu: boolean('status_dofu').notNull().default(false),
+        sync_status: syncStatusEnum('sync_status').notNull().default('pending'),
+        external_ref_id: varchar('external_ref_id', { length: 100 }),
+        location_type: serviceLocationTypeEnum('location_type'),
+        notes: text('notes'),
 
-    ...timestamps
-})
+        ...timestamps
+    },
+    table => [
+        unique('immunization_records_child_vaccine_dose_unique').on(
+            table.children_id,
+            table.vaccine_id,
+            table.dose_number
+        )
+    ]
+)
 
 export type ImmunizationRecord = typeof immunizationRecords.$inferSelect
 export type NewImmunizationRecord = typeof immunizationRecords.$inferInsert

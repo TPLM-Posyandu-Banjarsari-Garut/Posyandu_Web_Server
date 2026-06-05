@@ -37,7 +37,7 @@ export class ParentRepository {
         const whereClause = and(
             search
                 ? or(
-                      ilike(parents.identitiy_number, `%${search}%`),
+                      ilike(parents.identity_number, `%${search}%`),
                       ilike(parents.address_line, `%${search}%`)
                   )
                 : undefined,
@@ -83,12 +83,12 @@ export class ParentRepository {
     }
 
     async findByIdentityNumber(
-        identitiy_number: string
+        identity_number: string
     ): Promise<Parent | undefined> {
         const [parent] = await this.db
             .select()
             .from(parents)
-            .where(eq(parents.identitiy_number, identitiy_number))
+            .where(eq(parents.identity_number, identity_number))
             .limit(1)
         return parent
     }
@@ -113,11 +113,11 @@ export class ParentRepository {
         return parent
     }
 
-    async existsByIdentityNumber(identitiy_number: string): Promise<boolean> {
+    async existsByIdentityNumber(identity_number: string): Promise<boolean> {
         const [parent] = await this.db
             .select({ id: parents.id })
             .from(parents)
-            .where(eq(parents.identitiy_number, identitiy_number))
+            .where(eq(parents.identity_number, identity_number))
             .limit(1)
         return !!parent
     }

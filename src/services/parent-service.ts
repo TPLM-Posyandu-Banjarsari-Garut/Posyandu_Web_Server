@@ -17,10 +17,10 @@ export class ParentService {
         }
 
         // Business logic: Ensure identity_number (NIK) is unique if provided
-        if (parent_payload.identitiy_number) {
+        if (parent_payload.identity_number) {
             const isNikUsed =
                 await this.parent_repository.existsByIdentityNumber(
-                    parent_payload.identitiy_number
+                    parent_payload.identity_number
                 )
             if (isNikUsed) {
                 throw new Error('Identity number (NIK) is already registered')
@@ -61,12 +61,12 @@ export class ParentService {
 
         // If updating identity_number, ensure it doesn't belong to another parent
         if (
-            parent_payload.identitiy_number &&
-            parent_payload.identitiy_number !== existingParent.identitiy_number
+            parent_payload.identity_number &&
+            parent_payload.identity_number !== existingParent.identity_number
         ) {
             const isNikUsed =
                 await this.parent_repository.existsByIdentityNumber(
-                    parent_payload.identitiy_number
+                    parent_payload.identity_number
                 )
             if (isNikUsed) {
                 throw new Error(

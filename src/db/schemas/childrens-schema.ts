@@ -12,7 +12,7 @@ export const childrens = pgTable('childrens', {
         .references(() => posyandus.id),
 
     name: varchar('name', { length: 100 }).notNull(),
-    identity_number: varchar('identity_number', { length: 20 })
+    identity_number: varchar('identity_number', { length: 16 })
         .notNull()
         .unique(),
 

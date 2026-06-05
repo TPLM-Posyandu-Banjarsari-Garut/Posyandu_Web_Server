@@ -5,7 +5,7 @@ import { z } from 'zod'
 export const createParentSchema = createInsertSchema(parents, {
     user_id: z.number('User ID must be a number').int().positive(),
 
-    identitiy_number: z
+    identity_number: z
         .string()
         .max(16, 'Identity number (NIK) cannot exceed 16 characters')
         .optional()

@@ -9,9 +9,10 @@ export const parents = pgTable('parents', {
 
     user_id: integer('user_id')
         .notNull()
+        .unique()
         .references(() => users.id),
 
-    identitiy_number: varchar('identity_number', { length: 16 }).unique(), // NIK
+    identity_number: varchar('identity_number', { length: 16 }).unique(), // NIK
     place_of_birth: varchar('place_of_birth', { length: 50 }),
     date_of_birth: date('date_of_birth', { mode: 'date' }),
 
