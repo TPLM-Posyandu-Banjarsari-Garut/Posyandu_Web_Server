@@ -98,6 +98,31 @@ export const AGE_UNIT_VALUES = ['day', 'month', 'year'] as const
 
 export const BLOOD_TYPE_VALUES = ['A', 'B', 'AB', 'O', 'UNKNOWN'] as const
 
+export const NUTRITION_STATUS_VALUES = [
+    'normal',
+    'underweight',
+    'severely_underweight',
+    'stunted',
+    'wasted',
+    'overweight'
+] as const
+
+export const EDUCATION_CATEGORY_VALUES = [
+    'pregnancy',
+    'infant_care',
+    'nutrition',
+    'immunization',
+    'general'
+] as const
+
+export const INVENTORY_UNIT_VALUES = [
+    'pcs',
+    'box',
+    'bottle',
+    'pack',
+    'set'
+] as const
+
 export type Status = (typeof STATUS_VALUES)[number]
 export type AccountStatus = (typeof ACCOUNT_STATUS_VALUES)[number]
 export type AccountRole = (typeof ACCOUNT_ROLE_VALUES)[number]
@@ -116,6 +141,9 @@ export type NotificationStatus = (typeof NOTIFICATION_STATUS_VALUES)[number]
 export type PregnancyStatus = (typeof PREGNANCY_STATUS_VALUES)[number]
 export type AgeUnit = (typeof AGE_UNIT_VALUES)[number]
 export type BloodType = (typeof BLOOD_TYPE_VALUES)[number]
+export type NutritionStatus = (typeof NUTRITION_STATUS_VALUES)[number]
+export type EducationCategory = (typeof EDUCATION_CATEGORY_VALUES)[number]
+export type InventoryUnit = (typeof INVENTORY_UNIT_VALUES)[number]
 
 export const statusEnum = pgEnum('status', STATUS_VALUES)
 export const accountStatusEnum = pgEnum('account_status', ACCOUNT_STATUS_VALUES)
@@ -177,6 +205,18 @@ export const bloodTypeEnum = pgEnum('blood_type', BLOOD_TYPE_VALUES)
 
 export const ageUnitEnum = pgEnum('age_unit', AGE_UNIT_VALUES)
 
+export const nutritionStatusEnum = pgEnum(
+    'nutrition_status',
+    NUTRITION_STATUS_VALUES
+)
+
+export const educationCategoryEnum = pgEnum(
+    'education_category',
+    EDUCATION_CATEGORY_VALUES
+)
+
+export const inventoryUnitEnum = pgEnum('inventory_unit', INVENTORY_UNIT_VALUES)
+
 /** All pgEnum definitions for Drizzle schema & migrations */
 export const pgEnums = {
     status: statusEnum,
@@ -196,7 +236,10 @@ export const pgEnums = {
     notification_status: notificationStatusEnum,
     pregnancy_status: pregnancyStatusEnum,
     age_unit: ageUnitEnum,
-    blood_type: bloodTypeEnum
+    blood_type: bloodTypeEnum,
+    nutrition_status: nutritionStatusEnum,
+    education_category: educationCategoryEnum,
+    inventory_unit: inventoryUnitEnum
 } as const
 
 export const toPgEnumSql = (
@@ -225,7 +268,10 @@ export const allPgEnumSql = Object.entries({
     notification_status: NOTIFICATION_STATUS_VALUES,
     pregnancy_status: PREGNANCY_STATUS_VALUES,
     age_unit: AGE_UNIT_VALUES,
-    blood_type: BLOOD_TYPE_VALUES
+    blood_type: BLOOD_TYPE_VALUES,
+    nutrition_status: NUTRITION_STATUS_VALUES,
+    education_category: EDUCATION_CATEGORY_VALUES,
+    inventory_unit: INVENTORY_UNIT_VALUES
 } as const)
     .map(([name, values]) => toPgEnumSql(name, values))
     .join('\n')

@@ -9,6 +9,7 @@ export const midwifes = pgTable('midwifes', {
 
     user_id: integer('user_id')
         .notNull()
+        .unique()
         .references(() => users.id),
     posyandu_id: integer('posyandu_id')
         .notNull()
