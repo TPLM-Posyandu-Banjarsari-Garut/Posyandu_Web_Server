@@ -9,7 +9,14 @@ import { midwifes } from '@/db/schemas/midwifes-schema'
 import { parents } from '@/db/schemas/parents-schema'
 import { posyandus } from '@/db/schemas/posyandus-schema'
 import { sql } from 'drizzle-orm'
-import { check, date, integer, pgTable, text } from 'drizzle-orm/pg-core'
+import {
+    check,
+    date,
+    integer,
+    pgTable,
+    text,
+    timestamp
+} from 'drizzle-orm/pg-core'
 
 export const examinationRecords = pgTable(
     'examination_records',
@@ -36,6 +43,14 @@ export const examinationRecords = pgTable(
         status: examinationStatusEnum('status').notNull().default('pending'),
         result_summary: text('result_summary'),
         notes: text('notes'),
+
+        medically_validated_at: timestamp('medically_validated_at', {
+            withTimezone: true,
+            mode: 'date'
+        }),
+        medically_validated_by_midwife_id: integer(
+            'medically_validated_by_midwife_id'
+        ).references(() => midwifes.id),
 
         ...timestamps
     },

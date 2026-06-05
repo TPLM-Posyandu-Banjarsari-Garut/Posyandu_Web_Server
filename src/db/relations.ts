@@ -31,10 +31,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
         fields: [users.id],
         references: [cadres.user_id]
     }),
-    midwife: one(midwifes, {
-        fields: [users.id],
-        references: [midwifes.user_id]
-    }),
+    midwifeAssignments: many(midwifes),
     educations: many(educations)
 }))
 
@@ -78,7 +75,11 @@ export const midwifesRelations = relations(midwifes, ({ one, many }) => ({
     vitaminRecords: many(vitaminRecords),
     nutritionRecords: many(nutritionRecords),
     consultations: many(consultations),
-    examinationRecords: many(examinationRecords)
+    examinationRecords: many(examinationRecords),
+    medicalValidations: many(examinationRecords, {
+        relationName: 'medicalValidator'
+    }),
+    managedInventories: many(inventories)
 }))
 
 export const healthCentersRelations = relations(healthCenters, ({ many }) => ({
@@ -303,6 +304,11 @@ export const examinationRecordsRelations = relations(
         midwife: one(midwifes, {
             fields: [examinationRecords.midwife_id],
             references: [midwifes.id]
+        }),
+        medicalValidator: one(midwifes, {
+            fields: [examinationRecords.medically_validated_by_midwife_id],
+            references: [midwifes.id],
+            relationName: 'medicalValidator'
         })
     })
 )
@@ -322,6 +328,10 @@ export const inventoriesRelations = relations(inventories, ({ one, many }) => ({
     posyandu: one(posyandus, {
         fields: [inventories.posyandu_id],
         references: [posyandus.id]
+    }),
+    managedByMidwife: one(midwifes, {
+        fields: [inventories.managed_by_midwife_id],
+        references: [midwifes.id]
     }),
     immunizationRecords: many(immunizationRecords)
 }))

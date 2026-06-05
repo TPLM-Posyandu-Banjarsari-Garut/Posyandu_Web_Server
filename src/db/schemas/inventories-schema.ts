@@ -5,6 +5,7 @@ import {
 } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
 import { timestamps } from '@/db/helpers/timestamps'
+import { midwifes } from '@/db/schemas/midwifes-schema'
 import { posyandus } from '@/db/schemas/posyandus-schema'
 import { date, integer, pgTable, text, varchar } from 'drizzle-orm/pg-core'
 
@@ -24,6 +25,9 @@ export const inventories = pgTable('inventories', {
     batch_number: varchar('batch_number', { length: 50 }),
     expiry_date: date('expiry_date', { mode: 'date' }),
     last_checked_date: date('last_checked_date', { mode: 'date' }),
+    managed_by_midwife_id: integer('managed_by_midwife_id').references(
+        () => midwifes.id
+    ),
     notes: text('notes'),
 
     ...timestamps
