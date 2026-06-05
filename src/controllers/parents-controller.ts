@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { ParentService } from '@/services/parent-service'
+import { ParentService } from '@/services/parents-service'
 import { ParentQueryFilters } from '@/repositories/parents-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'

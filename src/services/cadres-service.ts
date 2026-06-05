@@ -2,7 +2,7 @@ import { NewCadre, Cadre } from '@/db'
 import {
     CadreRepository,
     CadreQueryFilters
-} from '@/repositories/cadre-repository'
+} from '@/repositories/cadres-repository'
 
 export class CadreService {
     constructor(private readonly cadre_repository: CadreRepository) {}

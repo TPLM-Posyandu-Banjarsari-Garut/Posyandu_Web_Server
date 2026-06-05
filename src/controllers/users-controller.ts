@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { UserService } from '@/services/user-service'
+import { UserService } from '@/services/users-service'
 import { UserQueryFilters } from '@/repositories/user-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'

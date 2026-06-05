@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import { ParentController } from '@/controllers/parent-controller'
-import { ParentService } from '@/services/parent-service'
+import { ParentController } from '@/controllers/parents-controller'
+import { ParentService } from '@/services/parents-service'
 import { ParentRepository } from '@/repositories/parents-repository'
 import { AsyncHandler } from '@/utils/async-handler'
 import { validateRequest } from '@/middlewares/validate-request'
@@ -10,7 +10,7 @@ import {
     getParentsQuerySchema,
     parentParamsSchema,
     deleteParentQuerySchema
-} from '@/validations/parent-validation'
+} from '@/validations/parents-validation'
 import db from '@/configs/db'
 
 const router = Router()

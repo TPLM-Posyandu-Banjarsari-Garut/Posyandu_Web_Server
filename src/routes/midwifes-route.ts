@@ -1,15 +1,16 @@
 import { Router } from 'express'
-import { MidwifeController } from '@/controllers/midwife-controller'
-import { MidwifeService } from '@/services/midwife-service'
-import { MidwifeRepository } from '@/repositories/midwife-repository'
+import { MidwifeController } from '@/controllers/midwifes-controller'
+import { MidwifeService } from '@/services/midwifes-service'
+import { MidwifeRepository } from '@/repositories/midwifes-repository'
 import { AsyncHandler } from '@/utils/async-handler'
 import { validateRequest } from '@/middlewares/validate-request'
 import {
     createMidwifeSchema,
     updateMidwifeSchema,
     getMidwifesQuerySchema,
-    midwifeParamsSchema
-} from '@/validations/midwife-validation'
+    midwifeParamsSchema,
+    deleteMidwifeQuerySchema
+} from '@/validations/midwifes-validation'
 import db from '@/configs/db'
 
 const router = Router()
@@ -27,7 +28,7 @@ router.post(
 router.get(
     '/',
     validateRequest({ query: getMidwifesQuerySchema }),
-    AsyncHandler(midwife_controller.getMidwifes)
+    AsyncHandler(midwife_controller.getmidwifes)
 )
 
 router.get(
@@ -44,8 +45,17 @@ router.put(
 
 router.delete(
     '/:public_id',
-    validateRequest({ params: midwifeParamsSchema }),
+    validateRequest({
+        params: midwifeParamsSchema,
+        query: deleteMidwifeQuerySchema
+    }),
     AsyncHandler(midwife_controller.deleteMidwife)
+)
+
+router.post(
+    '/:public_id/restore',
+    validateRequest({ params: midwifeParamsSchema }),
+    AsyncHandler(midwife_controller.restoreMidwife)
 )
 
 export default router

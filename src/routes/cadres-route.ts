@@ -1,7 +1,7 @@
 import { Router } from 'express'
-import { CadreController } from '@/controllers/cadre-controller'
-import { CadreService } from '@/services/cadre-service'
-import { CadreRepository } from '@/repositories/cadre-repository'
+import { CadreController } from '@/controllers/cadres-controller'
+import { CadreService } from '@/services/cadres-service'
+import { CadreRepository } from '@/repositories/cadres-repository'
 import { AsyncHandler } from '@/utils/async-handler'
 import { validateRequest } from '@/middlewares/validate-request'
 import {
@@ -10,7 +10,7 @@ import {
     getCadresQuerySchema,
     cadreParamsSchema,
     deleteCadreQuerySchema
-} from '@/validations/cadre-validation'
+} from '@/validations/cadres-validation'
 import db from '@/configs/db'
 
 const router = Router()

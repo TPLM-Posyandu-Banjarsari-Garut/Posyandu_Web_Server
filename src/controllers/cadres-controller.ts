@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { CadreService } from '@/services/cadre-service'
-import { CadreQueryFilters } from '@/repositories/cadre-repository'
+import { CadreService } from '@/services/cadres-service'
+import { CadreQueryFilters } from '@/repositories/cadres-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
 
