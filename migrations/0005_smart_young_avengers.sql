@@ -1,0 +1,1 @@
+ALTER TABLE "posyandus" ADD COLUMN "status" "status" DEFAULT 'active' NOT NULL;
