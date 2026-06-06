@@ -1,0 +1,88 @@
+services:
+    app-dev:
+        restart: unless-stopped
+        image: posyandu-server:dev
+        build:
+            context: .
+            dockerfile: dockerfile
+            target: development
+        ports:
+            - '${PORT:-3000}:3000'
+        environment:
+            - NODE_ENV=development
+            - TZ=Asia/Jakarta
+            - DATABASE_URL=postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@postgres:5432/${DATABASE_NAME}
+        env_file:
+            - .env
+        volumes:
+            - ./src:/app/src
+            - bun_cache:/root/.bun
+        networks:
+            - application
+        depends_on:
+            postgres:
+                condition: service_healthy
+        command: ['bun', 'run', 'dev']
+
+    # app-prod:
+    #     restart: unless-stopped
+    #     image: posyandu-server:prod
+    #     build:
+    #         context: .
+    #         dockerfile: dockerfile
+    #         target: prod
+    #     ports:
+    #         - '${PORT:-3000}:3000'
+    #     env_file:
+    #         - .env
+    #     environment:
+    #         - NODE_ENV=production
+    #         - TZ=Asia/Jakarta
+    #     networks:
+    #         - application
+    #     depends_on:
+    #         postgres:
+    #             condition: service_healthy
+    #     healthcheck:
+    #         test:
+    #             [
+    #                 'CMD-SHELL',
+    #                 'bun --eval "fetch(''http://localhost:${PORT:-3000}/health'').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"'
+    #             ]
+    #         interval: 30s
+    #         timeout: 5s
+    #         start_period: 15s
+    #         retries: 3
+
+    postgres:
+        image: postgres:18-alpine
+        restart: unless-stopped
+        volumes:
+            - postgres_data:/var/lib/postgresql
+        ports:
+            - '${DB_PORT:-5432}:5432'
+        env_file:
+            - .env
+        environment:
+            - POSTGRES_USER=${DATABASE_USER}
+            - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+            - POSTGRES_DB=${DATABASE_NAME}
+        networks:
+            - application
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}'
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+networks:
+    application:
+        driver: bridge
+
+volumes:
+    postgres_data:
+    bun_cache:

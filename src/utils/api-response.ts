@@ -1,70 +1,64 @@
-import { STATUS_CODES, StatusCode } from "../constants/status-codes";
-import type { Response } from "express";
+import { STATUS_CODES, StatusCode } from '@/constants/status-codes'
+import type { Response } from 'express'
 
-type ApiResponseParams<T> = {
-  success: boolean;
-  message: string;
-  statusCode: StatusCode;
-  data?: T | null;
-  errors?: unknown;
-};
-
-export class ApiResponse<T = unknown> {
-  public readonly success: boolean;
-  public readonly message: string;
-  public readonly statusCode: StatusCode;
-  public readonly data?: T | null;
-  public readonly errors?: unknown;
-
-  constructor({
-    success,
-    message,
-    statusCode,
-    data,
-    errors
-  }: ApiResponseParams<T>) {
-    this.success = success;
-    this.message = message;
-    this.statusCode = statusCode;
-    this.data = data;
-    this.errors = errors;
-  }
-
-  send(res: Response): Response {
-    return res.status(this.statusCode).json({
-      success: this.success,
-      message: this.message,
-      statusCode: this.statusCode,
-      ...(this.data !== undefined && { data: this.data }),
-      ...(this.errors !== undefined && { errors: this.errors })
-    });
-  }
-
-  static Success<T>(
-    res: Response,
-    message: string,
-    data?: T,
-    statusCode: StatusCode = STATUS_CODES.OK
-  ): Response {
-    return new ApiResponse<T>({
-      success: true,
-      message,
-      data,
-      statusCode
-    }).send(res);
-  }
-
-  static ok<T>(res: Response, message = "OK", data?: T) {
-    return ApiResponse.Success(res, message, data, STATUS_CODES.OK);
-  }
-
-  static created<T>(res: Response, message = "Created", data?: T) {
-    return ApiResponse.Success(res, message, data, STATUS_CODES.CREATED);
-  }
+export type PaginationMeta = {
+    page: number
+    limit: number
+    total_items: number
+    total_pages: number
 }
 
-/*
- * Usage:
- * ApiResponse.ok(res, "OK", data);
- * ApiResponse.created(res, "Created", data);
- */
+export class ApiResponse {
+    private static send<T>(
+        res: Response,
+        statusCode: StatusCode,
+        success: boolean,
+        message: string,
+        data?: T,
+        meta?: unknown,
+        errors?: unknown
+    ): Response {
+        return res.status(statusCode).json({
+            success,
+            message,
+            statusCode,
+            ...(data !== undefined && { data }),
+            ...(meta !== undefined && { meta }),
+            ...(errors !== undefined && { errors })
+        })
+    }
+
+    static ok<T>(res: Response, message = 'OK', data?: T): Response {
+        return this.send(res, STATUS_CODES.OK, true, message, data)
+    }
+
+    static created<T>(res: Response, message = 'Created', data?: T): Response {
+        return this.send(res, STATUS_CODES.CREATED, true, message, data)
+    }
+
+    static paginated<T>(
+        res: Response,
+        data: T,
+        meta: PaginationMeta,
+        message = 'OK'
+    ): Response {
+        return this.send(res, STATUS_CODES.OK, true, message, data, meta)
+    }
+
+    static error(
+        res: Response,
+        message = 'Internal Server Error',
+        statusCode: StatusCode = STATUS_CODES.INTERNAL_SERVER_ERROR,
+        errors?: unknown
+    ): Response {
+        return this.send(
+            res,
+            statusCode,
+            false,
+            message,
+            undefined,
+            undefined,
+            errors
+        )
+    }
+}

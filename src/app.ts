@@ -1,46 +1,43 @@
-import express, { Express, Request, Response } from "express";
-import cors from "cors";
-import helmet from "helmet";
-import cookieParser from "cookie-parser";
-import morgan from "morgan";
-import { notFoundHandler } from "./middlewares/not-found-handler";
-import { errorHandler } from "./middlewares/error-handler";
-import { setupSwagger } from "./configs/swagger";
-import healthRoutes from "./routes/health.routes";
-import env from "./configs/env";
-import sourceMapSupport from "source-map-support";
-sourceMapSupport.install();
+import express, { Express, Request, Response } from 'express'
+import cors from 'cors'
+import helmet from 'helmet'
+import cookieParser from 'cookie-parser'
+import morgan from 'morgan'
+import { notFoundHandler } from '@/middlewares/not-found-handler'
+import { errorHandler } from '@/middlewares/error-handler'
+import { setupSwagger } from '@/configs/swagger'
+import apiRoutes from '@/routes/index-routes'
+import env from '@/configs/env'
+import sourceMapSupport from 'source-map-support'
+sourceMapSupport.install()
 
-const app: Express = express();
+const app: Express = express()
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 app.use(
-  cors({
-    origin: env.CORS_ORIGIN,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-    credentials: true
-  })
-);
-app.use(helmet());
-app.use(cookieParser());
-app.use(morgan(env.NODE_ENV === "development" ? "dev" : "combined"));
+    cors({
+        origin: env.CORS_ORIGIN,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+        credentials: true
+    })
+)
+app.use(helmet())
+app.use(cookieParser())
+app.use(morgan(env.NODE_ENV === 'development' ? 'dev' : 'combined'))
 
-//? Swagger Setup
-setupSwagger(app);
+setupSwagger(app)
 
-//? Routes
-app.get("/", (req: Request, res: Response) => {
-  res.redirect("/api/health");
-});
+app.get('/favicon.ico', (req, res) => res.status(204).end())
 
-app.use("/api/health", healthRoutes);
+app.get('/', (req: Request, res: Response) => {
+    res.redirect('/api/docs')
+})
 
-// Not found handler (should be after routes)
-app.use(notFoundHandler);
+app.use(apiRoutes)
 
-// Global error handler (should be last)
-app.use(errorHandler);
+app.use(notFoundHandler)
+app.use(errorHandler)
 
-export default app;
+export default app

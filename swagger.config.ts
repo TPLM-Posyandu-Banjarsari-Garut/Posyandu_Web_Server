@@ -1,16 +1,16 @@
-import swaggerAutoGen from "swagger-autogen";
+import swaggerAutoGen from 'swagger-autogen'
 
 const doc = {
-  info: {
-    title: "Express Starter",
-    description: "Express Starter",
-    version: "1.0.0"
-  },
-  host: `localhost:3000`,
-  schemes: ["http"]
-};
+    info: {
+        title: 'Express Starter',
+        description: 'Express Starter',
+        version: '1.0.0'
+    },
+    host: 'localhost:3000',
+    schemes: ['http']
+}
 
-const outputFile = "./src/docs/swagger.json";
-const endpointsFiles = ["./src/routes/*.ts"];
+const outputFile = './src/docs/swagger.json'
+const endpointsFiles = ['./src/routes/index-routes.ts']
 
-swaggerAutoGen(outputFile, endpointsFiles, doc);
+swaggerAutoGen({ openapi: '3.0.0' })(outputFile, endpointsFiles, doc)

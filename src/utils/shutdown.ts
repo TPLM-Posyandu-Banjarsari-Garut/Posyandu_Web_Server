@@ -1,30 +1,31 @@
-import { Server } from "http";
-import { logger } from "./logger";
+import type { Server } from 'node:http'
+import { logger } from '@/utils/logger'
 
-export const configureGracefulShutdown = (server: Server) => {
-  const signals = ["SIGTERM", "SIGINT"];
+export const configureGracefulShutdown = (
+    server: Server,
+    onCleanup?: () => Promise<void> | void
+) => {
+    const shutdown = (signal: string) => {
+        logger.warn(`⚠️ ${signal} received. Shutting down gracefully...`)
 
-  signals.forEach(signal => {
-    process.on(signal, () => {
-      logger.info(`\n${signal} signal received. Shutting down gracefully...`);
+        setTimeout(() => process.exit(1), 10000).unref()
 
-      server.close(err => {
-        if (err) {
-          logger.error(err, "Error during server close");
-          process.exit(1);
-        }
+        server.close(async err => {
+            if (err) logger.error(err, '❌ Error closing HTTP server')
 
-        logger.info("HTTP server closed.");
-        process.exit(0);
-      });
+            try {
+                // 2. Putus koneksi DB / resource eksternal
+                if (onCleanup) await onCleanup()
 
-      // Force shutdown after 10 seconds
-      setTimeout(() => {
-        logger.error(
-          "Could not close connections in time, forcefully shutting down"
-        );
-        process.exit(1);
-      }, 10000);
-    });
-  });
-};
+                logger.info('👋 Server shut down cleanly.')
+                process.exit(0)
+            } catch (cleanupErr) {
+                logger.error(cleanupErr, '❌ Error during cleanup')
+                process.exit(1)
+            }
+        })
+    }
+
+    process.once('SIGTERM', () => shutdown('SIGTERM'))
+    process.once('SIGINT', () => shutdown('SIGINT'))
+}

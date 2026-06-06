@@ -1,0 +1,1 @@
+ALTER TABLE "parents" ADD COLUMN "status" "account_status" DEFAULT 'active' NOT NULL;
