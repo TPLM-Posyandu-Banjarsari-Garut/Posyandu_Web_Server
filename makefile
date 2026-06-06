@@ -15,7 +15,6 @@ help:
 	@echo "  make typecheck   : Memeriksa validasi tipe TypeScript tanpa melakukan emit"
 	@echo "  make lint        : Memeriksa kualitas kode menggunakan ESLint"
 	@echo "  make format      : Merapikan format kode menggunakan Prettier & ESLint"
-	@echo "  make docs        : Memperbarui atau membuat dokumentasi Swagger API"
 	@echo "  make clean       : Menghapus folder build (dist/) secara lokal"
 	@echo "------------------------------------------------------------------------------"
 	@echo "Database (Drizzle ORM):"
@@ -46,9 +45,6 @@ lint:
 
 format:
 	$(BUN) run format:fix
-
-docs:
-	$(BUN) run docs
 
 clean:
 	rm -rf dist
