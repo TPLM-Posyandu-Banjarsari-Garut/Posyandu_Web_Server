@@ -5,12 +5,17 @@ import {
 import { registerCadresRoutes } from '@/docs/cadres-docs'
 import { registerHealthCentersRoutes } from '@/docs/health-centers-docs'
 import { registerPosyandusRoutes } from '@/docs/posyandus-docs'
+import { registerMidwifesRoutes } from '@/docs/midwifes-docs'
 
 export const registry = new OpenAPIRegistry()
 
+// health-facility
 registerHealthCentersRoutes(registry)
 registerPosyandusRoutes(registry)
+
+// users
 registerCadresRoutes(registry)
+registerMidwifesRoutes(registry)
 
 export function generateOpenApiDocs() {
     const generator = new OpenApiGeneratorV3(registry.definitions)
