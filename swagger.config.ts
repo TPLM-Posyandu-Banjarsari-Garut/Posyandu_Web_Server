@@ -10,7 +10,13 @@ const doc = {
     schemes: ['http']
 }
 
+const options = {
+    autoHeaders: true, 
+    autoQuery: true, 
+    autoBody: true,
+}
+
 const outputFile = './src/docs/swagger.json'
 const endpointsFiles = ['./src/routes/index-routes.ts']
 
-swaggerAutoGen({ openapi: '3.0.0' })(outputFile, endpointsFiles, doc)
+swaggerAutoGen({ openapi: '3.0.0', options: options })(outputFile, endpointsFiles, doc)
