@@ -8,8 +8,17 @@ import { registerPosyandusRoutes } from '@/docs/posyandus-docs'
 import { registerMidwifesRoutes } from '@/docs/midwifes-docs'
 import { registerUsersRoutes } from '@/docs/users-docs'
 import { registerParentsRoutes } from '@/docs/parents-docs'
+import { registerChildrenRoutes } from '@/docs/childrens-docs'
 
 export const registry = new OpenAPIRegistry()
+
+registry.registerComponent('securitySchemes', 'BearerAuth', {
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'JWT',
+    in: 'header',
+    name: 'Authorization'
+})
 
 // users
 registerUsersRoutes(registry)
@@ -20,6 +29,9 @@ registerMidwifesRoutes(registry)
 // health-facility
 registerHealthCentersRoutes(registry)
 registerPosyandusRoutes(registry)
+
+// children
+registerChildrenRoutes(registry)
 
 export function generateOpenApiDocs() {
     const generator = new OpenApiGeneratorV3(registry.definitions)
