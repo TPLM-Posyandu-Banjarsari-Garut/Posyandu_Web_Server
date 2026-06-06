@@ -1,1166 +1,586 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Posyandu Web Server",
-        "description": "API documentation for Posyandu Web Server",
+        "title": "Express Starter",
+        "description": "Express Starter",
         "version": "1.0.0"
     },
     "servers": [
         {
-            "url": "http://localhost:3000",
-            "description": "Local Development Server"
+            "url": "http://localhost:3000/"
         }
     ],
-    "components": {
-        "schemas": {
-            "ApiResponse": {
-                "type": "object",
-                "properties": {
-                    "success": { "type": "boolean" },
-                    "message": { "type": "string" },
-                    "data": {}
-                }
-            },
-            "PaginationMeta": {
-                "type": "object",
-                "properties": {
-                    "page": { "type": "integer", "example": 1 },
-                    "limit": { "type": "integer", "example": 10 },
-                    "total_items": { "type": "integer", "example": 100 },
-                    "total_pages": { "type": "integer", "example": 10 }
-                }
-            },
-            "User": {
-                "type": "object",
-                "properties": {
-                    "id": { "type": "integer", "example": 1 },
-                    "public_id": {
-                        "type": "string",
-                        "format": "uuid",
-                        "example": "550e8400-e29b-41d4-a716-446655440000"
-                    },
-                    "name": { "type": "string", "example": "Budi Santoso" },
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "example": "budi@example.com"
-                    },
-                    "phone_number": {
-                        "type": "string",
-                        "nullable": true,
-                        "example": "081234567890"
-                    },
-                    "role": {
-                        "type": "string",
-                        "enum": [
-                            "posyandu_admin",
-                            "village_admin",
-                            "parent",
-                            "cadre",
-                            "midwife"
-                        ],
-                        "example": "parent"
-                    },
-                    "status": {
-                        "type": "string",
-                        "enum": [
-                            "active",
-                            "inactive",
-                            "disabled",
-                            "pending_verification"
-                        ],
-                        "example": "active"
-                    },
-                    "created_at": { "type": "string", "format": "date-time" },
-                    "updated_at": { "type": "string", "format": "date-time" },
-                    "deleted_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "nullable": true
-                    }
-                }
-            },
-            "CreateUserBody": {
-                "type": "object",
-                "required": ["name", "email", "password"],
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 100,
-                        "example": "Budi Santoso"
-                    },
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "maxLength": 255,
-                        "example": "budi@example.com"
-                    },
-                    "password": {
-                        "type": "string",
-                        "minLength": 6,
-                        "maxLength": 100,
-                        "example": "secret123"
-                    },
-                    "phone_number": {
-                        "type": "string",
-                        "maxLength": 20,
-                        "nullable": true,
-                        "example": "081234567890"
-                    },
-                    "role": {
-                        "type": "string",
-                        "enum": [
-                            "posyandu_admin",
-                            "village_admin",
-                            "parent",
-                            "cadre",
-                            "midwife"
-                        ],
-                        "default": "parent"
-                    },
-                    "status": {
-                        "type": "string",
-                        "enum": [
-                            "active",
-                            "inactive",
-                            "disabled",
-                            "pending_verification"
-                        ],
-                        "default": "active"
-                    }
-                }
-            },
-            "UpdateUserBody": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 100,
-                        "example": "Budi Diperbarui"
-                    },
-                    "password": {
-                        "type": "string",
-                        "minLength": 6,
-                        "maxLength": 100,
-                        "example": "newsecret123"
-                    },
-                    "phone_number": {
-                        "type": "string",
-                        "maxLength": 20,
-                        "nullable": true,
-                        "example": "082345678901"
-                    },
-                    "role": {
-                        "type": "string",
-                        "enum": [
-                            "posyandu_admin",
-                            "village_admin",
-                            "parent",
-                            "cadre",
-                            "midwife"
-                        ]
-                    },
-                    "status": {
-                        "type": "string",
-                        "enum": [
-                            "active",
-                            "inactive",
-                            "disabled",
-                            "pending_verification"
-                        ]
-                    }
-                }
-            },
-            "Cadre": {
-                "type": "object",
-                "properties": {
-                    "id": { "type": "integer", "example": 1 },
-                    "public_id": {
-                        "type": "string",
-                        "example": "cadre-uuid-1234"
-                    },
-                    "user_id": { "type": "integer", "example": 1 },
-                    "posyandu_id": { "type": "integer", "example": 2 },
-                    "position": { "type": "string", "example": "member" },
-                    "created_at": { "type": "string", "format": "date-time" },
-                    "updated_at": { "type": "string", "format": "date-time" },
-                    "deleted_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "nullable": true
-                    }
-                }
-            },
-            "CreateCadreBody": {
-                "type": "object",
-                "required": ["user_id", "posyandu_id"],
-                "properties": {
-                    "user_id": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "example": 1
-                    },
-                    "posyandu_id": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "example": 2
-                    },
-                    "position": { "type": "string", "default": "member" }
-                }
-            },
-            "UpdateCadreBody": {
-                "type": "object",
-                "properties": {
-                    "user_id": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "example": 1
-                    },
-                    "posyandu_id": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "example": 2
-                    },
-                    "position": { "type": "string" }
-                }
-            },
-            "Midwife": {
-                "type": "object",
-                "properties": {
-                    "id": { "type": "integer", "example": 1 },
-                    "public_id": {
-                        "type": "string",
-                        "example": "midwife-uuid-1234"
-                    },
-                    "user_id": { "type": "integer", "example": 1 },
-                    "posyandu_id": { "type": "integer", "example": 3 },
-                    "license_number": {
-                        "type": "string",
-                        "nullable": true,
-                        "example": "SIPB-123456"
-                    },
-                    "created_at": { "type": "string", "format": "date-time" },
-                    "updated_at": { "type": "string", "format": "date-time" },
-                    "deleted_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "nullable": true
-                    }
-                }
-            },
-            "CreateMidwifeBody": {
-                "type": "object",
-                "required": ["user_id", "posyandu_id"],
-                "properties": {
-                    "user_id": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "example": 1
-                    },
-                    "posyandu_id": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "example": 3
-                    },
-                    "license_number": {
-                        "type": "string",
-                        "maxLength": 50,
-                        "nullable": true,
-                        "example": "SIPB-123456"
-                    }
-                }
-            },
-            "UpdateMidwifeBody": {
-                "type": "object",
-                "properties": {
-                    "user_id": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "example": 1
-                    },
-                    "posyandu_id": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "example": 3
-                    },
-                    "license_number": {
-                        "type": "string",
-                        "maxLength": 50,
-                        "nullable": true,
-                        "example": "SIPB-654321"
-                    }
-                }
-            },
-            "Parent": {
-                "type": "object",
-                "properties": {
-                    "id": { "type": "integer", "example": 1 },
-                    "public_id": {
-                        "type": "string",
-                        "example": "parent-uuid-1234"
-                    },
-                    "user_id": { "type": "integer", "example": 1 },
-                    "identity_number": {
-                        "type": "string",
-                        "nullable": true,
-                        "example": "3201XXXXXXXXXXXX"
-                    },
-                    "place_of_birth": {
-                        "type": "string",
-                        "nullable": true,
-                        "example": "Bogor"
-                    },
-                    "date_of_birth": {
-                        "type": "string",
-                        "format": "date",
-                        "nullable": true,
-                        "example": "1990-01-01"
-                    },
-                    "blood_type": {
-                        "type": "string",
-                        "nullable": true,
-                        "example": "O"
-                    },
-                    "education": {
-                        "type": "string",
-                        "nullable": true,
-                        "example": "S1"
-                    },
-                    "occupation": {
-                        "type": "string",
-                        "nullable": true,
-                        "example": "Swasta"
-                    },
-                    "address_line": {
-                        "type": "string",
-                        "nullable": true,
-                        "example": "Jl. Merdeka No. 12"
-                    },
-                    "rt": {
-                        "type": "string",
-                        "nullable": true,
-                        "example": "001"
-                    },
-                    "rw": {
-                        "type": "string",
-                        "nullable": true,
-                        "example": "002"
-                    },
-                    "village_name": {
-                        "type": "string",
-                        "example": "Banjarsari"
-                    },
-                    "created_at": { "type": "string", "format": "date-time" },
-                    "updated_at": { "type": "string", "format": "date-time" },
-                    "deleted_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "nullable": true
-                    }
-                }
-            },
-            "CreateParentBody": {
-                "type": "object",
-                "required": ["user_id"],
-                "properties": {
-                    "user_id": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "example": 1
-                    },
-                    "identity_number": {
-                        "type": "string",
-                        "maxLength": 16,
-                        "nullable": true,
-                        "example": "3201XXXXXXXXXXXX"
-                    },
-                    "place_of_birth": {
-                        "type": "string",
-                        "maxLength": 50,
-                        "nullable": true,
-                        "example": "Bogor"
-                    },
-                    "date_of_birth": {
-                        "type": "string",
-                        "nullable": true,
-                        "example": "1990-01-01"
-                    },
-                    "blood_type": {
-                        "type": "string",
-                        "nullable": true,
-                        "example": "O"
-                    },
-                    "education": {
-                        "type": "string",
-                        "maxLength": 50,
-                        "nullable": true,
-                        "example": "S1"
-                    },
-                    "occupation": {
-                        "type": "string",
-                        "maxLength": 50,
-                        "nullable": true,
-                        "example": "Swasta"
-                    },
-                    "address_line": { "type": "string", "nullable": true },
-                    "rt": {
-                        "type": "string",
-                        "maxLength": 5,
-                        "nullable": true,
-                        "example": "001"
-                    },
-                    "rw": {
-                        "type": "string",
-                        "maxLength": 5,
-                        "nullable": true,
-                        "example": "002"
-                    },
-                    "village_name": {
-                        "type": "string",
-                        "maxLength": 100,
-                        "default": "Banjarsari"
-                    }
-                }
-            },
-            "UpdateParentBody": {
-                "type": "object",
-                "properties": {
-                    "user_id": { "type": "integer", "minimum": 1 },
-                    "identity_number": {
-                        "type": "string",
-                        "maxLength": 16,
-                        "nullable": true
-                    },
-                    "place_of_birth": {
-                        "type": "string",
-                        "maxLength": 50,
-                        "nullable": true
-                    },
-                    "date_of_birth": { "type": "string", "nullable": true },
-                    "blood_type": { "type": "string", "nullable": true },
-                    "education": {
-                        "type": "string",
-                        "maxLength": 50,
-                        "nullable": true
-                    },
-                    "occupation": {
-                        "type": "string",
-                        "maxLength": 50,
-                        "nullable": true
-                    },
-                    "address_line": { "type": "string", "nullable": true },
-                    "rt": {
-                        "type": "string",
-                        "maxLength": 5,
-                        "nullable": true
-                    },
-                    "rw": {
-                        "type": "string",
-                        "maxLength": 5,
-                        "nullable": true
-                    },
-                    "village_name": { "type": "string", "maxLength": 100 }
-                }
-            },
-            "Error": {
-                "type": "object",
-                "properties": {
-                    "success": { "type": "boolean", "example": false },
-                    "message": {
-                        "type": "string",
-                        "example": "Invalid request data"
-                    },
-                    "errors": { "type": "object" }
-                }
-            }
-        },
-        "parameters": {
-            "PublicIdParam": {
-                "name": "public_id",
-                "in": "path",
-                "required": true,
-                "description": "Public ID (UUID atau string identifikasi)",
-                "schema": {
-                    "type": "string",
-                    "minLength": 1,
-                    "example": "550e8400-e29b-41d4-a716-446655440000"
-                }
-            },
-            "QueryPage": {
-                "name": "page",
-                "in": "query",
-                "description": "Nomor halaman",
-                "schema": { "type": "string", "default": "1" }
-            },
-            "QueryLimit": {
-                "name": "limit",
-                "in": "query",
-                "description": "Jumlah data per halaman",
-                "schema": { "type": "string", "default": "10" }
-            }
-        }
-    },
     "paths": {
-        "/api/health": {
+        "/api/health/": {
             "get": {
-                "tags": ["Health"],
-                "summary": "Health check server",
+                "description": "",
                 "responses": {
-                    "200": {
-                        "description": "Server berjalan normal",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ApiResponse"
-                                }
-                            }
-                        }
+                    "default": {
+                        "description": ""
                     }
                 }
             }
         },
-        "/api/users": {
+        "/api/users/": {
             "post": {
-                "tags": ["Users"],
-                "summary": "Buat user baru",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CreateUserBody"
-                            }
-                        }
-                    }
-                },
+                "description": "",
                 "responses": {
-                    "201": {
-                        "description": "User berhasil dibuat",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "allOf": [
-                                        {
-                                            "$ref": "#/components/schemas/ApiResponse"
-                                        },
-                                        {
-                                            "properties": {
-                                                "data": {
-                                                    "$ref": "#/components/schemas/User"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Data request tidak valid",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
+                    "default": {
+                        "description": ""
                     }
                 }
             },
             "get": {
-                "tags": ["Users"],
-                "summary": "Ambil semua user dengan paginasi dan filter",
-                "parameters": [
-                    { "$ref": "#/components/parameters/QueryPage" },
-                    { "$ref": "#/components/parameters/QueryLimit" },
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "description": "Cari berdasarkan nama atau email",
-                        "schema": { "type": "string" }
-                    },
-                    {
-                        "name": "role",
-                        "in": "query",
-                        "description": "Filter berdasarkan role",
-                        "schema": { "type": "string" }
-                    },
-                    {
-                        "name": "status",
-                        "in": "query",
-                        "description": "Filter berdasarkan status",
-                        "schema": { "type": "string" }
-                    }
-                ],
+                "description": "",
                 "responses": {
-                    "200": {
-                        "description": "Daftar user berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "allOf": [
-                                        {
-                                            "$ref": "#/components/schemas/ApiResponse"
-                                        },
-                                        {
-                                            "properties": {
-                                                "data": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "$ref": "#/components/schemas/User"
-                                                    }
-                                                },
-                                                "meta": {
-                                                    "$ref": "#/components/schemas/PaginationMeta"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        }
+                    "default": {
+                        "description": ""
                     }
                 }
             }
         },
         "/api/users/{public_id}": {
             "get": {
-                "tags": ["Users"],
-                "summary": "Ambil user berdasarkan public_id",
+                "description": "",
                 "parameters": [
-                    { "$ref": "#/components/parameters/PublicIdParam" }
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "User ditemukan",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "allOf": [
-                                        {
-                                            "$ref": "#/components/schemas/ApiResponse"
-                                        },
-                                        {
-                                            "properties": {
-                                                "data": {
-                                                    "$ref": "#/components/schemas/User"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User tidak ditemukan",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
+                    "default": {
+                        "description": ""
                     }
                 }
             },
             "put": {
-                "tags": ["Users"],
-                "summary": "Perbarui data user",
+                "description": "",
                 "parameters": [
-                    { "$ref": "#/components/parameters/PublicIdParam" }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/UpdateUserBody"
-                            }
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
                     }
-                },
+                ],
                 "responses": {
-                    "200": {
-                        "description": "User berhasil diperbarui",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "allOf": [
-                                        {
-                                            "$ref": "#/components/schemas/ApiResponse"
-                                        },
-                                        {
-                                            "properties": {
-                                                "data": {
-                                                    "$ref": "#/components/schemas/User"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Data request tidak valid",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User tidak ditemukan",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
+                    "default": {
+                        "description": ""
                     }
                 }
             },
             "delete": {
-                "tags": ["Users"],
-                "summary": "Hapus user (soft delete)",
+                "description": "",
                 "parameters": [
-                    { "$ref": "#/components/parameters/PublicIdParam" }
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "User berhasil dihapus",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ApiResponse"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User tidak ditemukan",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
+                    "default": {
+                        "description": ""
                     }
                 }
             }
         },
-        "/api/cadres": {
+        "/api/users/{public_id}/restore": {
             "post": {
-                "tags": ["Cadres"],
-                "summary": "Buat kader baru",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CreateCadreBody"
-                            }
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
                     }
-                },
+                ],
                 "responses": {
-                    "201": {
-                        "description": "Kader berhasil dibuat",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "allOf": [
-                                        {
-                                            "$ref": "#/components/schemas/ApiResponse"
-                                        },
-                                        {
-                                            "properties": {
-                                                "data": {
-                                                    "$ref": "#/components/schemas/Cadre"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Data tidak valid",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
+                    "default": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/cadres/": {
+            "post": {
+                "description": "",
+                "responses": {
+                    "default": {
+                        "description": ""
                     }
                 }
             },
             "get": {
-                "tags": ["Cadres"],
-                "summary": "Ambil semua data kader",
-                "parameters": [
-                    { "$ref": "#/components/parameters/QueryPage" },
-                    { "$ref": "#/components/parameters/QueryLimit" },
-                    {
-                        "name": "user_id",
-                        "in": "query",
-                        "schema": { "type": "string" }
-                    },
-                    {
-                        "name": "posyandu_id",
-                        "in": "query",
-                        "schema": { "type": "string" }
-                    },
-                    {
-                        "name": "position",
-                        "in": "query",
-                        "schema": { "type": "string" }
-                    }
-                ],
+                "description": "",
                 "responses": {
-                    "200": {
-                        "description": "Sukses",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "allOf": [
-                                        {
-                                            "$ref": "#/components/schemas/ApiResponse"
-                                        },
-                                        {
-                                            "properties": {
-                                                "data": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "$ref": "#/components/schemas/Cadre"
-                                                    }
-                                                },
-                                                "meta": {
-                                                    "$ref": "#/components/schemas/PaginationMeta"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        }
+                    "default": {
+                        "description": ""
                     }
                 }
             }
         },
         "/api/cadres/{public_id}": {
-            "put": {
-                "tags": ["Cadres"],
-                "summary": "Perbarui data kader",
+            "get": {
+                "description": "",
                 "parameters": [
-                    { "$ref": "#/components/parameters/PublicIdParam" }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/UpdateCadreBody"
-                            }
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
                     }
-                },
+                ],
                 "responses": {
-                    "200": {
-                        "description": "Berhasil diperbarui",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "allOf": [
-                                        {
-                                            "$ref": "#/components/schemas/ApiResponse"
-                                        },
-                                        {
-                                            "properties": {
-                                                "data": {
-                                                    "$ref": "#/components/schemas/Cadre"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
+                    "default": {
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": ""
                     }
                 }
             }
         },
-        "/api/midwifes": {
+        "/api/cadres/{public_id}/restore": {
             "post": {
-                "tags": ["Midwifes"],
-                "summary": "Buat bidan baru",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CreateMidwifeBody"
-                            }
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
                     }
-                },
+                ],
                 "responses": {
-                    "201": {
-                        "description": "Bidan berhasil dibuat",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "allOf": [
-                                        {
-                                            "$ref": "#/components/schemas/ApiResponse"
-                                        },
-                                        {
-                                            "properties": {
-                                                "data": {
-                                                    "$ref": "#/components/schemas/Midwife"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        }
+                    "default": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/midwifes/": {
+            "post": {
+                "description": "",
+                "responses": {
+                    "default": {
+                        "description": ""
                     }
                 }
             },
             "get": {
-                "tags": ["Midwifes"],
-                "summary": "Ambil semua data bidan",
-                "parameters": [
-                    { "$ref": "#/components/parameters/QueryPage" },
-                    { "$ref": "#/components/parameters/QueryLimit" },
-                    {
-                        "name": "user_id",
-                        "in": "query",
-                        "schema": { "type": "string" }
-                    },
-                    {
-                        "name": "posyandu_id",
-                        "in": "query",
-                        "schema": { "type": "string" }
-                    },
-                    {
-                        "name": "license_number",
-                        "in": "query",
-                        "schema": { "type": "string" }
-                    }
-                ],
+                "description": "",
                 "responses": {
-                    "200": {
-                        "description": "Sukses",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "allOf": [
-                                        {
-                                            "$ref": "#/components/schemas/ApiResponse"
-                                        },
-                                        {
-                                            "properties": {
-                                                "data": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "$ref": "#/components/schemas/Midwife"
-                                                    }
-                                                },
-                                                "meta": {
-                                                    "$ref": "#/components/schemas/PaginationMeta"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        }
+                    "default": {
+                        "description": ""
                     }
                 }
             }
         },
         "/api/midwifes/{public_id}": {
-            "put": {
-                "tags": ["Midwifes"],
-                "summary": "Perbarui data bidan",
+            "get": {
+                "description": "",
                 "parameters": [
-                    { "$ref": "#/components/parameters/PublicIdParam" }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/UpdateMidwifeBody"
-                            }
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
                     }
-                },
+                ],
                 "responses": {
-                    "200": {
-                        "description": "Berhasil diperbarui",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "allOf": [
-                                        {
-                                            "$ref": "#/components/schemas/ApiResponse"
-                                        },
-                                        {
-                                            "properties": {
-                                                "data": {
-                                                    "$ref": "#/components/schemas/Midwife"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
+                    "default": {
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": ""
                     }
                 }
             }
         },
-        "/api/parents": {
+        "/api/midwifes/{public_id}/restore": {
             "post": {
-                "tags": ["Parents"],
-                "summary": "Buat data orang tua baru",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CreateParentBody"
-                            }
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
                     }
-                },
+                ],
                 "responses": {
-                    "201": {
-                        "description": "Orang tua berhasil dibuat",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "allOf": [
-                                        {
-                                            "$ref": "#/components/schemas/ApiResponse"
-                                        },
-                                        {
-                                            "properties": {
-                                                "data": {
-                                                    "$ref": "#/components/schemas/Parent"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        }
+                    "default": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/parents/": {
+            "post": {
+                "description": "",
+                "responses": {
+                    "default": {
+                        "description": ""
                     }
                 }
             },
             "get": {
-                "tags": ["Parents"],
-                "summary": "Ambil semua data orang tua",
-                "parameters": [
-                    { "$ref": "#/components/parameters/QueryPage" },
-                    { "$ref": "#/components/parameters/QueryLimit" },
-                    {
-                        "name": "user_id",
-                        "in": "query",
-                        "schema": { "type": "string" }
-                    },
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "schema": { "type": "string" }
-                    },
-                    {
-                        "name": "blood_type",
-                        "in": "query",
-                        "schema": { "type": "string" }
-                    }
-                ],
+                "description": "",
                 "responses": {
-                    "200": {
-                        "description": "Sukses",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "allOf": [
-                                        {
-                                            "$ref": "#/components/schemas/ApiResponse"
-                                        },
-                                        {
-                                            "properties": {
-                                                "data": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "$ref": "#/components/schemas/Parent"
-                                                    }
-                                                },
-                                                "meta": {
-                                                    "$ref": "#/components/schemas/PaginationMeta"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        }
+                    "default": {
+                        "description": ""
                     }
                 }
             }
         },
         "/api/parents/{public_id}": {
-            "put": {
-                "tags": ["Parents"],
-                "summary": "Perbarui data orang tua",
+            "get": {
+                "description": "",
                 "parameters": [
-                    { "$ref": "#/components/parameters/PublicIdParam" }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/UpdateParentBody"
-                            }
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
                     }
-                },
+                ],
                 "responses": {
-                    "200": {
-                        "description": "Berhasil diperbarui",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "allOf": [
-                                        {
-                                            "$ref": "#/components/schemas/ApiResponse"
-                                        },
-                                        {
-                                            "properties": {
-                                                "data": {
-                                                    "$ref": "#/components/schemas/Parent"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
+                    "default": {
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/parents/{public_id}/restore": {
+            "post": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/posyandus/": {
+            "post": {
+                "description": "",
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            },
+            "get": {
+                "description": "",
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/posyandus/{public_id}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/posyandus/{public_id}/restore": {
+            "post": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/health-centers/": {
+            "post": {
+                "description": "",
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            },
+            "get": {
+                "description": "",
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/health-centers/{public_id}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/health-centers/{public_id}/restore": {
+            "post": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "public_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": ""
                     }
                 }
             }
