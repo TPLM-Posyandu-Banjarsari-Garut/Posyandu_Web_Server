@@ -7,11 +7,13 @@ import { registerHealthCentersRoutes } from '@/docs/health-centers-docs'
 import { registerPosyandusRoutes } from '@/docs/posyandus-docs'
 import { registerMidwifesRoutes } from '@/docs/midwifes-docs'
 import { registerUsersRoutes } from '@/docs/users-docs'
+import { registerParentsRoutes } from '@/docs/parents-docs'
 
 export const registry = new OpenAPIRegistry()
 
 // users
 registerUsersRoutes(registry)
+registerParentsRoutes(registry)
 registerCadresRoutes(registry)
 registerMidwifesRoutes(registry)
 
