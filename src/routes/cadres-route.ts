@@ -1,15 +1,16 @@
 import { Router } from 'express'
-import { CadreController } from '@/controllers/cadre-controller'
-import { CadreService } from '@/services/cadre-service'
-import { CadreRepository } from '@/repositories/cadre-repository'
+import { CadreController } from '@/controllers/cadres-controller'
+import { CadreService } from '@/services/cadres-service'
+import { CadreRepository } from '@/repositories/cadres-repository'
 import { AsyncHandler } from '@/utils/async-handler'
 import { validateRequest } from '@/middlewares/validate-request'
 import {
     createCadreSchema,
     updateCadreSchema,
     getCadresQuerySchema,
-    cadreParamsSchema
-} from '@/validations/cadre-validation'
+    cadreParamsSchema,
+    deleteCadreQuerySchema
+} from '@/validations/cadres-validation'
 import db from '@/configs/db'
 
 const router = Router()
@@ -44,8 +45,17 @@ router.put(
 
 router.delete(
     '/:public_id',
-    validateRequest({ params: cadreParamsSchema }),
+    validateRequest({
+        params: cadreParamsSchema,
+        query: deleteCadreQuerySchema
+    }),
     AsyncHandler(cadre_controller.deleteCadre)
+)
+
+router.post(
+    '/:public_id/restore',
+    validateRequest({ params: cadreParamsSchema }),
+    AsyncHandler(cadre_controller.restoreCadre)
 )
 
 export default router

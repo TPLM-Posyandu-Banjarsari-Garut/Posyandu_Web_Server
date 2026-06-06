@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { ParentService } from '@/services/parent-service'
+import { ParentService } from '@/services/parents-service'
 import { ParentQueryFilters } from '@/repositories/parents-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
@@ -48,9 +48,24 @@ export class ParentController {
 
     deleteParent = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
-        logger.warn({ public_id }, 'Incoming request: Delete Parent')
+        const is_permanent = req.query.permanent === 'true'
+        logger.warn(
+            { public_id, is_permanent },
+            'Incoming request: Delete Parent'
+        )
 
-        const parent = await this.parent_service.deleteParent(public_id)
+        const parent = await this.parent_service.deleteParent(
+            public_id,
+            is_permanent
+        )
         return ApiResponse.ok(res, 'Parent deleted successfully', parent)
+    }
+
+    restoreParent = async (req: Request, res: Response) => {
+        const public_id = req.params.public_id as string
+        logger.info({ public_id }, 'Incoming request: Restore Parent')
+
+        const parent = await this.parent_service.restoreParent(public_id)
+        return ApiResponse.ok(res, 'Parent restored successfully', parent)
     }
 }

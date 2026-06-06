@@ -8,7 +8,6 @@ export class ParentService {
     constructor(private readonly parent_repository: ParentRepository) {}
 
     async createParent(parent_payload: NewParent): Promise<Parent> {
-        // Business logic: Ensure the user doesn't already have a parent profile
         const existingProfile = await this.parent_repository.findByUserId(
             parent_payload.user_id
         )
@@ -16,7 +15,6 @@ export class ParentService {
             throw new Error('User already has a parent profile')
         }
 
-        // Business logic: Ensure identity_number (NIK) is unique if provided
         if (parent_payload.identity_number) {
             const isNikUsed =
                 await this.parent_repository.existsByIdentityNumber(
@@ -56,10 +54,8 @@ export class ParentService {
         public_id: string,
         parent_payload: Partial<NewParent>
     ): Promise<Parent> {
-        // Ensure the parent exists before updating
         const existingParent = await this.getParentById(public_id)
 
-        // If updating identity_number, ensure it doesn't belong to another parent
         if (
             parent_payload.identity_number &&
             parent_payload.identity_number !== existingParent.identity_number
@@ -75,7 +71,6 @@ export class ParentService {
             }
         }
 
-        // If updating user_id, ensure the new user_id doesn't already have a profile
         if (
             parent_payload.user_id &&
             parent_payload.user_id !== existingParent.user_id
@@ -97,12 +92,23 @@ export class ParentService {
         return updated
     }
 
-    async deleteParent(public_id: string): Promise<Parent> {
-        // Ensure the parent exists before deleting
+    async deleteParent(
+        public_id: string,
+        is_permanent: boolean = false
+    ): Promise<Parent> {
         await this.getParentById(public_id)
 
-        const deleted = await this.parent_repository.delete(public_id)
+        const deleted = is_permanent
+            ? await this.parent_repository.hardDelete(public_id)
+            : await this.parent_repository.softDelete(public_id)
+
         if (!deleted) throw new Error('Failed to delete parent profile')
         return deleted
+    }
+
+    async restoreParent(public_id: string): Promise<Parent> {
+        const restored = await this.parent_repository.restore(public_id)
+        if (!restored) throw new Error('Failed to restore parent profile')
+        return restored
     }
 }

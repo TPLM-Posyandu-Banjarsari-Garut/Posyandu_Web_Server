@@ -1,12 +1,13 @@
 FROM oven/bun:1.3-slim AS deps
 WORKDIR /app
 
-COPY package.json bun.lock* ./
-RUN bun install --frozen-lockfile
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile --ignore-scripts
 
 FROM deps AS development
 WORKDIR /app
-COPY . .
+COPY tsconfig.json ./
+COPY src ./src
 
 FROM development AS builder
 RUN bun run build
@@ -21,7 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 
 ENV NODE_ENV=production
 
-COPY package.json bun.lock* ./
+COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile --production --ignore-scripts
 
 COPY --from=builder /app/dist ./dist

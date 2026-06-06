@@ -8,6 +8,7 @@ export interface UserQueryFilters {
     status?: User['status']
     page?: number
     limit?: number
+    includeDeleted?: boolean
 }
 
 export class UserRepository {
@@ -19,11 +20,25 @@ export class UserRepository {
     }
 
     async findAll(): Promise<User[]> {
-        return this.db.select().from(users)
+        return this.db.select().from(users).where(eq(users.status, 'active'))
     }
 
     async getUsers(filters?: UserQueryFilters) {
-        const { search, role, status, page = 1, limit = 10 } = filters || {}
+        const {
+            search,
+            role,
+            status,
+            page = 1,
+            limit = 10,
+            includeDeleted = false
+        } = filters || {}
+
+        let statusCondition = undefined
+        if (status) {
+            statusCondition = eq(users.status, status)
+        } else if (!includeDeleted) {
+            statusCondition = eq(users.status, 'active')
+        }
 
         const whereClause = and(
             search
@@ -33,7 +48,7 @@ export class UserRepository {
                   )
                 : undefined,
             role ? eq(users.role, role) : undefined,
-            status ? eq(users.status, status) : undefined
+            statusCondition
         )
 
         const [data, countResult] = await Promise.all([
@@ -59,7 +74,9 @@ export class UserRepository {
         const [user] = await this.db
             .select()
             .from(users)
-            .where(eq(users.public_id, public_id))
+            .where(
+                and(eq(users.public_id, public_id), eq(users.status, 'active'))
+            )
             .limit(1)
         return user
     }
@@ -68,14 +85,21 @@ export class UserRepository {
         return this.db
             .select()
             .from(users)
-            .where(ilike(users.name, `%${name}%`))
+            .where(
+                and(ilike(users.name, `%${name}%`), eq(users.status, 'active'))
+            )
     }
 
     async findByPhoneNumber(phone_number: string): Promise<User | undefined> {
         const [user] = await this.db
             .select()
             .from(users)
-            .where(eq(users.phone_number, phone_number))
+            .where(
+                and(
+                    eq(users.phone_number, phone_number),
+                    eq(users.status, 'active')
+                )
+            )
             .limit(1)
         return user
     }
@@ -84,7 +108,7 @@ export class UserRepository {
         const [user] = await this.db
             .select()
             .from(users)
-            .where(eq(users.email, email))
+            .where(and(eq(users.email, email), eq(users.status, 'active')))
             .limit(1)
         return user
     }
@@ -101,9 +125,31 @@ export class UserRepository {
         return user
     }
 
-    async delete(public_id: string): Promise<User | undefined> {
+    async softDelete(public_id: string): Promise<User | undefined> {
+        const [user] = await this.db
+            .update(users)
+            .set({
+                status: 'inactive'
+            })
+            .where(eq(users.public_id, public_id))
+            .returning()
+        return user
+    }
+
+    async hardDelete(public_id: string): Promise<User | undefined> {
         const [user] = await this.db
             .delete(users)
+            .where(eq(users.public_id, public_id))
+            .returning()
+        return user
+    }
+
+    async restore(public_id: string): Promise<User | undefined> {
+        const [user] = await this.db
+            .update(users)
+            .set({
+                status: 'active'
+            })
             .where(eq(users.public_id, public_id))
             .returning()
         return user
@@ -113,7 +159,7 @@ export class UserRepository {
         const [user] = await this.db
             .select({ id: users.id })
             .from(users)
-            .where(eq(users.email, email))
+            .where(and(eq(users.email, email), eq(users.status, 'active')))
             .limit(1)
         return !!user
     }
@@ -122,7 +168,12 @@ export class UserRepository {
         const [user] = await this.db
             .select({ id: users.id })
             .from(users)
-            .where(eq(users.phone_number, phone_number))
+            .where(
+                and(
+                    eq(users.phone_number, phone_number),
+                    eq(users.status, 'active')
+                )
+            )
             .limit(1)
         return !!user
     }

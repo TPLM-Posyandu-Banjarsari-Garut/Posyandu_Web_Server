@@ -72,7 +72,9 @@ export const midwifesRelations = relations(midwifes, ({ one, many }) => ({
     vitaminRecords: many(vitaminRecords),
     nutritionRecords: many(nutritionRecords),
     consultations: many(consultations),
-    examinationRecords: many(examinationRecords),
+    examinationRecords: many(examinationRecords, {
+        relationName: 'midwife'
+    }),
     medicalValidations: many(examinationRecords, {
         relationName: 'medicalValidator'
     }),
@@ -300,7 +302,8 @@ export const examinationRecordsRelations = relations(
         }),
         midwife: one(midwifes, {
             fields: [examinationRecords.midwife_id],
-            references: [midwifes.id]
+            references: [midwifes.id],
+            relationName: 'midwife'
         }),
         medicalValidator: one(midwifes, {
             fields: [examinationRecords.medically_validated_by_midwife_id],

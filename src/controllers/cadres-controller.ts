@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { CadreService } from '@/services/cadre-service'
-import { CadreQueryFilters } from '@/repositories/cadre-repository'
+import { CadreService } from '@/services/cadres-service'
+import { CadreQueryFilters } from '@/repositories/cadres-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
 
@@ -45,9 +45,24 @@ export class CadreController {
 
     deleteCadre = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
-        logger.warn({ public_id }, 'Incoming request: Delete Cadre')
+        const is_permanent = req.query.permanent === 'true'
+        logger.warn(
+            { public_id, is_permanent },
+            'Incoming request: Delete Cadre'
+        )
 
-        const cadre = await this.cadre_service.deleteCadre(public_id)
+        const cadre = await this.cadre_service.deleteCadre(
+            public_id,
+            is_permanent
+        )
         return ApiResponse.ok(res, 'Cadre deleted successfully', cadre)
+    }
+
+    restoreCadre = async (req: Request, res: Response) => {
+        const public_id = req.params.public_id as string
+        logger.info({ public_id }, 'Incoming request: Restore Cadre')
+
+        const cadre = await this.cadre_service.restoreCadre(public_id)
+        return ApiResponse.ok(res, 'Cadre restored successfully', cadre)
     }
 }
