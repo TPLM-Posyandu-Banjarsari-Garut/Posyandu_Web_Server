@@ -13,7 +13,11 @@ export const envSchema = z.object({
 
     CORS_ORIGIN: z.url('Format Cors salah'),
 
-    DATABASE_URL: z.url('Database URL Salah').min(3, 'Database URL is required')
+    DATABASE_URL: z
+        .url('Database URL Salah')
+        .min(3, 'Database URL is required'),
+    BETTER_AUTH_SECRET: z.string().nonempty('BETTER_AUTH_SECRET is required'),
+    BETTER_AUTH_URL: z.url().nonempty('BETTER_AUTH_URL is required')
 })
 
 export type Env = z.infer<typeof envSchema>

@@ -9,6 +9,8 @@ import { setupSwagger } from '@/configs/swagger'
 import apiRoutes from '@/routes/index-routes'
 import env from '@/configs/env'
 import sourceMapSupport from 'source-map-support'
+import { toNodeHandler } from 'better-auth/node'
+import { auth } from '@/configs/auth'
 sourceMapSupport.install()
 
 const app: Express = express()
@@ -29,6 +31,7 @@ app.use(morgan(env.NODE_ENV === 'development' ? 'dev' : 'combined'))
 
 setupSwagger(app)
 
+app.all('/api/auth/*splat', toNodeHandler(auth))
 app.get('/favicon.ico', (req, res) => res.status(204).end())
 
 app.get('/', (req: Request, res: Response) => {
