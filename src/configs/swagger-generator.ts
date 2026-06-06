@@ -3,9 +3,13 @@ import {
     OpenApiGeneratorV3
 } from '@asteasolutions/zod-to-openapi'
 import { registerCadresRoutes } from '@/docs/cadres-docs'
+import { registerHealthCentersRoutes } from '@/docs/health-centers-docs'
+import { registerPosyandusRoutes } from '@/docs/posyandus-docs'
 
 export const registry = new OpenAPIRegistry()
 
+registerHealthCentersRoutes(registry)
+registerPosyandusRoutes(registry)
 registerCadresRoutes(registry)
 
 export function generateOpenApiDocs() {
