@@ -9,6 +9,12 @@ import { registerMidwifesRoutes } from '@/docs/midwifes-docs'
 import { registerUsersRoutes } from '@/docs/users-docs'
 import { registerParentsRoutes } from '@/docs/parents-docs'
 import { registerChildrenRoutes } from '@/docs/childrens-docs'
+import { registerVitaminsRoutes } from '@/docs/vitamins-docs'
+import { registerImmunizationRecordsRoutes } from '@/docs/immunization-records-docs'
+import { registerVitaminRecordsRoutes } from '@/docs/vitamin-records-docs'
+import { registerVaccinesRoutes } from '@/docs/vaccines-docs'
+import { registerKipiDetailsRoutes } from '@/docs/kipi-details-docs'
+import { registerNutritionRecordsRoutes } from '@/docs/nutrition-records-docs'
 
 import { registerAuthRoutes } from '@/docs/auth-docs'
 
@@ -37,6 +43,12 @@ registerPosyandusRoutes(registry)
 
 // children
 registerChildrenRoutes(registry)
+registerVitaminsRoutes(registry)
+registerImmunizationRecordsRoutes(registry)
+registerVitaminRecordsRoutes(registry)
+registerVaccinesRoutes(registry)
+registerKipiDetailsRoutes(registry)
+registerNutritionRecordsRoutes(registry)
 
 export function generateOpenApiDocs() {
     const generator = new OpenApiGeneratorV3(registry.definitions)
