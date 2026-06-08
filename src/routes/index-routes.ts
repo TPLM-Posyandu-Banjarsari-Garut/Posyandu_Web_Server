@@ -10,6 +10,7 @@ import healthCenterRoutes from '@/routes/health-centers-route'
 import vitaminRoutes from '@/routes/vitamins-route'
 import immunizationRecordRoutes from '@/routes/immunization-records-route'
 import vitaminRecordRoutes from '@/routes/vitamin-records-route'
+import vaccineRoutes from '@/routes/vaccines-route'
 
 const router = Router()
 
@@ -23,5 +24,6 @@ router.use('/api/health-centers', healthCenterRoutes)
 router.use('/api/vitamins', vitaminRoutes)
 router.use('/api/immunization-records', immunizationRecordRoutes)
 router.use('/api/vitamin-records', vitaminRecordRoutes)
+router.use('/api/vaccines', vaccineRoutes)
 
 export default router
