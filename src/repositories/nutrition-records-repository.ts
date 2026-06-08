@@ -1,0 +1,137 @@
+import { NewNutritionRecord, NutritionRecord, nutritionRecords } from '@/db'
+import { and, eq, sql } from 'drizzle-orm'
+import { NodePgDatabase } from 'drizzle-orm/node-postgres'
+
+export interface NutritionRecordQueryFilters {
+    children_id?: string
+    cadre_id?: string
+    midwife_id?: string
+    nutrition_status?: NutritionRecord['nutrition_status']
+    page?: number
+    limit?: number
+    includeDeleted?: boolean
+}
+
+export class NutritionRecordRepository {
+    constructor(private readonly db: NodePgDatabase) {}
+
+    async create(new_record: NewNutritionRecord): Promise<NutritionRecord> {
+        const [record] = await this.db
+            .insert(nutritionRecords)
+            .values(new_record)
+            .returning()
+        return record
+    }
+
+    async getNutritionRecords(filters?: NutritionRecordQueryFilters) {
+        const {
+            children_id,
+            cadre_id,
+            midwife_id,
+            nutrition_status,
+            page = 1,
+            limit = 10,
+            includeDeleted = false
+        } = filters || {}
+
+        const conditions = []
+
+        if (!includeDeleted) {
+            conditions.push(sql`${nutritionRecords.deleted_at} IS NULL`)
+        }
+
+        if (children_id) {
+            conditions.push(eq(nutritionRecords.children_id, children_id))
+        }
+
+        if (cadre_id) {
+            conditions.push(eq(nutritionRecords.cadre_id, cadre_id))
+        }
+
+        if (midwife_id) {
+            conditions.push(eq(nutritionRecords.midwife_id, midwife_id))
+        }
+
+        if (nutrition_status) {
+            conditions.push(
+                eq(nutritionRecords.nutrition_status, nutrition_status)
+            )
+        }
+
+        const whereClause = and(...conditions)
+
+        const [data, countResult] = await Promise.all([
+            this.db
+                .select()
+                .from(nutritionRecords)
+                .where(whereClause)
+                .limit(limit)
+                .offset((page - 1) * limit),
+            this.db
+                .select({ count: sql<number>`count(*)` })
+                .from(nutritionRecords)
+                .where(whereClause)
+        ])
+
+        return {
+            data,
+            totalItems: Number(countResult[0]?.count || 0)
+        }
+    }
+
+    async findById(public_id: string): Promise<NutritionRecord | undefined> {
+        const [record] = await this.db
+            .select()
+            .from(nutritionRecords)
+            .where(
+                and(
+                    eq(nutritionRecords.id, public_id),
+                    sql`${nutritionRecords.deleted_at} IS NULL`
+                )
+            )
+            .limit(1)
+        return record
+    }
+
+    async update(
+        public_id: string,
+        updated_record: Partial<NewNutritionRecord>
+    ): Promise<NutritionRecord | undefined> {
+        const [record] = await this.db
+            .update(nutritionRecords)
+            .set(updated_record)
+            .where(eq(nutritionRecords.id, public_id))
+            .returning()
+        return record
+    }
+
+    async softDelete(public_id: string): Promise<NutritionRecord | undefined> {
+        const [record] = await this.db
+            .update(nutritionRecords)
+            .set({
+                deleted_at: new Date()
+            })
+            .where(eq(nutritionRecords.id, public_id))
+            .returning()
+        return record
+    }
+
+    async hardDelete(public_id: string): Promise<NutritionRecord | undefined> {
+        const [record] = await this.db
+            .delete(nutritionRecords)
+            .where(eq(nutritionRecords.id, public_id))
+            .returning()
+        return record
+    }
+
+    async restore(public_id: string): Promise<NutritionRecord | undefined> {
+        const [record] = await this.db
+            .update(nutritionRecords)
+            .set({
+                deleted_at: null
+            })
+            .where(eq(nutritionRecords.id, public_id))
+            .returning()
+        return record
+    }
+}

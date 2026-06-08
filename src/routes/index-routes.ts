@@ -12,6 +12,7 @@ import immunizationRecordRoutes from '@/routes/immunization-records-route'
 import vitaminRecordRoutes from '@/routes/vitamin-records-route'
 import vaccineRoutes from '@/routes/vaccines-route'
 import kipiDetailRoutes from '@/routes/kipi-details-route'
+import nutritionRecordRoutes from '@/routes/nutrition-records-route'
 
 const router = Router()
 
@@ -27,5 +28,6 @@ router.use('/api/immunization-records', immunizationRecordRoutes)
 router.use('/api/vitamin-records', vitaminRecordRoutes)
 router.use('/api/vaccines', vaccineRoutes)
 router.use('/api/kipi-details', kipiDetailRoutes)
+router.use('/api/nutrition-records', nutritionRecordRoutes)
 
 export default router
