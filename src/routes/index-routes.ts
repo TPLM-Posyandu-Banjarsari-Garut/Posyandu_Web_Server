@@ -14,6 +14,8 @@ import vaccineRoutes from '@/routes/vaccines-route'
 import kipiDetailRoutes from '@/routes/kipi-details-route'
 import nutritionRecordRoutes from '@/routes/nutrition-records-route'
 import inventoryRoutes from '@/routes/inventories-route'
+import educationCategoryRoutes from '@/routes/education-categories-route'
+import educationRoutes from '@/routes/educations-route'
 
 const router = Router()
 
@@ -31,5 +33,7 @@ router.use('/api/vaccines', vaccineRoutes)
 router.use('/api/kipi-details', kipiDetailRoutes)
 router.use('/api/nutrition-records', nutritionRecordRoutes)
 router.use('/api/inventories', inventoryRoutes)
+router.use('/api/education-categories', educationCategoryRoutes)
+router.use('/api/educations', educationRoutes)
 
 export default router

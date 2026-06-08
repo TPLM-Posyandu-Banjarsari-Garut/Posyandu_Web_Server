@@ -16,6 +16,8 @@ import { registerVaccinesRoutes } from '@/docs/vaccines-docs'
 import { registerKipiDetailsRoutes } from '@/docs/kipi-details-docs'
 import { registerNutritionRecordsRoutes } from '@/docs/nutrition-records-docs'
 import { registerInventoriesRoutes } from '@/docs/inventories-docs'
+import { registerEducationCategoriesRoutes } from '@/docs/education-categories-docs'
+import { registerEducationsRoutes } from '@/docs/educations-docs'
 
 import { registerAuthRoutes } from '@/docs/auth-docs'
 
@@ -51,6 +53,10 @@ registerVaccinesRoutes(registry)
 registerKipiDetailsRoutes(registry)
 registerNutritionRecordsRoutes(registry)
 registerInventoriesRoutes(registry)
+
+// education
+registerEducationCategoriesRoutes(registry)
+registerEducationsRoutes(registry)
 
 export function generateOpenApiDocs() {
     const generator = new OpenApiGeneratorV3(registry.definitions)

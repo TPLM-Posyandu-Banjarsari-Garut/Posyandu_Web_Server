@@ -15,6 +15,13 @@
             "when": 1780900125236,
             "tag": "0001_melted_the_phantom",
             "breakpoints": true
+        },
+        {
+            "idx": 2,
+            "version": "7",
+            "when": 1780909842646,
+            "tag": "0002_nasty_nightshade",
+            "breakpoints": true
         }
     ]
 }
