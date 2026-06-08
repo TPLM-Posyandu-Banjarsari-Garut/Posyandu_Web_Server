@@ -12,6 +12,7 @@ import sourceMapSupport from 'source-map-support'
 import { toNodeHandler, fromNodeHeaders } from 'better-auth/node'
 import { auth } from '@/configs/auth'
 import { autoAuditMiddleware } from '@/middlewares/auto-audit-middleware'
+import { authRateLimiter } from '@/middlewares/rate-limiter'
 sourceMapSupport.install()
 
 const app: Express = express()
@@ -44,6 +45,7 @@ app.use(autoAuditMiddleware)
 
 setupSwagger(app)
 
+app.use('/api/auth', authRateLimiter)
 app.all('/api/auth/', toNodeHandler(auth))
 app.get('/favicon.ico', (req, res) => res.status(204).end())
 
