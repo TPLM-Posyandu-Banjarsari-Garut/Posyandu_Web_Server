@@ -4,6 +4,8 @@ import {
     UserQueryFilters
 } from '@/repositories/user-repository'
 
+import { AuthService } from '@/services/auth-service'
+
 export class UserService {
     constructor(private readonly user_repository: UserRepository) {}
 
@@ -20,7 +22,21 @@ export class UserService {
         if (email_exists) throw new Error('Email already registered')
         if (phone_exists) throw new Error('Phone number already registered')
 
-        return this.user_repository.create(user_payload)
+        const auth_service = new AuthService(this.user_repository)
+        return await auth_service.registerWithEmail({
+            email: user_payload.email,
+            password: user_payload.password,
+            name: user_payload.name,
+            phone_number: user_payload.phone_number,
+            avatar_url: (user_payload as Record<string, unknown>).avatar_url as
+                | string
+                | undefined,
+            role: (user_payload.role || 'parent') as
+                | 'admin'
+                | 'midwife'
+                | 'cadre'
+                | 'parent'
+        })
     }
 
     async getUsers(query_filters?: UserQueryFilters) {
