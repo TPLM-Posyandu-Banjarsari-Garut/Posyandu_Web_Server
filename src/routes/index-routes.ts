@@ -9,6 +9,7 @@ import posyanduRoutes from '@/routes/posyandus-route'
 import healthCenterRoutes from '@/routes/health-centers-route'
 import vitaminRoutes from '@/routes/vitamins-route'
 import immunizationRecordRoutes from '@/routes/immunization-records-route'
+import vitaminRecordRoutes from '@/routes/vitamin-records-route'
 
 const router = Router()
 
@@ -21,5 +22,6 @@ router.use('/api/posyandus', posyanduRoutes)
 router.use('/api/health-centers', healthCenterRoutes)
 router.use('/api/vitamins', vitaminRoutes)
 router.use('/api/immunization-records', immunizationRecordRoutes)
+router.use('/api/vitamin-records', vitaminRecordRoutes)
 
 export default router
