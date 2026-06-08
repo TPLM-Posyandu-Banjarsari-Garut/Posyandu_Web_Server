@@ -74,7 +74,7 @@ export class HealthCenterRepository {
             .from(healthCenters)
             .where(
                 and(
-                    eq(healthCenters.public_id, public_id),
+                    eq(healthCenters.id, public_id),
                     eq(healthCenters.status, 'active')
                 )
             )
@@ -89,7 +89,7 @@ export class HealthCenterRepository {
         const [health_center] = await this.db
             .update(healthCenters)
             .set(updated_health_center)
-            .where(eq(healthCenters.public_id, public_id))
+            .where(eq(healthCenters.id, public_id))
             .returning()
         return health_center
     }
@@ -100,7 +100,7 @@ export class HealthCenterRepository {
             .set({
                 status: 'inactive'
             })
-            .where(eq(healthCenters.public_id, public_id))
+            .where(eq(healthCenters.id, public_id))
             .returning()
         return health_center
     }
@@ -108,7 +108,7 @@ export class HealthCenterRepository {
     async hardDelete(public_id: string): Promise<HealthCenter | undefined> {
         const [health_center] = await this.db
             .delete(healthCenters)
-            .where(eq(healthCenters.public_id, public_id))
+            .where(eq(healthCenters.id, public_id))
             .returning()
         return health_center
     }
@@ -119,7 +119,7 @@ export class HealthCenterRepository {
             .set({
                 status: 'active'
             })
-            .where(eq(healthCenters.public_id, public_id))
+            .where(eq(healthCenters.id, public_id))
             .returning()
         return health_center
     }

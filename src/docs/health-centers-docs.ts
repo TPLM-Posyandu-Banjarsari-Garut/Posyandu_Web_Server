@@ -17,7 +17,7 @@ export const registerHealthCentersRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/health-centers',
         tags: HC_TAG,
-        summary: 'Create a new health center',
+        summary: 'Create a new health center [Roles: admin]',
         request: {
             body: {
                 content: {
@@ -35,7 +35,7 @@ export const registerHealthCentersRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/health-centers',
         tags: HC_TAG,
-        summary: 'Get list of health centers',
+        summary: 'Get list of health centers [Roles: admin]',
         request: { query: getHealthCentersQuerySchema },
         responses: {
             200: { description: 'Success get list of health centers' }
@@ -46,7 +46,7 @@ export const registerHealthCentersRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/health-centers/{public_id}',
         tags: HC_TAG,
-        summary: 'Get health center by public ID',
+        summary: 'Get health center by public ID [Roles: admin]',
         request: { params: healthCenterParamsSchema },
         responses: {
             200: { description: 'Success get health center detail' },
@@ -58,7 +58,7 @@ export const registerHealthCentersRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/health-centers/{public_id}',
         tags: HC_TAG,
-        summary: 'Update health center data',
+        summary: 'Update health center data [Roles: admin]',
         request: {
             params: healthCenterParamsSchema,
             body: {
@@ -78,7 +78,7 @@ export const registerHealthCentersRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/health-centers/{public_id}',
         tags: HC_TAG,
-        summary: 'Delete health center',
+        summary: 'Delete health center [Roles: admin]',
         request: {
             params: healthCenterParamsSchema,
             query: deleteHealthCenterQuerySchema
@@ -93,7 +93,7 @@ export const registerHealthCentersRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/health-centers/{public_id}/restore',
         tags: HC_TAG,
-        summary: 'Restore soft-deleted health center',
+        summary: 'Restore soft-deleted health center [Roles: admin]',
         request: { params: healthCenterParamsSchema },
         responses: {
             200: { description: 'Health center restored successfully' },

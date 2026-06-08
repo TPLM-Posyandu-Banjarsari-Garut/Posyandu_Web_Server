@@ -4,7 +4,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface PosyanduQueryFilters {
     search?: string
-    health_center_id?: number
+    health_center_id?: string
     status?: Posyandu['status']
     page?: number
     limit?: number
@@ -78,16 +78,13 @@ export class PosyanduRepository {
             .select()
             .from(posyandus)
             .where(
-                and(
-                    eq(posyandus.public_id, public_id),
-                    eq(posyandus.status, 'active')
-                )
+                and(eq(posyandus.id, public_id), eq(posyandus.status, 'active'))
             )
             .limit(1)
         return posyandu
     }
 
-    async findByHealthCenterId(health_center_id: number): Promise<Posyandu[]> {
+    async findByHealthCenterId(health_center_id: string): Promise<Posyandu[]> {
         return this.db
             .select()
             .from(posyandus)
@@ -106,7 +103,7 @@ export class PosyanduRepository {
         const [posyandu] = await this.db
             .update(posyandus)
             .set(updated_posyandu)
-            .where(eq(posyandus.public_id, public_id))
+            .where(eq(posyandus.id, public_id))
             .returning()
         return posyandu
     }
@@ -117,7 +114,7 @@ export class PosyanduRepository {
             .set({
                 status: 'inactive'
             })
-            .where(eq(posyandus.public_id, public_id))
+            .where(eq(posyandus.id, public_id))
             .returning()
         return posyandu
     }
@@ -125,7 +122,7 @@ export class PosyanduRepository {
     async hardDelete(public_id: string): Promise<Posyandu | undefined> {
         const [posyandu] = await this.db
             .delete(posyandus)
-            .where(eq(posyandus.public_id, public_id))
+            .where(eq(posyandus.id, public_id))
             .returning()
         return posyandu
     }
@@ -136,7 +133,7 @@ export class PosyanduRepository {
             .set({
                 status: 'active'
             })
-            .where(eq(posyandus.public_id, public_id))
+            .where(eq(posyandus.id, public_id))
             .returning()
         return posyandu
     }

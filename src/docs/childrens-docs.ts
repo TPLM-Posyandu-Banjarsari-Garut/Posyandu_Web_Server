@@ -18,7 +18,7 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/children',
         tags: CHILD_TAG,
-        summary: 'Create a new child',
+        summary: 'Create a new child [Roles: admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
         request: {
             body: {
@@ -28,6 +28,7 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
         responses: {
             201: { description: 'Child created successfully' },
             401: { description: 'Unauthorized' },
+            403: { description: 'Forbidden - Insufficient permissions' },
             400: { description: 'Validation error' }
         }
     })
@@ -36,12 +37,13 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/children',
         tags: CHILD_TAG,
-        summary: 'Get list of children',
+        summary: 'Get list of children [Roles: admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
         request: { query: getChildrenQuerySchema },
         responses: {
             200: { description: 'Success get list of children' },
-            401: { description: 'Unauthorized' }
+            401: { description: 'Unauthorized' },
+            403: { description: 'Forbidden - Insufficient permissions' }
         }
     })
 
@@ -49,12 +51,14 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/children/{public_id}',
         tags: CHILD_TAG,
-        summary: 'Get child by public ID',
+        summary:
+            'Get child by public ID [Roles: admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
         request: { params: childParamsSchema },
         responses: {
             200: { description: 'Success get child detail' },
             401: { description: 'Unauthorized' },
+            403: { description: 'Forbidden - Insufficient permissions' },
             404: { description: 'Child not found' }
         }
     })
@@ -63,7 +67,7 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/children/{public_id}',
         tags: CHILD_TAG,
-        summary: 'Update child data',
+        summary: 'Update child data [Roles: admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
         request: {
             params: childParamsSchema,
@@ -74,6 +78,7 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
         responses: {
             200: { description: 'Child updated successfully' },
             401: { description: 'Unauthorized' },
+            403: { description: 'Forbidden - Insufficient permissions' },
             400: { description: 'Validation error' },
             404: { description: 'Child not found' }
         }
@@ -83,12 +88,13 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/children/{public_id}',
         tags: CHILD_TAG,
-        summary: 'Delete child',
+        summary: 'Delete child [Roles: admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
         request: { params: childParamsSchema, query: deleteChildQuerySchema },
         responses: {
             200: { description: 'Child deleted successfully' },
             401: { description: 'Unauthorized' },
+            403: { description: 'Forbidden - Insufficient permissions' },
             404: { description: 'Child not found' }
         }
     })
@@ -97,12 +103,14 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/children/{public_id}/restore',
         tags: CHILD_TAG,
-        summary: 'Restore soft-deleted child',
+        summary:
+            'Restore soft-deleted child [Roles: admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
         request: { params: childParamsSchema },
         responses: {
             200: { description: 'Child restored successfully' },
             401: { description: 'Unauthorized' },
+            403: { description: 'Forbidden - Insufficient permissions' },
             404: { description: 'Child not found' }
         }
     })

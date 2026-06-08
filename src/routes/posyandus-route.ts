@@ -1,3 +1,5 @@
+import { verifyAuth } from '@/middlewares/verify-auth'
+import { authorizeRoles } from '@/middlewares/authorize-role'
 import { Router } from 'express'
 import { PosyanduController } from '@/controllers/posyandus-controller'
 import { PosyanduService } from '@/services/posyandus-service'
@@ -21,24 +23,32 @@ const posyandu_controller = new PosyanduController(posyandu_service)
 
 router.post(
     '/',
+    verifyAuth,
+    authorizeRoles('admin'),
     validateRequest({ body: createPosyanduSchema }),
     AsyncHandler(posyandu_controller.createPosyandu)
 )
 
 router.get(
     '/',
+    verifyAuth,
+    authorizeRoles('admin'),
     validateRequest({ query: getPosyandusQuerySchema }),
     AsyncHandler(posyandu_controller.getPosyandus)
 )
 
 router.get(
     '/:public_id',
+    verifyAuth,
+    authorizeRoles('admin'),
     validateRequest({ params: posyanduParamsSchema }),
     AsyncHandler(posyandu_controller.getPosyanduById)
 )
 
 router.put(
     '/:public_id',
+    verifyAuth,
+    authorizeRoles('admin'),
     validateRequest({
         params: posyanduParamsSchema,
         body: updatePosyanduSchema
@@ -48,6 +58,8 @@ router.put(
 
 router.delete(
     '/:public_id',
+    verifyAuth,
+    authorizeRoles('admin'),
     validateRequest({
         params: posyanduParamsSchema,
         query: deletePosyanduQuerySchema
@@ -57,6 +69,8 @@ router.delete(
 
 router.post(
     '/:public_id/restore',
+    verifyAuth,
+    authorizeRoles('admin'),
     validateRequest({ params: posyanduParamsSchema }),
     AsyncHandler(posyandu_controller.restorePosyandu)
 )

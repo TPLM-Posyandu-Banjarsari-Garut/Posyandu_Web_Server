@@ -21,15 +21,33 @@ import { users } from '@/db/schemas/users-schema'
 import { vaccines } from '@/db/schemas/vaccines-schema'
 import { vitaminRecords } from '@/db/schemas/vitamin-records-schema'
 import { vitamins } from '@/db/schemas/vitamins-schema'
+import { sessions } from '@/db/schemas/sessions-schema'
+import { accounts } from '@/db/schemas/accounts-schema'
 
 export const usersRelations = relations(users, ({ one, many }) => ({
     parent: one(parents, {
         fields: [users.id],
         references: [parents.user_id]
     }),
+    sessions: many(sessions),
+    accounts: many(accounts),
     cadreAssignments: many(cadres),
     midwifeAssignments: many(midwifes),
     educations: many(educations)
+}))
+
+export const sessions_relations = relations(sessions, ({ one }) => ({
+    user: one(users, {
+        fields: [sessions.user_id],
+        references: [users.id]
+    })
+}))
+
+export const accounts_relations = relations(accounts, ({ one }) => ({
+    user: one(users, {
+        fields: [accounts.user_id],
+        references: [users.id]
+    })
 }))
 
 export const parentsRelations = relations(parents, ({ one, many }) => ({

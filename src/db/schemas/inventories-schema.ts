@@ -12,7 +12,7 @@ import { date, integer, pgTable, text, varchar } from 'drizzle-orm/pg-core'
 export const inventories = pgTable('inventories', {
     ...createBaseColumns('inventories'),
 
-    posyandu_id: integer('posyandu_id')
+    posyandu_id: text('posyandu_id')
         .notNull()
         .references(() => posyandus.id),
 
@@ -25,7 +25,7 @@ export const inventories = pgTable('inventories', {
     batch_number: varchar('batch_number', { length: 50 }),
     expiry_date: date('expiry_date', { mode: 'date' }),
     last_checked_date: date('last_checked_date', { mode: 'date' }),
-    managed_by_midwife_id: integer('managed_by_midwife_id').references(
+    managed_by_midwife_id: text('managed_by_midwife_id').references(
         () => midwifes.id
     ),
     notes: text('notes'),

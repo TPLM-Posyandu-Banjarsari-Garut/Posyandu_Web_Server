@@ -1,1 +1,0 @@
-ALTER TABLE "cadres" RENAME COLUMN "assignment_status" TO "status";

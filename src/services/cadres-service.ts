@@ -63,8 +63,7 @@ export class CadreService {
                     await this.cadre_repository.findByUserId(targetUserId)
                 const isAlreadyCadre = existingCadresForUser.some(
                     c =>
-                        c.posyandu_id === targetPosyanduId &&
-                        c.public_id !== public_id
+                        c.posyandu_id === targetPosyanduId && c.id !== public_id
                 )
 
                 if (isAlreadyCadre) {

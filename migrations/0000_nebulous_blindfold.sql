@@ -29,26 +29,65 @@ CREATE TYPE "public"."sync_status" AS ENUM('pending', 'synced', 'failed');--> st
 CREATE TYPE "public"."vaccine_route" AS ENUM('injection', 'oral');--> statement-breakpoint
 CREATE TYPE "public"."vitamin_record_status" AS ENUM('not_yet', 'given', 'missed', 'sweeping');--> statement-breakpoint
 CREATE TABLE "users" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"email" varchar(255) NOT NULL,
+	"email_verified" boolean DEFAULT false NOT NULL,
 	"password" text NOT NULL,
 	"phone_number" varchar(20),
+	"avatar_url" text,
 	"role" "account_role" DEFAULT 'parent' NOT NULL,
 	"status" "account_status" DEFAULT 'active' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp with time zone,
-	CONSTRAINT "users_public_id_unique" UNIQUE("public_id"),
 	CONSTRAINT "users_email_unique" UNIQUE("email"),
 	CONSTRAINT "users_phone_number_unique" UNIQUE("phone_number")
 );
 --> statement-breakpoint
+CREATE TABLE "sessions" (
+	"id" text PRIMARY KEY NOT NULL,
+	"token" text NOT NULL,
+	"expires_at" timestamp NOT NULL,
+	"user_agent" text,
+	"ip_address" text,
+	"user_id" text NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	CONSTRAINT "sessions_token_unique" UNIQUE("token")
+);
+--> statement-breakpoint
+CREATE TABLE "accounts" (
+	"id" text PRIMARY KEY NOT NULL,
+	"account_id" text NOT NULL,
+	"provider_id" text NOT NULL,
+	"access_token" text,
+	"refresh_token" text,
+	"id_token" text,
+	"access_token_expires_at" timestamp,
+	"refresh_token_expires_at" timestamp,
+	"scope" text,
+	"password" text,
+	"user_id" text NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
+);
+--> statement-breakpoint
+CREATE TABLE "verifications" (
+	"id" text PRIMARY KEY NOT NULL,
+	"identifier" text NOT NULL,
+	"value" text NOT NULL,
+	"expires_at" timestamp NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
+);
+--> statement-breakpoint
 CREATE TABLE "parents" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" integer NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
 	"identity_number" varchar(16),
 	"place_of_birth" varchar(50),
 	"date_of_birth" date,
@@ -59,35 +98,32 @@ CREATE TABLE "parents" (
 	"rt" varchar(5),
 	"rw" varchar(5),
 	"village_name" varchar(100) DEFAULT 'Banjarsari',
+	"status" "account_status" DEFAULT 'active' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp with time zone,
-	CONSTRAINT "parents_public_id_unique" UNIQUE("public_id"),
 	CONSTRAINT "parents_user_id_unique" UNIQUE("user_id"),
 	CONSTRAINT "parents_identity_number_unique" UNIQUE("identity_number")
 );
 --> statement-breakpoint
 CREATE TABLE "cadres" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" integer NOT NULL,
-	"posyandu_id" integer NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
+	"posyandu_id" text NOT NULL,
 	"identity_number" varchar(16),
 	"position" "cadre_position" DEFAULT 'member' NOT NULL,
 	"is_primary_assignment" boolean DEFAULT true NOT NULL,
 	"duty_area_notes" text,
-	"assignment_status" "status" DEFAULT 'active' NOT NULL,
+	"status" "account_status" DEFAULT 'active' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"deleted_at" timestamp with time zone,
-	CONSTRAINT "cadres_public_id_unique" UNIQUE("public_id")
+	"deleted_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "midwifes" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" integer NOT NULL,
-	"posyandu_id" integer NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
+	"posyandu_id" text NOT NULL,
 	"identity_number" varchar(16) NOT NULL,
 	"employee_number" varchar(32),
 	"license_number" varchar(50),
@@ -97,34 +133,31 @@ CREATE TABLE "midwifes" (
 	"is_poned_provider" boolean DEFAULT false NOT NULL,
 	"is_primary_assignment" boolean DEFAULT true NOT NULL,
 	"duty_area_notes" text,
-	"assignment_status" "status" DEFAULT 'active' NOT NULL,
+	"status" "account_status" DEFAULT 'active' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"deleted_at" timestamp with time zone,
-	CONSTRAINT "midwifes_public_id_unique" UNIQUE("public_id")
+	"deleted_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "posyandus" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"name" varchar(100) NOT NULL,
-	"health_center_id" integer NOT NULL,
+	"health_center_id" text NOT NULL,
 	"address_line" text,
 	"rt" varchar(5),
 	"rw" varchar(5),
 	"village_name" varchar(100) DEFAULT 'Banjarsari',
 	"contact_number" varchar(20),
+	"status" "status" DEFAULT 'active' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp with time zone,
-	CONSTRAINT "posyandus_public_id_unique" UNIQUE("public_id"),
 	CONSTRAINT "posyandus_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE "childrens" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"posyandu_id" integer NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
+	"posyandu_id" text NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"identity_number" varchar(16) NOT NULL,
 	"gender" "gender" NOT NULL,
@@ -139,25 +172,21 @@ CREATE TABLE "childrens" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp with time zone,
-	CONSTRAINT "childrens_public_id_unique" UNIQUE("public_id"),
 	CONSTRAINT "childrens_identity_number_unique" UNIQUE("identity_number")
 );
 --> statement-breakpoint
 CREATE TABLE "relation_childrens" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"parent_id" integer NOT NULL,
-	"children_id" integer NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
+	"parent_id" text NOT NULL,
+	"children_id" text NOT NULL,
 	"relation" "family_relation" NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"deleted_at" timestamp with time zone,
-	CONSTRAINT "relation_childrens_public_id_unique" UNIQUE("public_id")
+	"deleted_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "vaccines" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"code" varchar(10) NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"description" text,
@@ -168,14 +197,12 @@ CREATE TABLE "vaccines" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp with time zone,
-	CONSTRAINT "vaccines_public_id_unique" UNIQUE("public_id"),
 	CONSTRAINT "vaccines_code_unique" UNIQUE("code"),
 	CONSTRAINT "vaccines_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE "vitamins" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"description" text,
 	"capsule_color" "capsule_color" NOT NULL,
@@ -187,19 +214,17 @@ CREATE TABLE "vitamins" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp with time zone,
-	CONSTRAINT "vitamins_public_id_unique" UNIQUE("public_id"),
 	CONSTRAINT "vitamins_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE "immunization_records" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"children_id" integer NOT NULL,
-	"vaccine_id" integer NOT NULL,
-	"cadre_id" integer,
-	"midwife_id" integer,
-	"posyandu_id" integer,
-	"inventory_id" integer,
+	"id" text PRIMARY KEY NOT NULL,
+	"children_id" text NOT NULL,
+	"vaccine_id" text NOT NULL,
+	"cadre_id" text,
+	"midwife_id" text,
+	"posyandu_id" text,
+	"inventory_id" text,
 	"dose_number" integer NOT NULL,
 	"date_given" date,
 	"batch_number" varchar(50),
@@ -214,33 +239,30 @@ CREATE TABLE "immunization_records" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp with time zone,
-	CONSTRAINT "immunization_records_public_id_unique" UNIQUE("public_id"),
 	CONSTRAINT "immunization_records_child_vaccine_dose_unique" UNIQUE("children_id","vaccine_id","dose_number")
 );
 --> statement-breakpoint
 CREATE TABLE "health_centers" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"address_line" text,
 	"village_name" varchar(100),
 	"contact_number" varchar(20),
 	"head_name" varchar(100),
+	"status" "status" DEFAULT 'active' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp with time zone,
-	CONSTRAINT "health_centers_public_id_unique" UNIQUE("public_id"),
 	CONSTRAINT "health_centers_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE "vitamin_records" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"children_id" integer NOT NULL,
-	"vitamin_id" integer NOT NULL,
-	"cadre_id" integer,
-	"midwife_id" integer,
-	"posyandu_id" integer,
+	"id" text PRIMARY KEY NOT NULL,
+	"children_id" text NOT NULL,
+	"vitamin_id" text NOT NULL,
+	"cadre_id" text,
+	"midwife_id" text,
+	"posyandu_id" text,
 	"distribution_period" "distribution_period" NOT NULL,
 	"distribution_year" integer NOT NULL,
 	"date_given" date,
@@ -256,14 +278,12 @@ CREATE TABLE "vitamin_records" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp with time zone,
-	CONSTRAINT "vitamin_records_public_id_unique" UNIQUE("public_id"),
 	CONSTRAINT "vitamin_records_child_period_year_unique" UNIQUE("children_id","distribution_period","distribution_year")
 );
 --> statement-breakpoint
 CREATE TABLE "kipi_details" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"immunization_record_id" integer NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
+	"immunization_record_id" text NOT NULL,
 	"symptoms" text NOT NULL,
 	"severity" "kipi_severity" NOT NULL,
 	"action_taken" text,
@@ -271,33 +291,29 @@ CREATE TABLE "kipi_details" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp with time zone,
-	CONSTRAINT "kipi_details_public_id_unique" UNIQUE("public_id"),
 	CONSTRAINT "kipi_details_immunization_record_id_unique" UNIQUE("immunization_record_id")
 );
 --> statement-breakpoint
 CREATE TABLE "nutrition_records" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"children_id" integer NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
+	"children_id" text NOT NULL,
 	"measurement_date" date NOT NULL,
 	"weight_kg" numeric(5, 2),
 	"height_cm" numeric(5, 2),
 	"head_circumference_cm" numeric(5, 2),
 	"age_months" integer,
 	"nutrition_status" "nutrition_status" NOT NULL,
-	"cadre_id" integer,
-	"midwife_id" integer,
+	"cadre_id" text,
+	"midwife_id" text,
 	"notes" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"deleted_at" timestamp with time zone,
-	CONSTRAINT "nutrition_records_public_id_unique" UNIQUE("public_id")
+	"deleted_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "pregnancy_records" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"parent_id" integer NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
+	"parent_id" text NOT NULL,
 	"pregnancy_status" "pregnancy_status" DEFAULT 'first_trimester' NOT NULL,
 	"last_menstrual_period" date,
 	"estimated_due_date" date,
@@ -306,47 +322,41 @@ CREATE TABLE "pregnancy_records" (
 	"notes" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"deleted_at" timestamp with time zone,
-	CONSTRAINT "pregnancy_records_public_id_unique" UNIQUE("public_id")
+	"deleted_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "consultations" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"parent_id" integer NOT NULL,
-	"pregnancy_record_id" integer,
-	"midwife_id" integer,
-	"cadre_id" integer,
-	"posyandu_id" integer NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
+	"parent_id" text NOT NULL,
+	"pregnancy_record_id" text,
+	"midwife_id" text,
+	"cadre_id" text,
+	"posyandu_id" text NOT NULL,
 	"scheduled_at" timestamp with time zone NOT NULL,
 	"status" "consultation_status" DEFAULT 'pending' NOT NULL,
 	"notes" text,
 	"cancellation_reason" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"deleted_at" timestamp with time zone,
-	CONSTRAINT "consultations_public_id_unique" UNIQUE("public_id")
+	"deleted_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "examinations" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"posyandu_id" integer NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
+	"posyandu_id" text NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"description" text,
 	"examination_type" "examination_type" NOT NULL,
 	"target_age_months" integer,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"deleted_at" timestamp with time zone,
-	CONSTRAINT "examinations_public_id_unique" UNIQUE("public_id")
+	"deleted_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "examination_schedules" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"examination_id" integer NOT NULL,
-	"posyandu_id" integer NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
+	"examination_id" text NOT NULL,
+	"posyandu_id" text NOT NULL,
 	"scheduled_date" date NOT NULL,
 	"start_time" time,
 	"end_time" time,
@@ -354,52 +364,46 @@ CREATE TABLE "examination_schedules" (
 	"status" "examination_status" DEFAULT 'pending' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"deleted_at" timestamp with time zone,
-	CONSTRAINT "examination_schedules_public_id_unique" UNIQUE("public_id")
+	"deleted_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "examination_records" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"examination_id" integer NOT NULL,
-	"schedule_id" integer,
-	"posyandu_id" integer NOT NULL,
-	"children_id" integer,
-	"parent_id" integer,
-	"cadre_id" integer,
-	"midwife_id" integer,
+	"id" text PRIMARY KEY NOT NULL,
+	"examination_id" text NOT NULL,
+	"schedule_id" text,
+	"posyandu_id" text NOT NULL,
+	"children_id" text,
+	"parent_id" text,
+	"cadre_id" text NOT NULL,
+	"midwife_id" text NOT NULL,
 	"examination_date" date NOT NULL,
 	"status" "examination_status" DEFAULT 'pending' NOT NULL,
 	"result_summary" text,
 	"notes" text,
 	"medically_validated_at" timestamp with time zone,
-	"medically_validated_by_midwife_id" integer,
+	"medically_validated_by_midwife_id" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp with time zone,
-	CONSTRAINT "examination_records_public_id_unique" UNIQUE("public_id"),
 	CONSTRAINT "examination_records_subject_check" CHECK ("examination_records"."children_id" IS NOT NULL OR "examination_records"."parent_id" IS NOT NULL)
 );
 --> statement-breakpoint
 CREATE TABLE "educations" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"title" varchar(200) NOT NULL,
 	"content" text NOT NULL,
 	"category" "education_category" DEFAULT 'general' NOT NULL,
-	"posyandu_id" integer,
-	"created_by_user_id" integer NOT NULL,
+	"posyandu_id" text,
+	"created_by_user_id" text NOT NULL,
 	"status" "status" DEFAULT 'active' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"deleted_at" timestamp with time zone,
-	CONSTRAINT "educations_public_id_unique" UNIQUE("public_id")
+	"deleted_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "inventories" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"public_id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"posyandu_id" integer NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
+	"posyandu_id" text NOT NULL,
 	"item_name" varchar(100) NOT NULL,
 	"item_type" "inventory_item_type" DEFAULT 'general' NOT NULL,
 	"description" text,
@@ -409,14 +413,15 @@ CREATE TABLE "inventories" (
 	"batch_number" varchar(50),
 	"expiry_date" date,
 	"last_checked_date" date,
-	"managed_by_midwife_id" integer,
+	"managed_by_midwife_id" text,
 	"notes" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"deleted_at" timestamp with time zone,
-	CONSTRAINT "inventories_public_id_unique" UNIQUE("public_id")
+	"deleted_at" timestamp with time zone
 );
 --> statement-breakpoint
+ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "parents" ADD CONSTRAINT "parents_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "cadres" ADD CONSTRAINT "cadres_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "cadres" ADD CONSTRAINT "cadres_posyandu_id_posyandus_id_fk" FOREIGN KEY ("posyandu_id") REFERENCES "public"."posyandus"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -463,6 +468,6 @@ ALTER TABLE "educations" ADD CONSTRAINT "educations_created_by_user_id_users_id_
 ALTER TABLE "inventories" ADD CONSTRAINT "inventories_posyandu_id_posyandus_id_fk" FOREIGN KEY ("posyandu_id") REFERENCES "public"."posyandus"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "inventories" ADD CONSTRAINT "inventories_managed_by_midwife_id_midwifes_id_fk" FOREIGN KEY ("managed_by_midwife_id") REFERENCES "public"."midwifes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "cadres_user_id_posyandu_id_unique" ON "cadres" USING btree ("user_id","posyandu_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "midwifes_user_id_posyandu_id_unique" ON "midwifes" USING btree ("user_id","posyandu_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "midwifes_license_number_unique" ON "midwifes" USING btree ("license_number");--> statement-breakpoint
+CREATE UNIQUE INDEX "midwives_user_id_posyandu_id_unique" ON "midwifes" USING btree ("user_id","posyandu_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "midwives_str_number_unique" ON "midwifes" USING btree ("license_number");--> statement-breakpoint
 CREATE UNIQUE INDEX "examinations_posyandu_id_name_unique" ON "examinations" USING btree ("posyandu_id","name");

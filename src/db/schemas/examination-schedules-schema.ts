@@ -3,15 +3,15 @@ import { createBaseColumns } from '@/db/helpers/base-columns'
 import { timestamps } from '@/db/helpers/timestamps'
 import { examinations } from '@/db/schemas/examinations-schema'
 import { posyandus } from '@/db/schemas/posyandus-schema'
-import { date, integer, pgTable, time } from 'drizzle-orm/pg-core'
+import { date, integer, pgTable, text, time } from 'drizzle-orm/pg-core'
 
 export const examinationSchedules = pgTable('examination_schedules', {
     ...createBaseColumns('examination_schedules'),
 
-    examination_id: integer('examination_id')
+    examination_id: text('examination_id')
         .notNull()
         .references(() => examinations.id),
-    posyandu_id: integer('posyandu_id')
+    posyandu_id: text('posyandu_id')
         .notNull()
         .references(() => posyandus.id),
 

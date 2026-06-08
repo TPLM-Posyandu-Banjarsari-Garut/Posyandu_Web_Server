@@ -1,13 +1,16 @@
 import { NewUser, User } from '@/db'
+import { CreateUserInput } from '@/validations/users-validation'
 import {
     UserRepository,
     UserQueryFilters
 } from '@/repositories/user-repository'
 
+import { AuthService } from '@/services/auth-service'
+
 export class UserService {
     constructor(private readonly user_repository: UserRepository) {}
 
-    async createUser(user_payload: NewUser): Promise<User> {
+    async createUser(user_payload: CreateUserInput): Promise<User> {
         const [email_exists, phone_exists] = await Promise.all([
             this.user_repository.existsByEmail(user_payload.email),
             user_payload.phone_number
@@ -20,7 +23,17 @@ export class UserService {
         if (email_exists) throw new Error('Email already registered')
         if (phone_exists) throw new Error('Phone number already registered')
 
-        return this.user_repository.create(user_payload)
+        const auth_service = new AuthService(this.user_repository)
+        return await auth_service.registerWithEmail({
+            email: user_payload.email,
+            password: user_payload.password,
+            name: user_payload.name,
+            phone_number: user_payload.phone_number,
+            avatar_url: (user_payload as Record<string, unknown>).avatar_url as
+                | string
+                | undefined,
+            role: user_payload.role || 'parent'
+        })
     }
 
     async getUsers(query_filters?: UserQueryFilters) {

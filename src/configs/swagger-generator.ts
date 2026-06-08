@@ -10,6 +10,8 @@ import { registerUsersRoutes } from '@/docs/users-docs'
 import { registerParentsRoutes } from '@/docs/parents-docs'
 import { registerChildrenRoutes } from '@/docs/childrens-docs'
 
+import { registerAuthRoutes } from '@/docs/auth-docs'
+
 export const registry = new OpenAPIRegistry()
 
 registry.registerComponent('securitySchemes', 'BearerAuth', {
@@ -19,6 +21,9 @@ registry.registerComponent('securitySchemes', 'BearerAuth', {
     in: 'header',
     name: 'Authorization'
 })
+
+// auth (Better Auth)
+registerAuthRoutes(registry)
 
 // users
 registerUsersRoutes(registry)

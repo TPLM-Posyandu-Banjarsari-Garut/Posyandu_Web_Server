@@ -1,3 +1,5 @@
+import { verifyAuth } from '@/middlewares/verify-auth'
+import { authorizeRoles } from '@/middlewares/authorize-role'
 import { Router } from 'express'
 import { MidwifeController } from '@/controllers/midwifes-controller'
 import { MidwifeService } from '@/services/midwifes-service'
@@ -21,30 +23,40 @@ const midwife_controller = new MidwifeController(midwife_service)
 
 router.post(
     '/',
+    verifyAuth,
+    authorizeRoles('admin', 'midwife'),
     validateRequest({ body: createMidwifeSchema }),
     AsyncHandler(midwife_controller.createMidwife)
 )
 
 router.get(
     '/',
+    verifyAuth,
+    authorizeRoles('admin', 'midwife'),
     validateRequest({ query: getMidwifesQuerySchema }),
     AsyncHandler(midwife_controller.getmidwifes)
 )
 
 router.get(
     '/:public_id',
+    verifyAuth,
+    authorizeRoles('admin', 'midwife'),
     validateRequest({ params: midwifeParamsSchema }),
     AsyncHandler(midwife_controller.getMidwifeById)
 )
 
 router.put(
     '/:public_id',
+    verifyAuth,
+    authorizeRoles('admin', 'midwife'),
     validateRequest({ params: midwifeParamsSchema, body: updateMidwifeSchema }),
     AsyncHandler(midwife_controller.updateMidwife)
 )
 
 router.delete(
     '/:public_id',
+    verifyAuth,
+    authorizeRoles('admin', 'midwife'),
     validateRequest({
         params: midwifeParamsSchema,
         query: deleteMidwifeQuerySchema
@@ -54,6 +66,8 @@ router.delete(
 
 router.post(
     '/:public_id/restore',
+    verifyAuth,
+    authorizeRoles('admin', 'midwife'),
     validateRequest({ params: midwifeParamsSchema }),
     AsyncHandler(midwife_controller.restoreMidwife)
 )

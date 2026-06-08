@@ -4,8 +4,8 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface CadreQueryFilters {
     search?: string
-    user_id?: number
-    posyandu_id?: number
+    user_id?: string
+    posyandu_id?: string
     position?: Cadre['position']
     status?: Cadre['status']
     page?: number
@@ -83,17 +83,12 @@ export class CadreRepository {
         const [cadre] = await this.db
             .select()
             .from(cadres)
-            .where(
-                and(
-                    eq(cadres.public_id, public_id),
-                    eq(cadres.status, 'active')
-                )
-            )
+            .where(and(eq(cadres.id, public_id), eq(cadres.status, 'active')))
             .limit(1)
         return cadre
     }
 
-    async findByUserId(user_id: number): Promise<Cadre[]> {
+    async findByUserId(user_id: string): Promise<Cadre[]> {
         return this.db
             .select()
             .from(cadres)
@@ -102,7 +97,7 @@ export class CadreRepository {
             )
     }
 
-    async findByPosyanduId(posyandu_id: number): Promise<Cadre[]> {
+    async findByPosyanduId(posyandu_id: string): Promise<Cadre[]> {
         return this.db
             .select()
             .from(cadres)
@@ -121,7 +116,7 @@ export class CadreRepository {
         const [cadre] = await this.db
             .update(cadres)
             .set(updated_cadre)
-            .where(eq(cadres.public_id, public_id))
+            .where(eq(cadres.id, public_id))
             .returning()
         return cadre
     }
@@ -132,7 +127,7 @@ export class CadreRepository {
             .set({
                 status: 'inactive'
             })
-            .where(eq(cadres.public_id, public_id))
+            .where(eq(cadres.id, public_id))
             .returning()
         return cadre
     }
@@ -140,7 +135,7 @@ export class CadreRepository {
     async hardDelete(public_id: string): Promise<Cadre | undefined> {
         const [cadre] = await this.db
             .delete(cadres)
-            .where(eq(cadres.public_id, public_id))
+            .where(eq(cadres.id, public_id))
             .returning()
         return cadre
     }
@@ -151,7 +146,7 @@ export class CadreRepository {
             .set({
                 status: 'active'
             })
-            .where(eq(cadres.public_id, public_id))
+            .where(eq(cadres.id, public_id))
             .returning()
         return cadre
     }

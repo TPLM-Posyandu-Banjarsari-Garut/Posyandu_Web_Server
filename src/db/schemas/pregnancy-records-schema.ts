@@ -7,7 +7,7 @@ import { date, integer, pgTable, text } from 'drizzle-orm/pg-core'
 export const pregnancyRecords = pgTable('pregnancy_records', {
     ...createBaseColumns('pregnancy_records'),
 
-    parent_id: integer('parent_id')
+    parent_id: text('parent_id')
         .notNull()
         .references(() => parents.id),
 

@@ -39,7 +39,6 @@ export const createCadreSchema = createInsertSchema(cadres, {
 })
     .omit({
         id: true,
-        public_id: true,
         created_at: true,
         updated_at: true,
         deleted_at: true

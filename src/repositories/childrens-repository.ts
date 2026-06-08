@@ -4,8 +4,8 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ChildrenQueryFilters {
     search?: string
-    posyandu_id?: number
-    parent_id?: number
+    posyandu_id?: string
+    parent_id?: string
     gender?: Children['gender']
     child_category?: Children['child_category']
     page?: number
@@ -94,7 +94,7 @@ export class ChildrenRepository {
             .from(childrens)
             .where(
                 and(
-                    eq(childrens.public_id, public_id),
+                    eq(childrens.id, public_id),
                     sql`${childrens.deleted_at} IS NULL`
                 )
             )
@@ -118,11 +118,10 @@ export class ChildrenRepository {
         return child
     }
 
-    async findByParentId(parent_id: number): Promise<Children[]> {
+    async findByParentId(parent_id: string): Promise<Children[]> {
         const records = await this.db
             .select({
                 id: childrens.id,
-                public_id: childrens.public_id,
                 posyandu_id: childrens.posyandu_id,
                 name: childrens.name,
                 identity_number: childrens.identity_number,
@@ -161,7 +160,7 @@ export class ChildrenRepository {
         const [child] = await this.db
             .update(childrens)
             .set(updated_children)
-            .where(eq(childrens.public_id, public_id))
+            .where(eq(childrens.id, public_id))
             .returning()
         return child
     }
@@ -172,7 +171,7 @@ export class ChildrenRepository {
             .set({
                 deleted_at: new Date()
             })
-            .where(eq(childrens.public_id, public_id))
+            .where(eq(childrens.id, public_id))
             .returning()
         return child
     }
@@ -180,7 +179,7 @@ export class ChildrenRepository {
     async hardDelete(public_id: string): Promise<Children | undefined> {
         const [child] = await this.db
             .delete(childrens)
-            .where(eq(childrens.public_id, public_id))
+            .where(eq(childrens.id, public_id))
             .returning()
         return child
     }
@@ -191,7 +190,7 @@ export class ChildrenRepository {
             .set({
                 deleted_at: null
             })
-            .where(eq(childrens.public_id, public_id))
+            .where(eq(childrens.id, public_id))
             .returning()
         return child
     }

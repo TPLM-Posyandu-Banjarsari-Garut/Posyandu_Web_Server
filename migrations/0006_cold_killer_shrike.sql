@@ -1,1 +1,0 @@
-ALTER TABLE "health_centers" ADD COLUMN "status" "status" DEFAULT 'active' NOT NULL;

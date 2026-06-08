@@ -8,7 +8,7 @@ export const posyandus = pgTable('posyandus', {
     ...createBaseColumns('posyandus'),
 
     name: varchar('name', { length: 100 }).notNull().unique(),
-    health_center_id: integer('health_center_id')
+    health_center_id: text('health_center_id')
         .notNull()
         .references(() => healthCenters.id),
 

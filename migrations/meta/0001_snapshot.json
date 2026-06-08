@@ -1,6 +1,6 @@
 {
-    "id": "adc606fa-3559-4f44-a9b8-8a57ca6b7eef",
-    "prevId": "1dce1802-2696-4e23-9a41-93719d2e8f6f",
+    "id": "67a77db8-224e-49be-adf2-a4b81663b5fb",
+    "prevId": "f4fc6399-0700-4b79-8b11-09d4eb917317",
     "version": "7",
     "dialect": "postgresql",
     "tables": {
@@ -10,16 +10,9 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
-                },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
                 },
                 "name": {
                     "name": "name",
@@ -33,15 +26,22 @@
                     "primaryKey": false,
                     "notNull": true
                 },
-                "password": {
-                    "name": "password",
-                    "type": "text",
+                "email_verified": {
+                    "name": "email_verified",
+                    "type": "boolean",
                     "primaryKey": false,
-                    "notNull": true
+                    "notNull": true,
+                    "default": false
                 },
                 "phone_number": {
                     "name": "phone_number",
                     "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "avatar_url": {
+                    "name": "avatar_url",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
@@ -86,11 +86,6 @@
             "foreignKeys": {},
             "compositePrimaryKeys": {},
             "uniqueConstraints": {
-                "users_public_id_unique": {
-                    "name": "users_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                },
                 "users_email_unique": {
                     "name": "users_email_unique",
                     "nullsNotDistinct": false,
@@ -106,26 +101,270 @@
             "checkConstraints": {},
             "isRLSEnabled": false
         },
+        "public.sessions": {
+            "name": "sessions",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "token": {
+                    "name": "token",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "expires_at": {
+                    "name": "expires_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "user_agent": {
+                    "name": "user_agent",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "ip_address": {
+                    "name": "ip_address",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "sessions_user_id_users_id_fk": {
+                    "name": "sessions_user_id_users_id_fk",
+                    "tableFrom": "sessions",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "sessions_token_unique": {
+                    "name": "sessions_token_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["token"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.accounts": {
+            "name": "accounts",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "account_id": {
+                    "name": "account_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "provider_id": {
+                    "name": "provider_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "access_token": {
+                    "name": "access_token",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "refresh_token": {
+                    "name": "refresh_token",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "id_token": {
+                    "name": "id_token",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "access_token_expires_at": {
+                    "name": "access_token_expires_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "refresh_token_expires_at": {
+                    "name": "refresh_token_expires_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "scope": {
+                    "name": "scope",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "password": {
+                    "name": "password",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "accounts_user_id_users_id_fk": {
+                    "name": "accounts_user_id_users_id_fk",
+                    "tableFrom": "accounts",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.verifications": {
+            "name": "verifications",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "identifier": {
+                    "name": "identifier",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "value": {
+                    "name": "value",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "expires_at": {
+                    "name": "expires_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
         "public.parents": {
             "name": "parents",
             "schema": "",
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
                 },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
-                },
                 "user_id": {
                     "name": "user_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
@@ -234,11 +473,6 @@
             },
             "compositePrimaryKeys": {},
             "uniqueConstraints": {
-                "parents_public_id_unique": {
-                    "name": "parents_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                },
                 "parents_user_id_unique": {
                     "name": "parents_user_id_unique",
                     "nullsNotDistinct": false,
@@ -260,26 +494,19 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
                 },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
-                },
                 "user_id": {
                     "name": "user_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
                 "posyandu_id": {
                     "name": "posyandu_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
@@ -310,9 +537,9 @@
                     "primaryKey": false,
                     "notNull": false
                 },
-                "assignment_status": {
-                    "name": "assignment_status",
-                    "type": "status",
+                "status": {
+                    "name": "status",
+                    "type": "account_status",
                     "typeSchema": "public",
                     "primaryKey": false,
                     "notNull": true,
@@ -383,13 +610,7 @@
                 }
             },
             "compositePrimaryKeys": {},
-            "uniqueConstraints": {
-                "cadres_public_id_unique": {
-                    "name": "cadres_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                }
-            },
+            "uniqueConstraints": {},
             "policies": {},
             "checkConstraints": {},
             "isRLSEnabled": false
@@ -400,26 +621,19 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
                 },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
-                },
                 "user_id": {
                     "name": "user_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
                 "posyandu_id": {
                     "name": "posyandu_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
@@ -482,9 +696,9 @@
                     "primaryKey": false,
                     "notNull": false
                 },
-                "assignment_status": {
-                    "name": "assignment_status",
-                    "type": "status",
+                "status": {
+                    "name": "status",
+                    "type": "account_status",
                     "typeSchema": "public",
                     "primaryKey": false,
                     "notNull": true,
@@ -512,8 +726,8 @@
                 }
             },
             "indexes": {
-                "midwifes_user_id_posyandu_id_unique": {
-                    "name": "midwifes_user_id_posyandu_id_unique",
+                "midwives_user_id_posyandu_id_unique": {
+                    "name": "midwives_user_id_posyandu_id_unique",
                     "columns": [
                         {
                             "expression": "user_id",
@@ -533,8 +747,8 @@
                     "method": "btree",
                     "with": {}
                 },
-                "midwifes_license_number_unique": {
-                    "name": "midwifes_license_number_unique",
+                "midwives_str_number_unique": {
+                    "name": "midwives_str_number_unique",
                     "columns": [
                         {
                             "expression": "license_number",
@@ -570,13 +784,7 @@
                 }
             },
             "compositePrimaryKeys": {},
-            "uniqueConstraints": {
-                "midwifes_public_id_unique": {
-                    "name": "midwifes_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                }
-            },
+            "uniqueConstraints": {},
             "policies": {},
             "checkConstraints": {},
             "isRLSEnabled": false
@@ -587,16 +795,9 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
-                },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
                 },
                 "name": {
                     "name": "name",
@@ -606,7 +807,7 @@
                 },
                 "health_center_id": {
                     "name": "health_center_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
@@ -640,6 +841,14 @@
                     "type": "varchar(20)",
                     "primaryKey": false,
                     "notNull": false
+                },
+                "status": {
+                    "name": "status",
+                    "type": "status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'active'"
                 },
                 "created_at": {
                     "name": "created_at",
@@ -676,11 +885,6 @@
             },
             "compositePrimaryKeys": {},
             "uniqueConstraints": {
-                "posyandus_public_id_unique": {
-                    "name": "posyandus_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                },
                 "posyandus_name_unique": {
                     "name": "posyandus_name_unique",
                     "nullsNotDistinct": false,
@@ -697,20 +901,13 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
                 },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
-                },
                 "posyandu_id": {
                     "name": "posyandu_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
@@ -818,11 +1015,6 @@
             },
             "compositePrimaryKeys": {},
             "uniqueConstraints": {
-                "childrens_public_id_unique": {
-                    "name": "childrens_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                },
                 "childrens_identity_number_unique": {
                     "name": "childrens_identity_number_unique",
                     "nullsNotDistinct": false,
@@ -839,26 +1031,19 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
                 },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
-                },
                 "parent_id": {
                     "name": "parent_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
                 "children_id": {
                     "name": "children_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
@@ -912,13 +1097,7 @@
                 }
             },
             "compositePrimaryKeys": {},
-            "uniqueConstraints": {
-                "relation_childrens_public_id_unique": {
-                    "name": "relation_childrens_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                }
-            },
+            "uniqueConstraints": {},
             "policies": {},
             "checkConstraints": {},
             "isRLSEnabled": false
@@ -929,16 +1108,9 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
-                },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
                 },
                 "code": {
                     "name": "code",
@@ -1008,11 +1180,6 @@
             "foreignKeys": {},
             "compositePrimaryKeys": {},
             "uniqueConstraints": {
-                "vaccines_public_id_unique": {
-                    "name": "vaccines_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                },
                 "vaccines_code_unique": {
                     "name": "vaccines_code_unique",
                     "nullsNotDistinct": false,
@@ -1034,16 +1201,9 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
-                },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
                 },
                 "name": {
                     "name": "name",
@@ -1119,11 +1279,6 @@
             "foreignKeys": {},
             "compositePrimaryKeys": {},
             "uniqueConstraints": {
-                "vitamins_public_id_unique": {
-                    "name": "vitamins_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                },
                 "vitamins_name_unique": {
                     "name": "vitamins_name_unique",
                     "nullsNotDistinct": false,
@@ -1140,50 +1295,43 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
                 },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
-                },
                 "children_id": {
                     "name": "children_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
                 "vaccine_id": {
                     "name": "vaccine_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
                 "cadre_id": {
                     "name": "cadre_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
                 "midwife_id": {
                     "name": "midwife_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
                 "posyandu_id": {
                     "name": "posyandu_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
                 "inventory_id": {
                     "name": "inventory_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
@@ -1341,11 +1489,6 @@
             },
             "compositePrimaryKeys": {},
             "uniqueConstraints": {
-                "immunization_records_public_id_unique": {
-                    "name": "immunization_records_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                },
                 "immunization_records_child_vaccine_dose_unique": {
                     "name": "immunization_records_child_vaccine_dose_unique",
                     "nullsNotDistinct": false,
@@ -1362,16 +1505,9 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
-                },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
                 },
                 "name": {
                     "name": "name",
@@ -1403,6 +1539,14 @@
                     "primaryKey": false,
                     "notNull": false
                 },
+                "status": {
+                    "name": "status",
+                    "type": "status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'active'"
+                },
                 "created_at": {
                     "name": "created_at",
                     "type": "timestamp with time zone",
@@ -1428,11 +1572,6 @@
             "foreignKeys": {},
             "compositePrimaryKeys": {},
             "uniqueConstraints": {
-                "health_centers_public_id_unique": {
-                    "name": "health_centers_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                },
                 "health_centers_name_unique": {
                     "name": "health_centers_name_unique",
                     "nullsNotDistinct": false,
@@ -1449,44 +1588,37 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
                 },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
-                },
                 "children_id": {
                     "name": "children_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
                 "vitamin_id": {
                     "name": "vitamin_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
                 "cadre_id": {
                     "name": "cadre_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
                 "midwife_id": {
                     "name": "midwife_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
                 "posyandu_id": {
                     "name": "posyandu_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
@@ -1641,11 +1773,6 @@
             },
             "compositePrimaryKeys": {},
             "uniqueConstraints": {
-                "vitamin_records_public_id_unique": {
-                    "name": "vitamin_records_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                },
                 "vitamin_records_child_period_year_unique": {
                     "name": "vitamin_records_child_period_year_unique",
                     "nullsNotDistinct": false,
@@ -1666,20 +1793,13 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
                 },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
-                },
                 "immunization_record_id": {
                     "name": "immunization_record_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
@@ -1744,11 +1864,6 @@
             },
             "compositePrimaryKeys": {},
             "uniqueConstraints": {
-                "kipi_details_public_id_unique": {
-                    "name": "kipi_details_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                },
                 "kipi_details_immunization_record_id_unique": {
                     "name": "kipi_details_immunization_record_id_unique",
                     "nullsNotDistinct": false,
@@ -1765,20 +1880,13 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
                 },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
-                },
                 "children_id": {
                     "name": "children_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
@@ -1821,13 +1929,13 @@
                 },
                 "cadre_id": {
                     "name": "cadre_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
                 "midwife_id": {
                     "name": "midwife_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
@@ -1889,13 +1997,7 @@
                 }
             },
             "compositePrimaryKeys": {},
-            "uniqueConstraints": {
-                "nutrition_records_public_id_unique": {
-                    "name": "nutrition_records_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                }
-            },
+            "uniqueConstraints": {},
             "policies": {},
             "checkConstraints": {},
             "isRLSEnabled": false
@@ -1906,20 +2008,13 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
                 },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
-                },
                 "parent_id": {
                     "name": "parent_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
@@ -1995,13 +2090,7 @@
                 }
             },
             "compositePrimaryKeys": {},
-            "uniqueConstraints": {
-                "pregnancy_records_public_id_unique": {
-                    "name": "pregnancy_records_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                }
-            },
+            "uniqueConstraints": {},
             "policies": {},
             "checkConstraints": {},
             "isRLSEnabled": false
@@ -2012,44 +2101,37 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
                 },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
-                },
                 "parent_id": {
                     "name": "parent_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
                 "pregnancy_record_id": {
                     "name": "pregnancy_record_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
                 "midwife_id": {
                     "name": "midwife_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
                 "cadre_id": {
                     "name": "cadre_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
                 "posyandu_id": {
                     "name": "posyandu_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
@@ -2149,13 +2231,7 @@
                 }
             },
             "compositePrimaryKeys": {},
-            "uniqueConstraints": {
-                "consultations_public_id_unique": {
-                    "name": "consultations_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                }
-            },
+            "uniqueConstraints": {},
             "policies": {},
             "checkConstraints": {},
             "isRLSEnabled": false
@@ -2166,20 +2242,13 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
                 },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
-                },
                 "posyandu_id": {
                     "name": "posyandu_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
@@ -2264,13 +2333,7 @@
                 }
             },
             "compositePrimaryKeys": {},
-            "uniqueConstraints": {
-                "examinations_public_id_unique": {
-                    "name": "examinations_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                }
-            },
+            "uniqueConstraints": {},
             "policies": {},
             "checkConstraints": {},
             "isRLSEnabled": false
@@ -2281,26 +2344,19 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
                 },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
-                },
                 "examination_id": {
                     "name": "examination_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
                 "posyandu_id": {
                     "name": "posyandu_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
@@ -2380,13 +2436,7 @@
                 }
             },
             "compositePrimaryKeys": {},
-            "uniqueConstraints": {
-                "examination_schedules_public_id_unique": {
-                    "name": "examination_schedules_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                }
-            },
+            "uniqueConstraints": {},
             "policies": {},
             "checkConstraints": {},
             "isRLSEnabled": false
@@ -2397,58 +2447,51 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
                 },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
-                },
                 "examination_id": {
                     "name": "examination_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
                 "schedule_id": {
                     "name": "schedule_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
                 "posyandu_id": {
                     "name": "posyandu_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
                 "children_id": {
                     "name": "children_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
                 "parent_id": {
                     "name": "parent_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
                 "cadre_id": {
                     "name": "cadre_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
-                    "notNull": false
+                    "notNull": true
                 },
                 "midwife_id": {
                     "name": "midwife_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
-                    "notNull": false
+                    "notNull": true
                 },
                 "examination_date": {
                     "name": "examination_date",
@@ -2484,7 +2527,7 @@
                 },
                 "medically_validated_by_midwife_id": {
                     "name": "medically_validated_by_midwife_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
@@ -2585,13 +2628,7 @@
                 }
             },
             "compositePrimaryKeys": {},
-            "uniqueConstraints": {
-                "examination_records_public_id_unique": {
-                    "name": "examination_records_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                }
-            },
+            "uniqueConstraints": {},
             "policies": {},
             "checkConstraints": {
                 "examination_records_subject_check": {
@@ -2607,16 +2644,9 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
-                },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
                 },
                 "title": {
                     "name": "title",
@@ -2640,13 +2670,13 @@
                 },
                 "posyandu_id": {
                     "name": "posyandu_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
                 "created_by_user_id": {
                     "name": "created_by_user_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
@@ -2701,13 +2731,7 @@
                 }
             },
             "compositePrimaryKeys": {},
-            "uniqueConstraints": {
-                "educations_public_id_unique": {
-                    "name": "educations_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                }
-            },
+            "uniqueConstraints": {},
             "policies": {},
             "checkConstraints": {},
             "isRLSEnabled": false
@@ -2718,20 +2742,13 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "serial",
+                    "type": "text",
                     "primaryKey": true,
                     "notNull": true
                 },
-                "public_id": {
-                    "name": "public_id",
-                    "type": "uuid",
-                    "primaryKey": false,
-                    "notNull": true,
-                    "default": "gen_random_uuid()"
-                },
                 "posyandu_id": {
                     "name": "posyandu_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
@@ -2798,7 +2815,7 @@
                 },
                 "managed_by_midwife_id": {
                     "name": "managed_by_midwife_id",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": false
                 },
@@ -2851,13 +2868,7 @@
                 }
             },
             "compositePrimaryKeys": {},
-            "uniqueConstraints": {
-                "inventories_public_id_unique": {
-                    "name": "inventories_public_id_unique",
-                    "nullsNotDistinct": false,
-                    "columns": ["public_id"]
-                }
-            },
+            "uniqueConstraints": {},
             "policies": {},
             "checkConstraints": {},
             "isRLSEnabled": false

@@ -9,7 +9,7 @@ import { date, decimal, integer, pgTable, text } from 'drizzle-orm/pg-core'
 export const nutritionRecords = pgTable('nutrition_records', {
     ...createBaseColumns('nutrition_records'),
 
-    children_id: integer('children_id')
+    children_id: text('children_id')
         .notNull()
         .references(() => childrens.id),
 
@@ -23,8 +23,8 @@ export const nutritionRecords = pgTable('nutrition_records', {
     age_months: integer('age_months'),
     nutrition_status: nutritionStatusEnum('nutrition_status').notNull(),
 
-    cadre_id: integer('cadre_id').references(() => cadres.id),
-    midwife_id: integer('midwife_id').references(() => midwifes.id),
+    cadre_id: text('cadre_id').references(() => cadres.id),
+    midwife_id: text('midwife_id').references(() => midwifes.id),
     notes: text('notes'),
 
     ...timestamps
