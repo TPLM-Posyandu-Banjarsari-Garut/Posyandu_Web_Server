@@ -7,6 +7,7 @@ import parentRoutes from '@/routes/parents-route'
 import midwifeRoutes from '@/routes/midwifes-route'
 import posyanduRoutes from '@/routes/posyandus-route'
 import healthCenterRoutes from '@/routes/health-centers-route'
+import vitaminRoutes from '@/routes/vitamins-route'
 
 const router = Router()
 
@@ -17,5 +18,6 @@ router.use('/api/midwifes', midwifeRoutes)
 router.use('/api/parents', parentRoutes)
 router.use('/api/posyandus', posyanduRoutes)
 router.use('/api/health-centers', healthCenterRoutes)
+router.use('/api/vitamins', vitaminRoutes)
 
 export default router
