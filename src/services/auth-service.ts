@@ -5,8 +5,7 @@ import { UserRepository } from '@/repositories/user-repository'
 import {
     AuthenticateCredentialsPayload,
     AuthenticationResult,
-    RegisterMultiRolePayload,
-    ResetPasswordPayload
+    RegisterMultiRolePayload
 } from '@/types/auth-types'
 
 export class AuthService {
