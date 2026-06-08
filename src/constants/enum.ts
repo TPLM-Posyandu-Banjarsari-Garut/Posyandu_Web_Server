@@ -107,14 +107,6 @@ export const NUTRITION_STATUS_VALUES = [
     'overweight'
 ] as const
 
-export const EDUCATION_CATEGORY_VALUES = [
-    'pregnancy',
-    'infant_care',
-    'nutrition',
-    'immunization',
-    'general'
-] as const
-
 export const INVENTORY_UNIT_VALUES = [
     'pcs',
     'box',
@@ -182,7 +174,6 @@ export type PregnancyStatus = (typeof PREGNANCY_STATUS_VALUES)[number]
 export type AgeUnit = (typeof AGE_UNIT_VALUES)[number]
 export type BloodType = (typeof BLOOD_TYPE_VALUES)[number]
 export type NutritionStatus = (typeof NUTRITION_STATUS_VALUES)[number]
-export type EducationCategory = (typeof EDUCATION_CATEGORY_VALUES)[number]
 export type InventoryUnit = (typeof INVENTORY_UNIT_VALUES)[number]
 export type CapsuleColor = (typeof CAPSULE_COLOR_VALUES)[number]
 export type DistributionPeriod = (typeof DISTRIBUTION_PERIOD_VALUES)[number]
@@ -259,11 +250,6 @@ export const nutritionStatusEnum = pgEnum(
     NUTRITION_STATUS_VALUES
 )
 
-export const educationCategoryEnum = pgEnum(
-    'education_category',
-    EDUCATION_CATEGORY_VALUES
-)
-
 export const inventoryUnitEnum = pgEnum('inventory_unit', INVENTORY_UNIT_VALUES)
 
 export const capsuleColorEnum = pgEnum('capsule_color', CAPSULE_COLOR_VALUES)
@@ -320,7 +306,6 @@ export const pgEnums = {
     age_unit: ageUnitEnum,
     blood_type: bloodTypeEnum,
     nutrition_status: nutritionStatusEnum,
-    education_category: educationCategoryEnum,
     inventory_unit: inventoryUnitEnum,
     capsule_color: capsuleColorEnum,
     distribution_period: distributionPeriodEnum,
@@ -361,7 +346,6 @@ export const allPgEnumSql = Object.entries({
     age_unit: AGE_UNIT_VALUES,
     blood_type: BLOOD_TYPE_VALUES,
     nutrition_status: NUTRITION_STATUS_VALUES,
-    education_category: EDUCATION_CATEGORY_VALUES,
     inventory_unit: INVENTORY_UNIT_VALUES,
     capsule_color: CAPSULE_COLOR_VALUES,
     distribution_period: DISTRIBUTION_PERIOD_VALUES,

@@ -3,6 +3,7 @@ import { relations } from 'drizzle-orm'
 import { cadres } from '@/db/schemas/cadres-schema'
 import { childrens } from '@/db/schemas/childrens-schema'
 import { consultations } from '@/db/schemas/consultations-schema'
+import { educationCategories } from '@/db/schemas/education-categories-schema'
 import { educations } from '@/db/schemas/educations-schema'
 import { examinationRecords } from '@/db/schemas/examination-records-schema'
 import { examinationSchedules } from '@/db/schemas/examination-schedules-schema'
@@ -339,8 +340,19 @@ export const educationsRelations = relations(educations, ({ one }) => ({
     createdBy: one(users, {
         fields: [educations.created_by_user_id],
         references: [users.id]
+    }),
+    category: one(educationCategories, {
+        fields: [educations.category_id],
+        references: [educationCategories.id]
     })
 }))
+
+export const educationCategoriesRelations = relations(
+    educationCategories,
+    ({ many }) => ({
+        educations: many(educations)
+    })
+)
 
 export const inventoriesRelations = relations(inventories, ({ one, many }) => ({
     posyandu: one(posyandus, {

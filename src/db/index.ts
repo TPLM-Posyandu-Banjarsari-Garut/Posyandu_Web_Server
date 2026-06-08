@@ -23,6 +23,7 @@ export * from '@/db/schemas/examinations-schema'
 export * from '@/db/schemas/examination-schedules-schema'
 export * from '@/db/schemas/examination-records-schema'
 export * from '@/db/schemas/educations-schema'
+export * from '@/db/schemas/education-categories-schema'
 export * from '@/db/schemas/inventories-schema'
 
 export * from '@/db/relations'
