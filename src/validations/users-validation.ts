@@ -11,12 +11,6 @@ export const createUserSchema = createInsertSchema(users, {
         .max(255, 'Email cannot exceed 255 characters')
         .openapi({ example: 'user@example.com' }),
 
-    password: z
-        .string()
-        .min(8, 'Password must be at least 8 characters')
-        .max(100, 'Password cannot exceed 100 characters')
-        .openapi({ example: 'P@ssword123' }),
-
     name: z
         .string()
         .min(3, 'Name must be at least 3 characters')
@@ -34,9 +28,15 @@ export const createUserSchema = createInsertSchema(users, {
 
     status: z.enum(accountStatusEnum.enumValues).default('active')
 })
+    .extend({
+        password: z
+            .string()
+            .min(8, 'Password must be at least 8 characters')
+            .max(100, 'Password cannot exceed 100 characters')
+            .openapi({ example: 'P@ssword123' })
+    })
     .omit({
         id: true,
-        public_id: true,
         created_at: true,
         updated_at: true,
         deleted_at: true

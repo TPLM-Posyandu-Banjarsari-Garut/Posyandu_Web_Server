@@ -3,7 +3,7 @@ import { createBaseColumns } from '@/db/helpers/base-columns'
 import { timestamps } from '@/db/helpers/timestamps'
 import { posyandus } from '@/db/schemas/posyandus-schema'
 import { users } from '@/db/schemas/users-schema'
-import { integer, pgTable, text, varchar } from 'drizzle-orm/pg-core'
+import { pgTable, text, varchar } from 'drizzle-orm/pg-core'
 
 export const educations = pgTable('educations', {
     ...createBaseColumns('educations'),
@@ -12,8 +12,8 @@ export const educations = pgTable('educations', {
     content: text('content').notNull(),
     category: educationCategoryEnum('category').notNull().default('general'),
 
-    posyandu_id: integer('posyandu_id').references(() => posyandus.id),
-    created_by_user_id: integer('created_by_user_id')
+    posyandu_id: text('posyandu_id').references(() => posyandus.id),
+    created_by_user_id: text('created_by_user_id')
         .notNull()
         .references(() => users.id),
 

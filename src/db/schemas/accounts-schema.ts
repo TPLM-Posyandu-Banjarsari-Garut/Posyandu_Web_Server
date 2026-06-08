@@ -1,10 +1,9 @@
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
-import { createBaseColumns } from '@/db/helpers/base-columns'
+import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { timestamps } from '@/db/helpers/timestamps'
 import { users } from './users-schema'
 
 export const accounts = pgTable('accounts', {
-    ...createBaseColumns('accounts'),
+    id: text('id').primaryKey(),
 
     account_id: text('account_id').notNull(),
     provider_id: text('provider_id').notNull(),
@@ -16,9 +15,9 @@ export const accounts = pgTable('accounts', {
     scope: text('scope'),
     password: text('password'),
 
-    user_id: uuid('user_id')
+    user_id: text('user_id')
         .notNull()
-        .references(() => users.public_id, { onDelete: 'cascade' }),
+        .references(() => users.id, { onDelete: 'cascade' }),
 
     ...timestamps
 })

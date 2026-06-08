@@ -2,12 +2,19 @@ import { bloodTypeEnum, childCategoryEnum, genderEnum } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
 import { timestamps } from '@/db/helpers/timestamps'
 import { posyandus } from '@/db/schemas/posyandus-schema'
-import { date, decimal, integer, pgTable, varchar } from 'drizzle-orm/pg-core'
+import {
+    date,
+    decimal,
+    integer,
+    pgTable,
+    text,
+    varchar
+} from 'drizzle-orm/pg-core'
 
 export const childrens = pgTable('childrens', {
     ...createBaseColumns('childrens'),
 
-    posyandu_id: integer('posyandu_id')
+    posyandu_id: text('posyandu_id')
         .notNull()
         .references(() => posyandus.id),
 

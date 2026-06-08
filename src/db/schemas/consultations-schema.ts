@@ -11,15 +11,15 @@ import { integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 export const consultations = pgTable('consultations', {
     ...createBaseColumns('consultations'),
 
-    parent_id: integer('parent_id')
+    parent_id: text('parent_id')
         .notNull()
         .references(() => parents.id),
-    pregnancy_record_id: integer('pregnancy_record_id').references(
+    pregnancy_record_id: text('pregnancy_record_id').references(
         () => pregnancyRecords.id
     ),
-    midwife_id: integer('midwife_id').references(() => midwifes.id),
-    cadre_id: integer('cadre_id').references(() => cadres.id),
-    posyandu_id: integer('posyandu_id')
+    midwife_id: text('midwife_id').references(() => midwifes.id),
+    cadre_id: text('cadre_id').references(() => cadres.id),
+    posyandu_id: text('posyandu_id')
         .notNull()
         .references(() => posyandus.id),
 

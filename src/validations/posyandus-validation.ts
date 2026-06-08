@@ -57,7 +57,6 @@ export const createPosyanduSchema = createInsertSchema(posyandus, {
 })
     .omit({
         id: true,
-        public_id: true,
         created_at: true,
         updated_at: true,
         deleted_at: true

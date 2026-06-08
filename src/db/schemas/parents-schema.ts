@@ -2,12 +2,12 @@ import { accountStatusEnum, bloodTypeEnum } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
 import { timestamps } from '@/db/helpers/timestamps'
 import { users } from '@/db/schemas/users-schema'
-import { date, integer, pgTable, text, varchar } from 'drizzle-orm/pg-core'
+import { date, pgTable, text, varchar } from 'drizzle-orm/pg-core'
 
 export const parents = pgTable('parents', {
     ...createBaseColumns('parents'),
 
-    user_id: integer('user_id')
+    user_id: text('user_id')
         .notNull()
         .unique()
         .references(() => users.id),

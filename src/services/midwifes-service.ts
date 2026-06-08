@@ -75,7 +75,7 @@ export class MidwifeService {
                 )
             if (
                 existingMidwifeForUser &&
-                existingMidwifeForUser.public_id !== public_id
+                existingMidwifeForUser.id !== public_id
             ) {
                 throw new Error('User is already registered as a midwife')
             }

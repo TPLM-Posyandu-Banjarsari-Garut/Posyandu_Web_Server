@@ -4,7 +4,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface MidwifeQueryFilters {
     search?: string
-    user_id?: number
+    user_id?: string
     str_number?: string
     status?: Midwife['status']
     page?: number
@@ -84,16 +84,13 @@ export class MidwifeRepository {
             .select()
             .from(midwifes)
             .where(
-                and(
-                    eq(midwifes.public_id, public_id),
-                    eq(midwifes.status, 'active')
-                )
+                and(eq(midwifes.id, public_id), eq(midwifes.status, 'active'))
             )
             .limit(1)
         return midwife
     }
 
-    async findByUserId(user_id: number): Promise<Midwife | undefined> {
+    async findByUserId(user_id: string): Promise<Midwife | undefined> {
         const [midwife] = await this.db
             .select()
             .from(midwifes)
@@ -130,7 +127,7 @@ export class MidwifeRepository {
         const [midwife] = await this.db
             .update(midwifes)
             .set(updated_midwife)
-            .where(eq(midwifes.public_id, public_id))
+            .where(eq(midwifes.id, public_id))
             .returning()
         return midwife
     }
@@ -141,7 +138,7 @@ export class MidwifeRepository {
             .set({
                 status: 'inactive'
             })
-            .where(eq(midwifes.public_id, public_id))
+            .where(eq(midwifes.id, public_id))
             .returning()
         return midwife
     }
@@ -149,7 +146,7 @@ export class MidwifeRepository {
     async hardDelete(public_id: string): Promise<Midwife | undefined> {
         const [midwife] = await this.db
             .delete(midwifes)
-            .where(eq(midwifes.public_id, public_id))
+            .where(eq(midwifes.id, public_id))
             .returning()
         return midwife
     }
@@ -160,7 +157,7 @@ export class MidwifeRepository {
             .set({
                 status: 'active'
             })
-            .where(eq(midwifes.public_id, public_id))
+            .where(eq(midwifes.id, public_id))
             .returning()
         return midwife
     }

@@ -41,7 +41,7 @@ export class ChildrenService {
         return child
     }
 
-    async getChildrenByParent(parent_id: number): Promise<Children[]> {
+    async getChildrenByParent(parent_id: string): Promise<Children[]> {
         return this.children_repository.findByParentId(parent_id)
     }
 
@@ -96,14 +96,12 @@ export class ChildrenService {
 
     async verifyParentAccess(
         public_id: string,
-        parent_id: number
+        parent_id: string
     ): Promise<boolean> {
         const parentChildren =
             await this.children_repository.findByParentId(parent_id)
 
-        const hasAccess = parentChildren.some(
-            child => child.public_id === public_id
-        )
+        const hasAccess = parentChildren.some(child => child.id === public_id)
 
         if (!hasAccess) {
             throw new Error(

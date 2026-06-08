@@ -7,7 +7,7 @@ import { boolean, integer, pgTable, text } from 'drizzle-orm/pg-core'
 export const kipiDetails = pgTable('kipi_details', {
     ...createBaseColumns('kipi_details'),
 
-    immunization_record_id: integer('immunization_record_id')
+    immunization_record_id: text('immunization_record_id')
         .notNull()
         .unique()
         .references(() => immunizationRecords.id),

@@ -4,7 +4,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ParentQueryFilters {
     search?: string
-    user_id?: number
+    user_id?: string
     blood_type?: Parent['blood_type']
     page?: number
     limit?: number
@@ -69,12 +69,12 @@ export class ParentRepository {
         const [parent] = await this.db
             .select()
             .from(parents)
-            .where(eq(parents.public_id, public_id))
+            .where(eq(parents.id, public_id))
             .limit(1)
         return parent
     }
 
-    async findByUserId(user_id: number): Promise<Parent | undefined> {
+    async findByUserId(user_id: string): Promise<Parent | undefined> {
         const [parent] = await this.db
             .select()
             .from(parents)
@@ -101,7 +101,7 @@ export class ParentRepository {
         const [parent] = await this.db
             .update(parents)
             .set(updated_parent)
-            .where(eq(parents.public_id, public_id))
+            .where(eq(parents.id, public_id))
             .returning()
         return parent
     }
@@ -112,7 +112,7 @@ export class ParentRepository {
             .set({
                 status: 'inactive'
             })
-            .where(eq(parents.public_id, public_id))
+            .where(eq(parents.id, public_id))
             .returning()
         return parent
     }
@@ -120,7 +120,7 @@ export class ParentRepository {
     async hardDelete(public_id: string): Promise<Parent | undefined> {
         const [parent] = await this.db
             .delete(parents)
-            .where(eq(parents.public_id, public_id))
+            .where(eq(parents.id, public_id))
             .returning()
         return parent
     }
@@ -131,7 +131,7 @@ export class ParentRepository {
             .set({
                 status: 'active'
             })
-            .where(eq(parents.public_id, public_id))
+            .where(eq(parents.id, public_id))
             .returning()
         return parent
     }

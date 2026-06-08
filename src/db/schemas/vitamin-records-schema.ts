@@ -26,15 +26,15 @@ export const vitaminRecords = pgTable(
     {
         ...createBaseColumns('vitamin_records'),
 
-        children_id: integer('children_id')
+        children_id: text('children_id')
             .notNull()
             .references(() => childrens.id),
-        vitamin_id: integer('vitamin_id')
+        vitamin_id: text('vitamin_id')
             .notNull()
             .references(() => vitamins.id),
-        cadre_id: integer('cadre_id').references(() => cadres.id),
-        midwife_id: integer('midwife_id').references(() => midwifes.id),
-        posyandu_id: integer('posyandu_id').references(() => posyandus.id),
+        cadre_id: text('cadre_id').references(() => cadres.id),
+        midwife_id: text('midwife_id').references(() => midwifes.id),
+        posyandu_id: text('posyandu_id').references(() => posyandus.id),
 
         distribution_period: distributionPeriodEnum(
             'distribution_period'

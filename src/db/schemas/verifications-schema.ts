@@ -1,9 +1,8 @@
 import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
-import { createBaseColumns } from '@/db/helpers/base-columns'
 import { timestamps } from '@/db/helpers/timestamps'
 
 export const verifications = pgTable('verifications', {
-    ...createBaseColumns('verifications'),
+    id: text('id').primaryKey(),
 
     identifier: text('identifier').notNull(),
     value: text('value').notNull(),

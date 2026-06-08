@@ -2,9 +2,12 @@ import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import * as schema from '@/db'
 import db from '@/configs/db'
+import env from '@/configs/env'
 
 export const auth = betterAuth({
     appName: 'Sampurasun Web Server',
+    baseURL: env.BETTER_AUTH_URL,
+    trustedOrigins: [env.CORS_ORIGIN],
     database: drizzleAdapter(db, {
         provider: 'pg',
         schema: {
@@ -24,9 +27,9 @@ export const auth = betterAuth({
     },
     user: {
         fields: {
-            id: 'public_id',
-            emailVerified: 'email_verified',
-            image: 'avatar_url'
+            image: 'avatar_url',
+            createdAt: 'created_at',
+            updatedAt: 'updated_at'
         },
         additionalFields: {
             role: { type: 'string', defaultValue: 'parent' },
@@ -35,30 +38,33 @@ export const auth = betterAuth({
     },
     session: {
         fields: {
-            id: 'public_id',
             expiresAt: 'expires_at',
-            userId: 'user_id',
+            ipAddress: 'ip_address',
             userAgent: 'user_agent',
-            ipAddress: 'ip_address'
+            userId: 'user_id',
+            createdAt: 'created_at',
+            updatedAt: 'updated_at'
         }
     },
     account: {
         fields: {
-            id: 'public_id',
-            userId: 'user_id',
             accountId: 'account_id',
             providerId: 'provider_id',
+            userId: 'user_id',
             accessToken: 'access_token',
             refreshToken: 'refresh_token',
             idToken: 'id_token',
             accessTokenExpiresAt: 'access_token_expires_at',
-            refreshTokenExpiresAt: 'refresh_token_expires_at'
+            refreshTokenExpiresAt: 'refresh_token_expires_at',
+            createdAt: 'created_at',
+            updatedAt: 'updated_at'
         }
     },
     verification: {
         fields: {
-            id: 'public_id',
-            expiresAt: 'expires_at'
+            expiresAt: 'expires_at',
+            createdAt: 'created_at',
+            updatedAt: 'updated_at'
         }
     }
 })

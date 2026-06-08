@@ -88,7 +88,6 @@ export const createParentSchema = createInsertSchema(parents, {
 })
     .omit({
         id: true,
-        public_id: true,
         created_at: true,
         updated_at: true,
         deleted_at: true

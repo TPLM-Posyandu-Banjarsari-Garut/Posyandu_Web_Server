@@ -1,4 +1,5 @@
 import { NewUser, User } from '@/db'
+import { CreateUserInput } from '@/validations/users-validation'
 import {
     UserRepository,
     UserQueryFilters
@@ -9,7 +10,7 @@ import { AuthService } from '@/services/auth-service'
 export class UserService {
     constructor(private readonly user_repository: UserRepository) {}
 
-    async createUser(user_payload: NewUser): Promise<User> {
+    async createUser(user_payload: CreateUserInput): Promise<User> {
         const [email_exists, phone_exists] = await Promise.all([
             this.user_repository.existsByEmail(user_payload.email),
             user_payload.phone_number
