@@ -1,3 +1,5 @@
+import { verifyAuth } from '@/middlewares/verify-auth'
+import { authorizeRoles } from '@/middlewares/authorize-role'
 import { Router } from 'express'
 import { HealthCenterController } from '@/controllers/health-centers-controller'
 import { HealthCenterService } from '@/services/health-centers-service'
@@ -23,24 +25,32 @@ const health_center_controller = new HealthCenterController(
 
 router.post(
     '/',
+    verifyAuth,
+    authorizeRoles('admin'),
     validateRequest({ body: createHealthCenterSchema }),
     AsyncHandler(health_center_controller.createHealthCenter)
 )
 
 router.get(
     '/',
+    verifyAuth,
+    authorizeRoles('admin'),
     validateRequest({ query: getHealthCentersQuerySchema }),
     AsyncHandler(health_center_controller.getHealthCenters)
 )
 
 router.get(
     '/:public_id',
+    verifyAuth,
+    authorizeRoles('admin'),
     validateRequest({ params: healthCenterParamsSchema }),
     AsyncHandler(health_center_controller.getHealthCenterById)
 )
 
 router.put(
     '/:public_id',
+    verifyAuth,
+    authorizeRoles('admin'),
     validateRequest({
         params: healthCenterParamsSchema,
         body: updateHealthCenterSchema
@@ -50,6 +60,8 @@ router.put(
 
 router.delete(
     '/:public_id',
+    verifyAuth,
+    authorizeRoles('admin'),
     validateRequest({
         params: healthCenterParamsSchema,
         query: deleteHealthCenterQuerySchema
@@ -59,6 +71,8 @@ router.delete(
 
 router.post(
     '/:public_id/restore',
+    verifyAuth,
+    authorizeRoles('admin'),
     validateRequest({ params: healthCenterParamsSchema }),
     AsyncHandler(health_center_controller.restoreHealthCenter)
 )
