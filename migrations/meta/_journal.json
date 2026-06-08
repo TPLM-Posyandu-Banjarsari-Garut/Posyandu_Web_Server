@@ -1,27 +1,27 @@
 {
-  "version": "7",
-  "dialect": "postgresql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1780899736441,
-      "tag": "0000_nebulous_blindfold",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1780900125236,
-      "tag": "0001_melted_the_phantom",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1780909842646,
-      "tag": "0002_nasty_nightshade",
-      "breakpoints": true
-    }
-  ]
+    "version": "7",
+    "dialect": "postgresql",
+    "entries": [
+        {
+            "idx": 0,
+            "version": "7",
+            "when": 1780899736441,
+            "tag": "0000_nebulous_blindfold",
+            "breakpoints": true
+        },
+        {
+            "idx": 1,
+            "version": "7",
+            "when": 1780900125236,
+            "tag": "0001_melted_the_phantom",
+            "breakpoints": true
+        },
+        {
+            "idx": 2,
+            "version": "7",
+            "when": 1780909842646,
+            "tag": "0002_nasty_nightshade",
+            "breakpoints": true
+        }
+    ]
 }
