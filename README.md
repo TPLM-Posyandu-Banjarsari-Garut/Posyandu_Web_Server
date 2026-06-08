@@ -10,6 +10,7 @@ Sebelum menjalankan aplikasi, pastikan Anda telah menginstal:
 
 - [Bun](https://bun.sh/) (Rekomendasi package manager & runtime)
 - [Docker & Docker Compose](https://www.docker.com/) (Jika ingin menjalankan PostgreSQL lokal melalui container)
+- [Infisical CLI](https://infisical.com/docs/cli/overview) (Untuk manajemen secrets & environment variables)
 - Database PostgreSQL aktif jika tidak menggunakan Docker.
 
 ---
@@ -31,25 +32,28 @@ Gunakan Bun untuk menginstal modul Node:
 bun install
 ```
 
-### 3. Konfigurasi Environment Variables (`.env`)
+### 3. Konfigurasi Secrets menggunakan Infisical
 
-Salin file `.env.example` menjadi `.env` lalu sesuaikan isinya:
+Proyek ini menggunakan **Infisical** untuk mengelola secrets secara aman.
+
+1. **Login ke Akun Infisical Anda**:
+    ```bash
+    infisical login
+    ```
+2. **Inisialisasi Proyek**:
+    ```bash
+    infisical init
+    ```
+    Pilih organisasi `Posyandu Banjarsari` dan proyek `Posyandu Web Server`.
+
+Variabel lingkungan (secrets) Anda akan disuntikkan secara dinamis saat aplikasi dijalankan lewat perintah `make` (tanpa membutuhkan file `.env` lokal manual).
+
+### 4. Konfigurasi `.env` Lokal (Opsional / Fallback)
+
+Jika Anda ingin menyimpan berkas `.env` lokal secara manual, salin berkas `.env.example`:
 
 ```bash
 cp .env.example .env
-```
-
-Isi variabel di `.env` sesuai kredensial database dan konfigurasi Auth Anda:
-
-```env
-LOG_LEVEL='info'
-NODE_ENV='development'
-PORT='3000'
-CORS_ORIGIN='http://localhost:3001'
-
-DATABASE_URL="postgresql://username:password@host:port/database"
-BETTER_AUTH_SECRET="your_better_auth_secret_here"
-BETTER_AUTH_URL="http://localhost:3000"
 ```
 
 ---
