@@ -15,6 +15,7 @@ import { registerVitaminRecordsRoutes } from '@/docs/vitamin-records-docs'
 import { registerVaccinesRoutes } from '@/docs/vaccines-docs'
 import { registerKipiDetailsRoutes } from '@/docs/kipi-details-docs'
 import { registerNutritionRecordsRoutes } from '@/docs/nutrition-records-docs'
+import { registerInventoriesRoutes } from '@/docs/inventories-docs'
 
 import { registerAuthRoutes } from '@/docs/auth-docs'
 
@@ -49,6 +50,7 @@ registerVitaminRecordsRoutes(registry)
 registerVaccinesRoutes(registry)
 registerKipiDetailsRoutes(registry)
 registerNutritionRecordsRoutes(registry)
+registerInventoriesRoutes(registry)
 
 export function generateOpenApiDocs() {
     const generator = new OpenApiGeneratorV3(registry.definitions)
