@@ -11,6 +11,7 @@ import env from '@/configs/env'
 import sourceMapSupport from 'source-map-support'
 import { toNodeHandler, fromNodeHeaders } from 'better-auth/node'
 import { auth } from '@/configs/auth'
+import { autoAuditMiddleware } from '@/middlewares/auto-audit-middleware'
 sourceMapSupport.install()
 
 const app: Express = express()
@@ -27,7 +28,19 @@ app.use(
 )
 app.use(helmet())
 app.use(cookieParser())
-app.use(morgan(env.NODE_ENV === 'development' ? 'dev' : 'combined'))
+
+morgan.token('user', (req: Request, res: Response) => {
+    const user = res.locals?.user
+    return user ? `${user.email} (${user.id})` : 'anonymous'
+})
+
+const morganFormat =
+    env.NODE_ENV === 'development'
+        ? '[:date[iso]] :method :url :status :response-time ms - :res[content-length] | User: :user'
+        : ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" | User: :user'
+
+app.use(morgan(morganFormat))
+app.use(autoAuditMiddleware)
 
 setupSwagger(app)
 
