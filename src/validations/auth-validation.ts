@@ -31,7 +31,6 @@ export const signUpSchema = z
 export const signInSchema = z
     .object({
         email: z
-            .string()
             .email('Invalid email format')
             .max(255, 'Email cannot exceed 255 characters')
             .openapi({ example: 'user@example.com' }),
@@ -47,7 +46,6 @@ export const signInSchema = z
 export const forgetPasswordSchema = z
     .object({
         email: z
-            .string()
             .email('Invalid email format')
             .max(255, 'Email cannot exceed 255 characters')
             .openapi({ example: 'user@example.com' })
