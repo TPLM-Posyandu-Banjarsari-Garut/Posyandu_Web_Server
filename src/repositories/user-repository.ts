@@ -81,6 +81,27 @@ export class UserRepository {
         return user
     }
 
+    async findByPublicId(public_id: string): Promise<User | undefined> {
+        const [user] = await this.db
+            .select()
+            .from(users)
+            .where(eq(users.public_id, public_id))
+            .limit(1)
+        return user
+    }
+
+    async findByPublicIdWithTransaction(
+        trx: typeof this.db,
+        public_id: string
+    ): Promise<User | undefined> {
+        const [user] = await trx
+            .select()
+            .from(users)
+            .where(eq(users.public_id, public_id))
+            .limit(1)
+        return user
+    }
+
     async findByName(name: string): Promise<User[]> {
         return this.db
             .select()
@@ -123,6 +144,17 @@ export class UserRepository {
             .where(eq(users.public_id, public_id))
             .returning()
         return user
+    }
+
+    async updateWithTransaction(
+        trx: typeof this.db,
+        public_id: string,
+        user_data: Partial<Omit<User, 'id' | 'public_id'>>
+    ): Promise<void> {
+        await trx
+            .update(users)
+            .set(user_data)
+            .where(eq(users.public_id, public_id))
     }
 
     async softDelete(public_id: string): Promise<User | undefined> {

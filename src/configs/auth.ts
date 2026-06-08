@@ -16,7 +16,11 @@ export const auth = betterAuth({
     }),
     emailAndPassword: {
         enabled: true,
-        autoSignIn: true
+        autoSignIn: true,
+        sendResetPassword: async ({ user, url, token }, request) => {
+            // TODO: Implement actual email sending logic here
+            console.log(`Password reset link for ${user.email}: ${url}`)
+        }
     },
     user: {
         fields: {
