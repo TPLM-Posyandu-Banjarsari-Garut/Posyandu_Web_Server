@@ -32,11 +32,7 @@ export class UserService {
             avatar_url: (user_payload as Record<string, unknown>).avatar_url as
                 | string
                 | undefined,
-            role: (user_payload.role || 'parent') as
-                | 'admin'
-                | 'midwife'
-                | 'cadre'
-                | 'parent'
+            role: user_payload.role || 'parent'
         })
     }
 

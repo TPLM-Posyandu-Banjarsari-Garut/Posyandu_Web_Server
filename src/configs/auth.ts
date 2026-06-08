@@ -28,6 +28,7 @@ export const auth = betterAuth({
     user: {
         fields: {
             image: 'avatar_url',
+            emailVerified: 'email_verified',
             createdAt: 'created_at',
             updatedAt: 'updated_at'
         },

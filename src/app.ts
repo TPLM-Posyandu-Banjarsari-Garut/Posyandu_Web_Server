@@ -9,7 +9,7 @@ import { setupSwagger } from '@/configs/swagger'
 import apiRoutes from '@/routes/index-routes'
 import env from '@/configs/env'
 import sourceMapSupport from 'source-map-support'
-import { toNodeHandler } from 'better-auth/node'
+import { toNodeHandler, fromNodeHeaders } from 'better-auth/node'
 import { auth } from '@/configs/auth'
 sourceMapSupport.install()
 
@@ -31,11 +31,23 @@ app.use(morgan(env.NODE_ENV === 'development' ? 'dev' : 'combined'))
 
 setupSwagger(app)
 
-app.all('/api/auth/*splat', toNodeHandler(auth))
+app.all('/api/auth/', toNodeHandler(auth))
 app.get('/favicon.ico', (req, res) => res.status(204).end())
 
 app.get('/', (req: Request, res: Response) => {
     res.redirect('/api/docs')
+})
+
+app.get('/api/auth/me', async (req, res) => {
+    const session = await auth.api.getSession({
+        headers: fromNodeHeaders(req.headers)
+    })
+
+    if (!session) {
+        return res.status(401).json({ error: 'Unauthorized' })
+    }
+
+    res.json({ user: session.user })
 })
 
 app.use(apiRoutes)

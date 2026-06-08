@@ -15,7 +15,6 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
 
     const AUTH_TAG = ['Authentication (Better Auth)']
 
-    // Sign Up
     registry.registerPath({
         method: 'post',
         path: '/api/auth/sign-up/email',
@@ -32,7 +31,6 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
         }
     })
 
-    // Sign In
     registry.registerPath({
         method: 'post',
         path: '/api/auth/sign-in/email',
@@ -49,7 +47,6 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
         }
     })
 
-    // Sign Out
     registry.registerPath({
         method: 'post',
         path: '/api/auth/sign-out',
@@ -62,10 +59,9 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
         }
     })
 
-    // Get Session
     registry.registerPath({
         method: 'get',
-        path: '/api/auth/session',
+        path: '/api/auth/me',
         tags: AUTH_TAG,
         summary: 'Get active session data',
         security: [{ BearerAuth: [] }],
