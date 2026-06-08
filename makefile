@@ -29,13 +29,13 @@ help:
 	@echo "=============================================================================="
 
 dev:
-	$(BUN) run dev
+	infisical run -- $(BUN) run dev
 
 build:
 	$(BUN) run build
 
 start:
-	$(BUN) run start
+	infisical run -- $(BUN) run start
 
 typecheck:
 	$(BUN) run typecheck
@@ -50,18 +50,20 @@ clean:
 	rm -rf dist
 
 db-gen:
-	$(BUN) run db:generate
+	infisical run -- $(BUN) run db:generate
 
 db-mig:
-	$(BUN) run db:migrate
+	infisical run -- $(BUN) run db:migrate
 
 db-studio:
-	$(BUN) run db:studio
+	infisical run -- $(BUN) run db:studio
 
 dc-up:
+	infisical export --output=dotenv > .env
 	DOCKER_BUILDKIT=1 $(DOCKER_COMPOSE) up --build app-dev postgres
  
 dc-bg:
+	infisical export --output=dotenv > .env
 	DOCKER_BUILDKIT=1 $(DOCKER_COMPOSE) up -d
 	
 dc-down:
