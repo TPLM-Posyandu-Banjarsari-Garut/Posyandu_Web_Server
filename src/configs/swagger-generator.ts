@@ -10,6 +10,7 @@ import { registerUsersRoutes } from '@/docs/users-docs'
 import { registerParentsRoutes } from '@/docs/parents-docs'
 import { registerChildrenRoutes } from '@/docs/childrens-docs'
 import { registerVitaminsRoutes } from '@/docs/vitamins-docs'
+import { registerImmunizationRecordsRoutes } from '@/docs/immunization-records-docs'
 
 import { registerAuthRoutes } from '@/docs/auth-docs'
 
@@ -39,6 +40,7 @@ registerPosyandusRoutes(registry)
 // children
 registerChildrenRoutes(registry)
 registerVitaminsRoutes(registry)
+registerImmunizationRecordsRoutes(registry)
 
 export function generateOpenApiDocs() {
     const generator = new OpenApiGeneratorV3(registry.definitions)
