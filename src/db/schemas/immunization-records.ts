@@ -27,16 +27,16 @@ export const immunizationRecords = pgTable(
     {
         ...createBaseColumns('immunization_records'),
 
-        children_id: integer('children_id')
+        children_id: text('children_id')
             .notNull()
             .references(() => childrens.id),
-        vaccine_id: integer('vaccine_id')
+        vaccine_id: text('vaccine_id')
             .notNull()
             .references(() => vaccines.id),
-        cadre_id: integer('cadre_id').references(() => cadres.id),
-        midwife_id: integer('midwife_id').references(() => midwifes.id),
-        posyandu_id: integer('posyandu_id').references(() => posyandus.id),
-        inventory_id: integer('inventory_id').references(() => inventories.id),
+        cadre_id: text('cadre_id').references(() => cadres.id),
+        midwife_id: text('midwife_id').references(() => midwifes.id),
+        posyandu_id: text('posyandu_id').references(() => posyandus.id),
+        inventory_id: text('inventory_id').references(() => inventories.id),
 
         dose_number: integer('dose_number').notNull(),
         date_given: date('date_given', { mode: 'date' }),

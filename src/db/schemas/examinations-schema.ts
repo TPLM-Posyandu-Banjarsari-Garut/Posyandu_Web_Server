@@ -15,7 +15,7 @@ export const examinations = pgTable(
     {
         ...createBaseColumns('examinations'),
 
-        posyandu_id: integer('posyandu_id')
+        posyandu_id: text('posyandu_id')
             .notNull()
             .references(() => posyandus.id),
 

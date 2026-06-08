@@ -1,3 +1,4 @@
+import { statusEnum } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
 import { timestamps } from '@/db/helpers/timestamps'
 import { pgTable, text, varchar } from 'drizzle-orm/pg-core'
@@ -12,6 +13,8 @@ export const healthCenters = pgTable('health_centers', {
 
     contact_number: varchar('contact_number', { length: 20 }),
     head_name: varchar('head_name', { length: 100 }), // Nama Kepala Puskesmas
+
+    status: statusEnum('status').notNull().default('active'),
 
     ...timestamps
 })

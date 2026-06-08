@@ -5,15 +5,19 @@ export const envSchema = z.object({
         .enum(['development', 'test', 'production'])
         .default('development'),
 
-    PORT: z.string().regex(/^\d+$/, 'PORT must be a number').transform(Number),
+    PORT: z.coerce.number().default(3000),
 
     LOG_LEVEL: z
         .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
         .default('info'),
 
-    CORS_ORIGIN: z.url('Format Cors salah'),
+    CORS_ORIGIN: z.url('Format CORS salah'),
 
-    DATABASE_URL: z.url('Database URL Salah').min(3, 'Database URL is required')
+    DATABASE_URL: z.url('Database URL salah'),
+
+    BETTER_AUTH_SECRET: z.string().min(1, 'BETTER_AUTH_SECRET is required'),
+
+    BETTER_AUTH_URL: z.url('BETTER_AUTH_URL salah')
 })
 
 export type Env = z.infer<typeof envSchema>

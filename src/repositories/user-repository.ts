@@ -74,9 +74,28 @@ export class UserRepository {
         const [user] = await this.db
             .select()
             .from(users)
-            .where(
-                and(eq(users.public_id, public_id), eq(users.status, 'active'))
-            )
+            .where(and(eq(users.id, public_id), eq(users.status, 'active')))
+            .limit(1)
+        return user
+    }
+
+    async findByPublicId(public_id: string): Promise<User | undefined> {
+        const [user] = await this.db
+            .select()
+            .from(users)
+            .where(eq(users.id, public_id))
+            .limit(1)
+        return user
+    }
+
+    async findByPublicIdWithTransaction(
+        trx: typeof this.db,
+        public_id: string
+    ): Promise<User | undefined> {
+        const [user] = await trx
+            .select()
+            .from(users)
+            .where(eq(users.id, public_id))
             .limit(1)
         return user
     }
@@ -120,9 +139,17 @@ export class UserRepository {
         const [user] = await this.db
             .update(users)
             .set(updated_user)
-            .where(eq(users.public_id, public_id))
+            .where(eq(users.id, public_id))
             .returning()
         return user
+    }
+
+    async updateWithTransaction(
+        trx: typeof this.db,
+        public_id: string,
+        user_data: Partial<Omit<User, 'id'>>
+    ): Promise<void> {
+        await trx.update(users).set(user_data).where(eq(users.id, public_id))
     }
 
     async softDelete(public_id: string): Promise<User | undefined> {
@@ -131,7 +158,7 @@ export class UserRepository {
             .set({
                 status: 'inactive'
             })
-            .where(eq(users.public_id, public_id))
+            .where(eq(users.id, public_id))
             .returning()
         return user
     }
@@ -139,7 +166,7 @@ export class UserRepository {
     async hardDelete(public_id: string): Promise<User | undefined> {
         const [user] = await this.db
             .delete(users)
-            .where(eq(users.public_id, public_id))
+            .where(eq(users.id, public_id))
             .returning()
         return user
     }
@@ -150,7 +177,7 @@ export class UserRepository {
             .set({
                 status: 'active'
             })
-            .where(eq(users.public_id, public_id))
+            .where(eq(users.id, public_id))
             .returning()
         return user
     }

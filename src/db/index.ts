@@ -1,6 +1,9 @@
 //? Export all schemas from schemas directory
 
 export * from '@/db/schemas/users-schema'
+export * from '@/db/schemas/sessions-schema'
+export * from '@/db/schemas/accounts-schema'
+export * from '@/db/schemas/verifications-schema'
 export * from '@/db/schemas/parents-schema'
 export * from '@/db/schemas/cadres-schema'
 export * from '@/db/schemas/midwifes-schema'
@@ -20,6 +23,7 @@ export * from '@/db/schemas/examinations-schema'
 export * from '@/db/schemas/examination-schedules-schema'
 export * from '@/db/schemas/examination-records-schema'
 export * from '@/db/schemas/educations-schema'
+export * from '@/db/schemas/education-categories-schema'
 export * from '@/db/schemas/inventories-schema'
 
 export * from '@/db/relations'

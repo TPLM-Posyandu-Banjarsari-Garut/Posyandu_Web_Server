@@ -3,6 +3,7 @@ import { relations } from 'drizzle-orm'
 import { cadres } from '@/db/schemas/cadres-schema'
 import { childrens } from '@/db/schemas/childrens-schema'
 import { consultations } from '@/db/schemas/consultations-schema'
+import { educationCategories } from '@/db/schemas/education-categories-schema'
 import { educations } from '@/db/schemas/educations-schema'
 import { examinationRecords } from '@/db/schemas/examination-records-schema'
 import { examinationSchedules } from '@/db/schemas/examination-schedules-schema'
@@ -21,15 +22,33 @@ import { users } from '@/db/schemas/users-schema'
 import { vaccines } from '@/db/schemas/vaccines-schema'
 import { vitaminRecords } from '@/db/schemas/vitamin-records-schema'
 import { vitamins } from '@/db/schemas/vitamins-schema'
+import { sessions } from '@/db/schemas/sessions-schema'
+import { accounts } from '@/db/schemas/accounts-schema'
 
 export const usersRelations = relations(users, ({ one, many }) => ({
     parent: one(parents, {
         fields: [users.id],
         references: [parents.user_id]
     }),
+    sessions: many(sessions),
+    accounts: many(accounts),
     cadreAssignments: many(cadres),
     midwifeAssignments: many(midwifes),
     educations: many(educations)
+}))
+
+export const sessions_relations = relations(sessions, ({ one }) => ({
+    user: one(users, {
+        fields: [sessions.user_id],
+        references: [users.id]
+    })
+}))
+
+export const accounts_relations = relations(accounts, ({ one }) => ({
+    user: one(users, {
+        fields: [accounts.user_id],
+        references: [users.id]
+    })
 }))
 
 export const parentsRelations = relations(parents, ({ one, many }) => ({
@@ -321,8 +340,19 @@ export const educationsRelations = relations(educations, ({ one }) => ({
     createdBy: one(users, {
         fields: [educations.created_by_user_id],
         references: [users.id]
+    }),
+    category: one(educationCategories, {
+        fields: [educations.category_id],
+        references: [educationCategories.id]
     })
 }))
+
+export const educationCategoriesRelations = relations(
+    educationCategories,
+    ({ many }) => ({
+        educations: many(educations)
+    })
+)
 
 export const inventoriesRelations = relations(inventories, ({ one, many }) => ({
     posyandu: one(posyandus, {

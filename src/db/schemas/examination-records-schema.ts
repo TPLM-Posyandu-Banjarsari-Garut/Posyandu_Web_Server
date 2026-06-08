@@ -9,37 +9,30 @@ import { midwifes } from '@/db/schemas/midwifes-schema'
 import { parents } from '@/db/schemas/parents-schema'
 import { posyandus } from '@/db/schemas/posyandus-schema'
 import { sql } from 'drizzle-orm'
-import {
-    check,
-    date,
-    integer,
-    pgTable,
-    text,
-    timestamp
-} from 'drizzle-orm/pg-core'
+import { check, date, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
 export const examinationRecords = pgTable(
     'examination_records',
     {
         ...createBaseColumns('examination_records'),
 
-        examination_id: integer('examination_id')
+        examination_id: text('examination_id')
             .notNull()
             .references(() => examinations.id),
-        schedule_id: integer('schedule_id').references(
+        schedule_id: text('schedule_id').references(
             () => examinationSchedules.id
         ),
-        posyandu_id: integer('posyandu_id')
+        posyandu_id: text('posyandu_id')
             .notNull()
             .references(() => posyandus.id),
 
-        children_id: integer('children_id').references(() => childrens.id),
-        parent_id: integer('parent_id').references(() => parents.id),
+        children_id: text('children_id').references(() => childrens.id),
+        parent_id: text('parent_id').references(() => parents.id),
 
-        cadre_id: integer('cadre_id')
+        cadre_id: text('cadre_id')
             .notNull()
             .references(() => cadres.id),
-        midwife_id: integer('midwife_id')
+        midwife_id: text('midwife_id')
             .notNull()
             .references(() => midwifes.id),
 
@@ -52,7 +45,7 @@ export const examinationRecords = pgTable(
             withTimezone: true,
             mode: 'date'
         }),
-        medically_validated_by_midwife_id: integer(
+        medically_validated_by_midwife_id: text(
             'medically_validated_by_midwife_id'
         ).references(() => midwifes.id),
 

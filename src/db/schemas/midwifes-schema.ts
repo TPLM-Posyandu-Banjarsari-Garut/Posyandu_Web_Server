@@ -5,7 +5,6 @@ import { posyandus } from '@/db/schemas/posyandus-schema'
 import { users } from '@/db/schemas/users-schema'
 import {
     boolean,
-    integer,
     pgTable,
     text,
     uniqueIndex,
@@ -17,10 +16,10 @@ export const midwifes = pgTable(
     {
         ...createBaseColumns('midwives'),
 
-        user_id: integer('user_id')
+        user_id: text('user_id')
             .notNull()
             .references(() => users.id),
-        posyandu_id: integer('posyandu_id')
+        posyandu_id: text('posyandu_id')
             .notNull()
             .references(() => posyandus.id),
 

@@ -15,7 +15,6 @@ help:
 	@echo "  make typecheck   : Memeriksa validasi tipe TypeScript tanpa melakukan emit"
 	@echo "  make lint        : Memeriksa kualitas kode menggunakan ESLint"
 	@echo "  make format      : Merapikan format kode menggunakan Prettier & ESLint"
-	@echo "  make docs        : Memperbarui atau membuat dokumentasi Swagger API"
 	@echo "  make clean       : Menghapus folder build (dist/) secara lokal"
 	@echo "------------------------------------------------------------------------------"
 	@echo "Database (Drizzle ORM):"
@@ -30,13 +29,13 @@ help:
 	@echo "=============================================================================="
 
 dev:
-	$(BUN) run dev
+	infisical run -- $(BUN) run dev
 
 build:
 	$(BUN) run build
 
 start:
-	$(BUN) run start
+	infisical run -- $(BUN) run start
 
 typecheck:
 	$(BUN) run typecheck
@@ -47,25 +46,24 @@ lint:
 format:
 	$(BUN) run format:fix
 
-docs:
-	$(BUN) run docs
-
 clean:
 	rm -rf dist
 
 db-gen:
-	$(BUN) run db:generate
+	infisical run -- $(BUN) run db:generate
 
 db-mig:
-	$(BUN) run db:migrate
+	infisical run -- $(BUN) run db:migrate
 
 db-studio:
-	$(BUN) run db:studio
+	infisical run -- $(BUN) run db:studio
 
 dc-up:
+	infisical export --output=dotenv > .env
 	DOCKER_BUILDKIT=1 $(DOCKER_COMPOSE) up --build app-dev postgres
  
 dc-bg:
+	infisical export --output=dotenv > .env
 	DOCKER_BUILDKIT=1 $(DOCKER_COMPOSE) up -d
 	
 dc-down:
