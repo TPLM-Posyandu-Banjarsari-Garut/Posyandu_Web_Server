@@ -25,7 +25,6 @@ export const createEducationSchema = createInsertSchema(educations, {
         .openapi({ example: 'Panduan lengkap tentang pencegahan stunting.' }),
 
     image_url: z
-        .string()
         .url('Must be a valid URL')
         .optional()
         .nullable()

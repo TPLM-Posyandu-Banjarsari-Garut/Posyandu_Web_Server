@@ -1,5 +1,5 @@
 import { NewEducation, Education, educations } from '@/db'
-import { and, eq, ilike, sql } from 'drizzle-orm'
+import { and, eq, ilike, sql, or } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface EducationQueryFilters {
@@ -42,10 +42,11 @@ export class EducationRepository {
 
         if (search) {
             conditions.push(
-                sql`(${ilike(educations.title, `%${search}%`)} OR ${ilike(
-                    educations.content,
-                    `%${search}%`
-                )} OR ${ilike(educations.summary, `%${search}%`)})`
+                or(
+                    ilike(educations.title, `%${search}%`),
+                    ilike(educations.content, `%${search}%`),
+                    ilike(educations.summary, `%${search}%`)
+                )
             )
         }
 

@@ -3,7 +3,7 @@ import {
     EducationCategory,
     educationCategories
 } from '@/db'
-import { and, eq, ilike, sql } from 'drizzle-orm'
+import { and, eq, ilike, sql, or } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface EducationCategoryQueryFilters {
@@ -44,10 +44,10 @@ export class EducationCategoryRepository {
 
         if (search) {
             conditions.push(
-                sql`(${ilike(educationCategories.name, `%${search}%`)} OR ${ilike(
-                    educationCategories.slug,
-                    `%${search}%`
-                )})`
+                or(
+                    ilike(educationCategories.name, `%${search}%`),
+                    ilike(educationCategories.slug, `%${search}%`)
+                )
             )
         }
 
