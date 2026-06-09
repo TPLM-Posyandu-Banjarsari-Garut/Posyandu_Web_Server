@@ -18,6 +18,8 @@
         "format:check": "bunx prettier . --check",
         "format:fix": "bunx prettier . --write && bunx eslint . --fix",
         "docs": "bun swagger.config.ts",
+        "test": "jest --passWithNoTests",
+        "test:coverage": "jest --coverage --passWithNoTests",
         "prepare": "husky"
     },
     "lint-staged": {
@@ -33,6 +35,7 @@
         "@types/cookie-parser": "^1.4.10",
         "@types/cors": "^2.8.19",
         "@types/express": "^5.0.6",
+        "@types/jest": "^30.0.0",
         "@types/morgan": "^1.9.10",
         "@types/node": "^25.9.1",
         "@types/pg": "^8.20.0",
@@ -44,9 +47,11 @@
         "eslint": "^10.4.0",
         "eslint-plugin-prettier": "^5.5.5",
         "husky": "^9.1.7",
+        "jest": "^30.4.2",
         "lint-staged": "^17.0.5",
         "morgan": "^1.10.1",
         "prettier": "^3.8.3",
+        "ts-jest": "^29.4.11",
         "tsc-alias": "^1.8.17",
         "tsx": "^4.22.3",
         "typescript": "^6.0.3"
