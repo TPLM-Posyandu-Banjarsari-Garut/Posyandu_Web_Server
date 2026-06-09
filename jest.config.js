@@ -28,9 +28,9 @@ export default {
     clearMocks: true,
     resetMocks: true,
     restoreMocks: true,
-    setupFilesAfterEnv: ['<rootDir>/src/tests/setup.ts'],
+    setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
     moduleNameMapper: {
-        '\\.d\\.ts$': '<rootDir>/src/tests/setup.ts', // Map .d.ts imports to an empty file
+        '\\.d\\.ts$': '<rootDir>/src/__tests__/setup.ts', // Map .d.ts imports to an empty file
         '^@/(.*)$': '<rootDir>/src/$1'
     }
 }

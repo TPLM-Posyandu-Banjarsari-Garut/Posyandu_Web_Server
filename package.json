@@ -18,8 +18,10 @@
         "format:check": "bunx prettier . --check",
         "format:fix": "bunx prettier . --write && bunx eslint . --fix",
         "docs": "bun swagger.config.ts",
-        "test": "jest --passWithNoTests",
-        "test:coverage": "jest --coverage --passWithNoTests",
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage",
+        "test:verbose": "jest --verbose",
         "prepare": "husky"
     },
     "lint-staged": {
