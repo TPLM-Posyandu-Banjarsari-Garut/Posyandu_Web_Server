@@ -33,9 +33,19 @@ app.use(
             directives: {
                 defaultSrc: ["'self'"],
                 scriptSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
+                scriptSrcElem: [
+                    "'self'",
+                    "'unsafe-inline'",
+                    'https://unpkg.com'
+                ],
                 styleSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
+                styleSrcElem: [
+                    "'self'",
+                    "'unsafe-inline'",
+                    'https://unpkg.com'
+                ],
                 imgSrc: ["'self'", 'data:'],
-                connectSrc: ["'self'"],
+                connectSrc: ["'self'", 'https://unpkg.com'],
                 fontSrc: ["'self'"],
                 objectSrc: ["'none'"],
                 frameAncestors: ["'none'"]
