@@ -7,6 +7,7 @@
         "dev": "NODE_ENV=development bun --watch src/server.ts",
         "start": "NODE_ENV=production bun dist/server.js",
         "build": "rm -rf dist && tsc && tsc-alias",
+        "vercel-build": "bun run build",
         "typecheck": "tsc --noEmit",
         "lint:check": "eslint .",
         "lint:fix": "eslint . --fix",
