@@ -5,8 +5,12 @@ import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
 import { User } from '@/db'
 
-jest.mock('@/services/users-service')
-jest.mock('@/utils/api-response')
+jest.mock('@/utils/api-response', () => ({
+    ApiResponse: {
+        created: jest.fn(),
+        ok: jest.fn()
+    }
+}))
 jest.mock('@/utils/logger', () => ({
     logger: {
         info: jest.fn(),

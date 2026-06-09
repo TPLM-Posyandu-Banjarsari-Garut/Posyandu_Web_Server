@@ -5,7 +5,9 @@ import { User } from '@/db'
 
 jest.mock('@/configs/auth', () => ({ auth: {} }))
 jest.mock('@/configs/db', () => ({ default: {} }))
-jest.mock('@/services/auth-service')
+jest.mock('@/services/auth-service', () => ({
+    AuthService: jest.fn()
+}))
 
 describe('UserService Unit Tests', () => {
     let userService: UserService
