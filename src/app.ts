@@ -46,7 +46,7 @@ app.use(autoAuditMiddleware)
 setupSwagger(app)
 
 app.use('/api/auth', authRateLimiter)
-app.all('/api/auth/', toNodeHandler(auth))
+app.all('/api/auth/*splat', toNodeHandler(auth))
 app.get('/favicon.ico', (req, res) => res.status(204).end())
 
 app.get('/', (req: Request, res: Response) => {
