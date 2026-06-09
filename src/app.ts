@@ -75,7 +75,7 @@ app.all('/api/auth/*splat', toNodeHandler(auth))
 app.get('/favicon.ico', (req, res) => res.status(204).end())
 
 app.get('/', (req: Request, res: Response) => {
-    res.redirect(env.NODE_ENV === 'development' ? '/api/docs' : '/health')
+    res.redirect(env.NODE_ENV === 'development' ? '/api/docs' : '/api/health')
 })
 
 app.get('/api/auth/me', async (req, res) => {

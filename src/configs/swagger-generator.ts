@@ -2,7 +2,6 @@ import {
     OpenAPIRegistry,
     OpenApiGeneratorV3
 } from '@asteasolutions/zod-to-openapi'
-import env from '@/configs/env'
 import { registerCadresRoutes } from '@/docs/cadres-docs'
 import { registerHealthCentersRoutes } from '@/docs/health-centers-docs'
 import { registerPosyandusRoutes } from '@/docs/posyandus-docs'
@@ -21,6 +20,7 @@ import { registerEducationCategoriesRoutes } from '@/docs/education-categories-d
 import { registerEducationsRoutes } from '@/docs/educations-docs'
 
 import { registerAuthRoutes } from '@/docs/auth-docs'
+import env from '@/configs/env'
 
 export const registry = new OpenAPIRegistry()
 
@@ -61,22 +61,6 @@ registerEducationsRoutes(registry)
 
 export function generateOpenApiDocs() {
     const generator = new OpenApiGeneratorV3(registry.definitions)
-
-    const servers =
-        env.NODE_ENV === 'production'
-            ? [
-                  {
-                      url: env.BETTER_AUTH_URL,
-                      description: 'Production Server'
-                  }
-              ]
-            : [
-                  {
-                      url: `http://localhost:${env.PORT}`,
-                      description: 'Development Server'
-                  }
-              ]
-
     return generator.generateDocument({
         openapi: '3.0.0',
         info: {
@@ -85,6 +69,11 @@ export function generateOpenApiDocs() {
             description:
                 'API documentation generated automatically from Zod Schema.'
         },
-        servers
+        servers: [
+            {
+                url: env.CORS_ORIGIN,
+                description: 'Development Server'
+            }
+        ]
     })
 }

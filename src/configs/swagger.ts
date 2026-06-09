@@ -5,7 +5,6 @@ const SWAGGER_CDN = 'https://unpkg.com/swagger-ui-dist@5.11.0'
 
 export const setupSwagger = (app: Express): void => {
     const swaggerDocument = generateOpenApiDocs()
-    const specJson = JSON.stringify(swaggerDocument)
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -27,15 +26,15 @@ export const setupSwagger = (app: Express): void => {
     <script>
         window.onload = function () {
             SwaggerUIBundle({
-                spec: ${specJson},
+                url: '/api/docs/openapi.json',
                 dom_id: '#swagger-ui',
                 deepLinking: true,
                 presets: [
                     SwaggerUIBundle.presets.apis,
                     SwaggerUIStandalonePreset
                 ],
-                plugins: [SwaggerUIBundle.plugins.DownloadUrl],
-                layout: 'StandaloneLayout'
+                layout: 'StandaloneLayout',
+                validatorUrl: null
             });
         };
     </script>
