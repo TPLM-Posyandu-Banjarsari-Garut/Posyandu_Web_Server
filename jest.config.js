@@ -32,5 +32,15 @@ export default {
     moduleNameMapper: {
         '\\.d\\.ts$': '<rootDir>/src/__tests__/setup.ts', // Map .d.ts imports to an empty file
         '^@/(.*)$': '<rootDir>/src/$1'
-    }
+    },
+    reporters: [
+        'default',
+        [
+            'jest-html-reporter',
+            {
+                pageTitle: 'Test Report',
+                outputPath: 'test-report.html'
+            }
+        ]
+    ]
 }
