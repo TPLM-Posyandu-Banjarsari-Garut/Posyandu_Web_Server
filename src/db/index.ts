@@ -25,6 +25,7 @@ export * from '@/db/schemas/examination-records-schema'
 export * from '@/db/schemas/educations-schema'
 export * from '@/db/schemas/education-categories-schema'
 export * from '@/db/schemas/inventories-schema'
+export * from '@/db/schemas/audit-logs-schema'
 
 export * from '@/db/relations'
 export * from '@/constants/enum'

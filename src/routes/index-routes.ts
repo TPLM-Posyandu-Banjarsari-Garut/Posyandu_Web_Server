@@ -16,9 +16,11 @@ import nutritionRecordRoutes from '@/routes/nutrition-records-route'
 import inventoryRoutes from '@/routes/inventories-route'
 import educationCategoryRoutes from '@/routes/education-categories-route'
 import educationRoutes from '@/routes/educations-route'
+import { rateLimiter } from '@/middlewares/rate-limiter'
 
 const router = Router()
 
+router.use(rateLimiter)
 router.use('/api/health', healthRoutes)
 router.use('/api/users', userRoutes)
 router.use('/api/cadres', cadreRoutes)
