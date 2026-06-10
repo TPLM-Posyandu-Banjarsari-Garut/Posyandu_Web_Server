@@ -6,6 +6,7 @@ export interface ParentQueryFilters {
     search?: string
     user_id?: string
     blood_type?: Parent['blood_type']
+    status?: Parent['status']
     page?: number
     limit?: number
     includeDeleted?: boolean
@@ -31,9 +32,18 @@ export class ParentRepository {
             search,
             user_id,
             blood_type,
+            status,
             page = 1,
-            limit = 10
+            limit = 10,
+            includeDeleted = false
         } = filters || {}
+
+        let statusCondition = undefined
+        if (status) {
+            statusCondition = eq(parents.status, status)
+        } else if (!includeDeleted) {
+            statusCondition = eq(parents.status, 'active')
+        }
 
         const whereClause = and(
             search
@@ -43,7 +53,8 @@ export class ParentRepository {
                   )
                 : undefined,
             user_id ? eq(parents.user_id, user_id) : undefined,
-            blood_type ? eq(parents.blood_type, blood_type) : undefined
+            blood_type ? eq(parents.blood_type, blood_type) : undefined,
+            statusCondition
         )
 
         const [data, countResult] = await Promise.all([

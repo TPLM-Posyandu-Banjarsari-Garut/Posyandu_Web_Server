@@ -4,7 +4,6 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface MidwifeQueryFilters {
     search?: string
-    user_id?: string
     str_number?: string
     status?: Midwife['status']
     page?: number
@@ -33,7 +32,6 @@ export class MidwifeRepository {
     async getMidwifes(filters?: MidwifeQueryFilters) {
         const {
             search,
-            user_id,
             str_number,
             status,
             page = 1,
@@ -55,7 +53,6 @@ export class MidwifeRepository {
                       ilike(midwifes.license_number, `%${search}%`)
                   )
                 : undefined,
-            user_id ? eq(midwifes.user_id, user_id) : undefined,
             str_number ? eq(midwifes.license_number, str_number) : undefined,
             statusCondition
         )
