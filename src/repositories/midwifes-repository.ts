@@ -1,5 +1,5 @@
 import { NewMidwife, Midwife, midwifes } from '@/db'
-import { and, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, eq, ilike, or, sql, SQL } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface MidwifeQueryFilters {
@@ -80,14 +80,9 @@ export class MidwifeRepository {
     }
 
     async findById(public_id: string): Promise<Midwife | undefined> {
-        const [midwife] = await this.db
-            .select()
-            .from(midwifes)
-            .where(
-                and(eq(midwifes.id, public_id), eq(midwifes.status, 'active'))
-            )
-            .limit(1)
-        return midwife
+        return this.findByCondition(
+            and(eq(midwifes.id, public_id), eq(midwifes.status, 'active'))
+        )
     }
 
     async findByUserId(user_id: string): Promise<Midwife | undefined> {
@@ -131,16 +126,40 @@ export class MidwifeRepository {
             .returning()
         return midwife
     }
+    private async findByCondition(
+        condition: SQL | undefined
+    ): Promise<Midwife | undefined> {
+        const [row] = await this.db
+            .select()
+            .from(midwifes)
+            .where(condition)
+            .limit(1)
+        return row
+    }
 
-    async softDelete(public_id: string): Promise<Midwife | undefined> {
-        const [midwife] = await this.db
+    private async updateStatus(
+        public_id: string,
+        status: 'active' | 'inactive'
+    ): Promise<Midwife | undefined> {
+        const [row] = await this.db
             .update(midwifes)
-            .set({
-                status: 'inactive'
-            })
+            .set({ status })
             .where(eq(midwifes.id, public_id))
             .returning()
-        return midwife
+        return row
+    }
+
+    private async checkExists(condition: SQL | undefined): Promise<boolean> {
+        const [row] = await this.db
+            .select({ id: midwifes.id })
+            .from(midwifes)
+            .where(condition)
+            .limit(1)
+        return !!row
+    }
+
+    async softDelete(public_id: string): Promise<Midwife | undefined> {
+        return this.updateStatus(public_id, 'inactive')
     }
 
     async hardDelete(public_id: string): Promise<Midwife | undefined> {
@@ -152,14 +171,7 @@ export class MidwifeRepository {
     }
 
     async restore(public_id: string): Promise<Midwife | undefined> {
-        const [midwife] = await this.db
-            .update(midwifes)
-            .set({
-                status: 'active'
-            })
-            .where(eq(midwifes.id, public_id))
-            .returning()
-        return midwife
+        return this.updateStatus(public_id, 'active')
     }
 
     async existsByStrNumber(str_number: string): Promise<boolean> {

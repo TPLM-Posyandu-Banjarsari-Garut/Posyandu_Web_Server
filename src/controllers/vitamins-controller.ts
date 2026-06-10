@@ -3,6 +3,11 @@ import { VitaminService } from '@/services/vitamins-service'
 import { VitaminQueryFilters } from '@/repositories/vitamins-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
+import {
+    handleDeleteRequest,
+    handleGetByIdRequest,
+    handleRestoreRequest
+} from '@/utils/controller-handlers'
 
 export class VitaminController {
     constructor(private readonly vitamin_service: VitaminService) {}
@@ -25,11 +30,12 @@ export class VitaminController {
     }
 
     getVitaminById = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Get Vitamin By ID')
-
-        const vitamin = await this.vitamin_service.getVitaminById(public_id)
-        return ApiResponse.ok(res, 'Vitamin retrieved successfully', vitamin)
+        return handleGetByIdRequest(
+            req,
+            res,
+            'Vitamin',
+            this.vitamin_service.getVitaminById.bind(this.vitamin_service)
+        )
     }
 
     updateVitamin = async (req: Request, res: Response) => {
@@ -47,25 +53,20 @@ export class VitaminController {
     }
 
     deleteVitamin = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        const is_permanent = req.query.permanent === 'true'
-        logger.warn(
-            { public_id, is_permanent },
-            'Incoming request: Delete Vitamin'
+        return handleDeleteRequest(
+            req,
+            res,
+            'Vitamin',
+            this.vitamin_service.deleteVitamin.bind(this.vitamin_service)
         )
-
-        const vitamin = await this.vitamin_service.deleteVitamin(
-            public_id,
-            is_permanent
-        )
-        return ApiResponse.ok(res, 'Vitamin deleted successfully', vitamin)
     }
 
     restoreVitamin = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Restore Vitamin')
-
-        const vitamin = await this.vitamin_service.restoreVitamin(public_id)
-        return ApiResponse.ok(res, 'Vitamin restored successfully', vitamin)
+        return handleRestoreRequest(
+            req,
+            res,
+            'Vitamin',
+            this.vitamin_service.restoreVitamin.bind(this.vitamin_service)
+        )
     }
 }

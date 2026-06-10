@@ -3,6 +3,11 @@ import { InventoryService } from '@/services/inventories-service'
 import { InventoryQueryFilters } from '@/repositories/inventories-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
+import {
+    handleDeleteRequest,
+    handleGetByIdRequest,
+    handleRestoreRequest
+} from '@/utils/controller-handlers'
 
 export class InventoryController {
     constructor(private readonly inventory_service: InventoryService) {}
@@ -32,15 +37,11 @@ export class InventoryController {
     }
 
     getInventoryById = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Get Inventory By ID')
-
-        const inventory =
-            await this.inventory_service.getInventoryById(public_id)
-        return ApiResponse.ok(
+        return handleGetByIdRequest(
+            req,
             res,
-            'Inventory retrieved successfully',
-            inventory
+            'Inventory',
+            this.inventory_service.getInventoryById.bind(this.inventory_service)
         )
     }
 
@@ -59,26 +60,20 @@ export class InventoryController {
     }
 
     deleteInventory = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        const is_permanent = req.query.permanent === 'true'
-        logger.warn(
-            { public_id, is_permanent },
-            'Incoming request: Delete Inventory'
+        return handleDeleteRequest(
+            req,
+            res,
+            'Inventory',
+            this.inventory_service.deleteInventory.bind(this.inventory_service)
         )
-
-        const inventory = await this.inventory_service.deleteInventory(
-            public_id,
-            is_permanent
-        )
-        return ApiResponse.ok(res, 'Inventory deleted successfully', inventory)
     }
 
     restoreInventory = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Restore Inventory')
-
-        const inventory =
-            await this.inventory_service.restoreInventory(public_id)
-        return ApiResponse.ok(res, 'Inventory restored successfully', inventory)
+        return handleRestoreRequest(
+            req,
+            res,
+            'Inventory',
+            this.inventory_service.restoreInventory.bind(this.inventory_service)
+        )
     }
 }

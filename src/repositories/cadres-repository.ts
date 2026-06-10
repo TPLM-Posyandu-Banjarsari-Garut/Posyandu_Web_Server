@@ -1,5 +1,5 @@
 import { NewCadre, Cadre, cadres } from '@/db'
-import { and, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, eq, ilike, or, sql, SQL } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface CadreQueryFilters {
@@ -80,12 +80,9 @@ export class CadreRepository {
     }
 
     async findById(public_id: string): Promise<Cadre | undefined> {
-        const [cadre] = await this.db
-            .select()
-            .from(cadres)
-            .where(and(eq(cadres.id, public_id), eq(cadres.status, 'active')))
-            .limit(1)
-        return cadre
+        return this.findByCondition(
+            and(eq(cadres.id, public_id), eq(cadres.status, 'active'))
+        )
     }
 
     async findByUserId(user_id: string): Promise<Cadre[]> {
@@ -120,16 +117,40 @@ export class CadreRepository {
             .returning()
         return cadre
     }
+    private async findByCondition(
+        condition: SQL | undefined
+    ): Promise<Cadre | undefined> {
+        const [row] = await this.db
+            .select()
+            .from(cadres)
+            .where(condition)
+            .limit(1)
+        return row
+    }
 
-    async softDelete(public_id: string): Promise<Cadre | undefined> {
-        const [cadre] = await this.db
+    private async updateStatus(
+        public_id: string,
+        status: 'active' | 'inactive'
+    ): Promise<Cadre | undefined> {
+        const [row] = await this.db
             .update(cadres)
-            .set({
-                status: 'inactive'
-            })
+            .set({ status })
             .where(eq(cadres.id, public_id))
             .returning()
-        return cadre
+        return row
+    }
+
+    private async checkExists(condition: SQL | undefined): Promise<boolean> {
+        const [row] = await this.db
+            .select({ id: cadres.id })
+            .from(cadres)
+            .where(condition)
+            .limit(1)
+        return !!row
+    }
+
+    async softDelete(public_id: string): Promise<Cadre | undefined> {
+        return this.updateStatus(public_id, 'inactive')
     }
 
     async hardDelete(public_id: string): Promise<Cadre | undefined> {
@@ -141,13 +162,6 @@ export class CadreRepository {
     }
 
     async restore(public_id: string): Promise<Cadre | undefined> {
-        const [cadre] = await this.db
-            .update(cadres)
-            .set({
-                status: 'active'
-            })
-            .where(eq(cadres.id, public_id))
-            .returning()
-        return cadre
+        return this.updateStatus(public_id, 'active')
     }
 }

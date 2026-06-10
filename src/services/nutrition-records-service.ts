@@ -1,3 +1,4 @@
+import { createPaginationMeta } from '@/utils/pagination'
 import { NewNutritionRecord, NutritionRecord } from '@/db'
 import {
     NutritionRecordRepository,
@@ -24,12 +25,7 @@ export class NutritionRecordService {
 
         return {
             data,
-            meta: {
-                page,
-                limit,
-                total_items: totalItems,
-                total_pages: Math.ceil(totalItems / limit)
-            }
+            meta: createPaginationMeta(page, limit, totalItems)
         }
     }
 

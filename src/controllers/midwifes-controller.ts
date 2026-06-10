@@ -3,6 +3,11 @@ import { MidwifeService } from '@/services/midwifes-service'
 import { MidwifeQueryFilters } from '@/repositories/midwifes-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
+import {
+    handleDeleteRequest,
+    handleGetByIdRequest,
+    handleRestoreRequest
+} from '@/utils/controller-handlers'
 
 export class MidwifeController {
     constructor(private readonly midwife_service: MidwifeService) {}
@@ -25,11 +30,12 @@ export class MidwifeController {
     }
 
     getMidwifeById = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Get Midwife By ID')
-
-        const midwife = await this.midwife_service.getMidwifeById(public_id)
-        return ApiResponse.ok(res, 'Midwife retrieved successfully', midwife)
+        return handleGetByIdRequest(
+            req,
+            res,
+            'Midwife',
+            this.midwife_service.getMidwifeById.bind(this.midwife_service)
+        )
     }
 
     updateMidwife = async (req: Request, res: Response) => {
@@ -47,25 +53,20 @@ export class MidwifeController {
     }
 
     deleteMidwife = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        const is_permanent = req.query.permanent === 'true'
-        logger.warn(
-            { public_id, is_permanent },
-            'Incoming request: Delete Midwife'
+        return handleDeleteRequest(
+            req,
+            res,
+            'Midwife',
+            this.midwife_service.deleteMidwife.bind(this.midwife_service)
         )
-
-        const midwife = await this.midwife_service.deleteMidwife(
-            public_id,
-            is_permanent
-        )
-        return ApiResponse.ok(res, 'Midwife deleted successfully', midwife)
     }
 
     restoreMidwife = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Restore Midwife')
-
-        const midwife = await this.midwife_service.restoreMidwife(public_id)
-        return ApiResponse.ok(res, 'Midwife restored successfully', midwife)
+        return handleRestoreRequest(
+            req,
+            res,
+            'Midwife',
+            this.midwife_service.restoreMidwife.bind(this.midwife_service)
+        )
     }
 }
