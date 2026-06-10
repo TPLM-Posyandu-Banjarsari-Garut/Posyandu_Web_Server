@@ -54,9 +54,7 @@ describe('ParentService Unit Tests', () => {
         it('should successfully create a parent profile', async () => {
             mockParentRepository.findByUserId.mockResolvedValue(undefined)
             mockParentRepository.existsByIdentityNumber.mockResolvedValue(false)
-            mockParentRepository.create.mockResolvedValue(
-                mockParent as unknown as Parent
-            )
+            mockParentRepository.create.mockResolvedValue(mockParent)
 
             const result = await parentService.createParent(createPayload)
 
@@ -73,9 +71,7 @@ describe('ParentService Unit Tests', () => {
         })
 
         it('should throw an error if user already has a parent profile', async () => {
-            mockParentRepository.findByUserId.mockResolvedValue(
-                mockParent as unknown as Parent
-            )
+            mockParentRepository.findByUserId.mockResolvedValue(mockParent)
 
             await expect(
                 parentService.createParent(createPayload)
@@ -98,7 +94,7 @@ describe('ParentService Unit Tests', () => {
         it('should return a paginated list of parents', async () => {
             const mockParents = [mockParent]
             mockParentRepository.getParents.mockResolvedValue({
-                data: mockParents as unknown as Parent[],
+                data: mockParents,
                 totalItems: 1
             })
 
@@ -125,9 +121,7 @@ describe('ParentService Unit Tests', () => {
 
     describe('getParentById', () => {
         it('should return a parent profile by id', async () => {
-            mockParentRepository.findById.mockResolvedValue(
-                mockParent as unknown as Parent
-            )
+            mockParentRepository.findById.mockResolvedValue(mockParent)
 
             const result = await parentService.getParentById('parent-123')
 
@@ -149,13 +143,11 @@ describe('ParentService Unit Tests', () => {
     describe('updateParent', () => {
         it('should update a parent profile and return the updated parent', async () => {
             const updatePayload = { village_name: 'New Village' }
-            mockParentRepository.findById.mockResolvedValue(
-                mockParent as unknown as Parent
-            )
+            mockParentRepository.findById.mockResolvedValue(mockParent)
             mockParentRepository.update.mockResolvedValue({
                 ...mockParent,
                 ...updatePayload
-            } as unknown as Parent)
+            })
 
             const result = await parentService.updateParent(
                 'parent-123',
@@ -174,9 +166,7 @@ describe('ParentService Unit Tests', () => {
 
         it('should throw an error if assigning a NIK already used by another parent', async () => {
             const updatePayload = { identity_number: '9876543210987654' }
-            mockParentRepository.findById.mockResolvedValue(
-                mockParent as unknown as Parent
-            )
+            mockParentRepository.findById.mockResolvedValue(mockParent)
             mockParentRepository.existsByIdentityNumber.mockResolvedValue(true)
 
             await expect(
@@ -189,16 +179,14 @@ describe('ParentService Unit Tests', () => {
 
         it('should throw an error if assigning a user_id already used by another parent', async () => {
             const updatePayload = { user_id: 'user-456' }
-            mockParentRepository.findById.mockResolvedValue(
-                mockParent as unknown as Parent
-            )
-            const existingOtherParent = {
+            mockParentRepository.findById.mockResolvedValue(mockParent)
+            const existingOtherParent: Parent = {
                 ...mockParent,
                 id: 'parent-999',
                 user_id: 'user-456'
             }
             mockParentRepository.findByUserId.mockResolvedValue(
-                existingOtherParent as unknown as Parent
+                existingOtherParent
             )
 
             await expect(
@@ -210,13 +198,11 @@ describe('ParentService Unit Tests', () => {
 
     describe('deleteParent', () => {
         it('should soft delete a parent profile', async () => {
-            mockParentRepository.findById.mockResolvedValue(
-                mockParent as unknown as Parent
-            )
+            mockParentRepository.findById.mockResolvedValue(mockParent)
             mockParentRepository.softDelete.mockResolvedValue({
                 ...mockParent,
-                status: 'inactive'
-            } as unknown as Parent)
+                status: 'inactive' as const
+            })
 
             const result = await parentService.deleteParent('parent-123', false)
 
@@ -224,16 +210,15 @@ describe('ParentService Unit Tests', () => {
                 'parent-123'
             )
             expect(mockParentRepository.hardDelete).not.toHaveBeenCalled()
-            expect(result).toEqual({ ...mockParent, status: 'inactive' })
+            expect(result).toEqual({
+                ...mockParent,
+                status: 'inactive' as const
+            })
         })
 
         it('should hard delete a parent profile', async () => {
-            mockParentRepository.findById.mockResolvedValue(
-                mockParent as unknown as Parent
-            )
-            mockParentRepository.hardDelete.mockResolvedValue(
-                mockParent as unknown as Parent
-            )
+            mockParentRepository.findById.mockResolvedValue(mockParent)
+            mockParentRepository.hardDelete.mockResolvedValue(mockParent)
 
             const result = await parentService.deleteParent('parent-123', true)
 
@@ -249,15 +234,15 @@ describe('ParentService Unit Tests', () => {
         it('should restore a parent profile', async () => {
             mockParentRepository.restore.mockResolvedValue({
                 ...mockParent,
-                status: 'active'
-            } as unknown as Parent)
+                status: 'active' as const
+            })
 
             const result = await parentService.restoreParent('parent-123')
 
             expect(mockParentRepository.restore).toHaveBeenCalledWith(
                 'parent-123'
             )
-            expect(result).toEqual({ ...mockParent, status: 'active' })
+            expect(result).toEqual({ ...mockParent, status: 'active' as const })
         })
 
         it('should throw an error if restoration fails', async () => {

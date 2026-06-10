@@ -25,13 +25,18 @@ describe('UserController Unit Tests', () => {
     let mockReq: Partial<Request>
     let mockRes: Partial<Response>
 
-    const mockUser = {
+    const mockUser: User = {
         id: 'user-123',
         name: 'Budi Santoso',
         email: 'budi.santoso@example.com',
+        emailVerified: false,
         phone_number: '081234567890',
+        avatar_url: null,
         role: 'parent',
-        status: 'active'
+        status: 'active',
+        created_at: new Date(),
+        updated_at: new Date(),
+        deleted_at: null
     }
 
     beforeEach(() => {
@@ -68,9 +73,7 @@ describe('UserController Unit Tests', () => {
                 password: 'password123'
             }
 
-            mockUserService.createUser.mockResolvedValue(
-                mockUser as unknown as User
-            )
+            mockUserService.createUser.mockResolvedValue(mockUser)
 
             await userController.createUser(
                 mockReq as Request,
@@ -97,11 +100,7 @@ describe('UserController Unit Tests', () => {
                 meta: { page: 1, limit: 10, total_items: 1, total_pages: 1 }
             }
 
-            mockUserService.getUsers.mockResolvedValue(
-                mockResult as unknown as Awaited<
-                    ReturnType<UserService['getUsers']>
-                >
-            )
+            mockUserService.getUsers.mockResolvedValue(mockResult)
 
             await userController.getUsers(
                 mockReq as Request,
@@ -121,9 +120,7 @@ describe('UserController Unit Tests', () => {
         it('should retrieve user by ID and return 200 OK', async () => {
             mockReq.params = { public_id: 'user-123' }
 
-            mockUserService.getUserById.mockResolvedValue(
-                mockUser as unknown as User
-            )
+            mockUserService.getUserById.mockResolvedValue(mockUser)
 
             await userController.getUserById(
                 mockReq as Request,
@@ -145,9 +142,7 @@ describe('UserController Unit Tests', () => {
             mockReq.body = { name: 'Updated Name' }
 
             const updatedUser = { ...mockUser, ...mockReq.body }
-            mockUserService.updateUser.mockResolvedValue(
-                updatedUser as unknown as User
-            )
+            mockUserService.updateUser.mockResolvedValue(updatedUser)
 
             await userController.updateUser(
                 mockReq as Request,
@@ -171,10 +166,8 @@ describe('UserController Unit Tests', () => {
             mockReq.params = { public_id: 'user-123' }
             mockReq.query = { permanent: 'false' }
 
-            const deletedUser = { ...mockUser, status: 'inactive' }
-            mockUserService.deleteUser.mockResolvedValue(
-                deletedUser as unknown as User
-            )
+            const deletedUser = { ...mockUser, status: 'inactive' as const }
+            mockUserService.deleteUser.mockResolvedValue(deletedUser)
 
             await userController.deleteUser(
                 mockReq as Request,
@@ -196,9 +189,7 @@ describe('UserController Unit Tests', () => {
             mockReq.params = { public_id: 'user-123' }
             mockReq.query = { permanent: 'true' }
 
-            mockUserService.deleteUser.mockResolvedValue(
-                mockUser as unknown as User
-            )
+            mockUserService.deleteUser.mockResolvedValue(mockUser)
 
             await userController.deleteUser(
                 mockReq as Request,
@@ -216,10 +207,8 @@ describe('UserController Unit Tests', () => {
         it('should restore user and return 200 OK', async () => {
             mockReq.params = { public_id: 'user-123' }
 
-            const restoredUser = { ...mockUser, status: 'active' }
-            mockUserService.restoreUser.mockResolvedValue(
-                restoredUser as unknown as User
-            )
+            const restoredUser = { ...mockUser, status: 'active' as const }
+            mockUserService.restoreUser.mockResolvedValue(restoredUser)
 
             await userController.restoreUser(
                 mockReq as Request,

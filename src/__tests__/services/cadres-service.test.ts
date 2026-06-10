@@ -48,9 +48,7 @@ describe('CadreService Unit Tests', () => {
 
         it('should successfully create a cadre', async () => {
             mockCadreRepository.findByUserId.mockResolvedValue([])
-            mockCadreRepository.create.mockResolvedValue(
-                mockCadre as unknown as Cadre
-            )
+            mockCadreRepository.create.mockResolvedValue(mockCadre)
 
             const result = await cadreService.createCadre(createPayload)
 
@@ -64,9 +62,7 @@ describe('CadreService Unit Tests', () => {
         })
 
         it('should throw an error if user is already a cadre in this posyandu', async () => {
-            mockCadreRepository.findByUserId.mockResolvedValue([
-                mockCadre as unknown as Cadre
-            ])
+            mockCadreRepository.findByUserId.mockResolvedValue([mockCadre])
 
             await expect(
                 cadreService.createCadre(createPayload)
@@ -79,7 +75,7 @@ describe('CadreService Unit Tests', () => {
         it('should return a paginated list of cadres', async () => {
             const mockCadres = [mockCadre]
             mockCadreRepository.getCadres.mockResolvedValue({
-                data: mockCadres as unknown as Cadre[],
+                data: mockCadres,
                 totalItems: 1
             })
 
@@ -103,9 +99,7 @@ describe('CadreService Unit Tests', () => {
 
     describe('getCadreById', () => {
         it('should return a cadre by id', async () => {
-            mockCadreRepository.findById.mockResolvedValue(
-                mockCadre as unknown as Cadre
-            )
+            mockCadreRepository.findById.mockResolvedValue(mockCadre)
 
             const result = await cadreService.getCadreById('cadre-123')
 
@@ -127,13 +121,11 @@ describe('CadreService Unit Tests', () => {
     describe('updateCadre', () => {
         it('should update a cadre and return the updated cadre', async () => {
             const updatePayload = { position: 'leader' as const }
-            mockCadreRepository.findById.mockResolvedValue(
-                mockCadre as unknown as Cadre
-            )
+            mockCadreRepository.findById.mockResolvedValue(mockCadre)
             mockCadreRepository.update.mockResolvedValue({
                 ...mockCadre,
                 ...updatePayload
-            } as unknown as Cadre)
+            })
 
             const result = await cadreService.updateCadre(
                 'cadre-123',
@@ -152,17 +144,15 @@ describe('CadreService Unit Tests', () => {
 
         it('should throw an error if assigning to a posyandu where user is already a cadre', async () => {
             const updatePayload = { posyandu_id: 'posyandu-456' }
-            mockCadreRepository.findById.mockResolvedValue(
-                mockCadre as unknown as Cadre
-            )
+            mockCadreRepository.findById.mockResolvedValue(mockCadre)
 
-            const existingOtherCadre = {
+            const existingOtherCadre: Cadre = {
                 ...mockCadre,
                 id: 'cadre-999',
                 posyandu_id: 'posyandu-456'
             }
             mockCadreRepository.findByUserId.mockResolvedValue([
-                existingOtherCadre as unknown as Cadre
+                existingOtherCadre
             ])
 
             await expect(
@@ -174,13 +164,11 @@ describe('CadreService Unit Tests', () => {
 
     describe('deleteCadre', () => {
         it('should soft delete a cadre', async () => {
-            mockCadreRepository.findById.mockResolvedValue(
-                mockCadre as unknown as Cadre
-            )
+            mockCadreRepository.findById.mockResolvedValue(mockCadre)
             mockCadreRepository.softDelete.mockResolvedValue({
                 ...mockCadre,
-                status: 'inactive'
-            } as unknown as Cadre)
+                status: 'inactive' as const
+            })
 
             const result = await cadreService.deleteCadre('cadre-123', false)
 
@@ -188,16 +176,15 @@ describe('CadreService Unit Tests', () => {
                 'cadre-123'
             )
             expect(mockCadreRepository.hardDelete).not.toHaveBeenCalled()
-            expect(result).toEqual({ ...mockCadre, status: 'inactive' })
+            expect(result).toEqual({
+                ...mockCadre,
+                status: 'inactive' as const
+            })
         })
 
         it('should hard delete a cadre', async () => {
-            mockCadreRepository.findById.mockResolvedValue(
-                mockCadre as unknown as Cadre
-            )
-            mockCadreRepository.hardDelete.mockResolvedValue(
-                mockCadre as unknown as Cadre
-            )
+            mockCadreRepository.findById.mockResolvedValue(mockCadre)
+            mockCadreRepository.hardDelete.mockResolvedValue(mockCadre)
 
             const result = await cadreService.deleteCadre('cadre-123', true)
 
@@ -213,15 +200,15 @@ describe('CadreService Unit Tests', () => {
         it('should restore a cadre', async () => {
             mockCadreRepository.restore.mockResolvedValue({
                 ...mockCadre,
-                status: 'active'
-            } as unknown as Cadre)
+                status: 'active' as const
+            })
 
             const result = await cadreService.restoreCadre('cadre-123')
 
             expect(mockCadreRepository.restore).toHaveBeenCalledWith(
                 'cadre-123'
             )
-            expect(result).toEqual({ ...mockCadre, status: 'active' })
+            expect(result).toEqual({ ...mockCadre, status: 'active' as const })
         })
 
         it('should throw an error if restoration fails', async () => {

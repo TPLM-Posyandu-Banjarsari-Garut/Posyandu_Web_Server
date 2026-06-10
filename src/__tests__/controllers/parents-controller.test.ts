@@ -104,11 +104,7 @@ describe('ParentController Unit Tests', () => {
                 meta: { page: 1, limit: 10, total_items: 1, total_pages: 1 }
             }
 
-            mockParentService.getParents.mockResolvedValue(
-                mockResult as unknown as Awaited<
-                    ReturnType<ParentService['getParents']>
-                >
-            )
+            mockParentService.getParents.mockResolvedValue(mockResult)
 
             await parentController.getParents(
                 mockReq as Request,

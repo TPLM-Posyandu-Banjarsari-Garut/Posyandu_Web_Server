@@ -100,11 +100,7 @@ describe('CadreController Unit Tests', () => {
                 meta: { page: 1, limit: 10, total_items: 1, total_pages: 1 }
             }
 
-            mockCadreService.getCadres.mockResolvedValue(
-                mockResult as unknown as Awaited<
-                    ReturnType<CadreService['getCadres']>
-                >
-            )
+            mockCadreService.getCadres.mockResolvedValue(mockResult)
 
             await cadreController.getCadres(
                 mockReq as Request,

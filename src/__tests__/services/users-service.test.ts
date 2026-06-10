@@ -14,13 +14,18 @@ describe('UserService Unit Tests', () => {
     let mockUserRepository: jest.Mocked<UserRepository>
     let mockAuthService: jest.Mocked<AuthService>
 
-    const mockUser = {
+    const mockUser: User = {
         id: 'user-123',
         name: 'Budi Santoso',
         email: 'budi.santoso@example.com',
+        emailVerified: false,
         phone_number: '081234567890',
+        avatar_url: null,
         role: 'parent',
-        status: 'active'
+        status: 'active',
+        created_at: new Date(),
+        updated_at: new Date(),
+        deleted_at: null
     }
 
     beforeEach(() => {
@@ -61,9 +66,7 @@ describe('UserService Unit Tests', () => {
         it('should successfully create a user', async () => {
             mockUserRepository.existsByEmail.mockResolvedValue(false)
             mockUserRepository.existsByPhoneNumber.mockResolvedValue(false)
-            mockAuthService.registerWithEmail.mockResolvedValue(
-                mockUser as unknown as User
-            )
+            mockAuthService.registerWithEmail.mockResolvedValue(mockUser)
 
             const result = await userService.createUser(createPayload)
 
@@ -109,7 +112,7 @@ describe('UserService Unit Tests', () => {
         it('should return a paginated list of users', async () => {
             const mockUsers = [mockUser]
             mockUserRepository.getUsers.mockResolvedValue({
-                data: mockUsers as unknown as User[],
+                data: mockUsers,
                 totalItems: 1
             })
 
@@ -133,9 +136,7 @@ describe('UserService Unit Tests', () => {
 
     describe('getUserById', () => {
         it('should return a user by id', async () => {
-            mockUserRepository.findById.mockResolvedValue(
-                mockUser as unknown as User
-            )
+            mockUserRepository.findById.mockResolvedValue(mockUser)
 
             const result = await userService.getUserById('user-123')
 
@@ -155,13 +156,11 @@ describe('UserService Unit Tests', () => {
     describe('updateUser', () => {
         it('should update a user and return the updated user', async () => {
             const updatePayload = { name: 'Updated Name' }
-            mockUserRepository.findById.mockResolvedValue(
-                mockUser as unknown as User
-            )
+            mockUserRepository.findById.mockResolvedValue(mockUser)
             mockUserRepository.update.mockResolvedValue({
                 ...mockUser,
                 ...updatePayload
-            } as unknown as User)
+            })
 
             const result = await userService.updateUser(
                 'user-123',
@@ -178,9 +177,7 @@ describe('UserService Unit Tests', () => {
 
         it('should throw an error if email is taken by another user', async () => {
             const updatePayload = { email: 'taken@example.com' }
-            mockUserRepository.findById.mockResolvedValue(
-                mockUser as unknown as User
-            )
+            mockUserRepository.findById.mockResolvedValue(mockUser)
             mockUserRepository.existsByEmail.mockResolvedValue(true) // Email taken
 
             await expect(
@@ -191,13 +188,11 @@ describe('UserService Unit Tests', () => {
 
     describe('deleteUser', () => {
         it('should soft delete a user', async () => {
-            mockUserRepository.findById.mockResolvedValue(
-                mockUser as unknown as User
-            )
+            mockUserRepository.findById.mockResolvedValue(mockUser)
             mockUserRepository.softDelete.mockResolvedValue({
                 ...mockUser,
-                status: 'inactive'
-            } as unknown as User)
+                status: 'inactive' as const
+            })
 
             const result = await userService.deleteUser('user-123', false)
 
@@ -205,16 +200,12 @@ describe('UserService Unit Tests', () => {
                 'user-123'
             )
             expect(mockUserRepository.hardDelete).not.toHaveBeenCalled()
-            expect(result).toEqual({ ...mockUser, status: 'inactive' })
+            expect(result).toEqual({ ...mockUser, status: 'inactive' as const })
         })
 
         it('should hard delete a user', async () => {
-            mockUserRepository.findById.mockResolvedValue(
-                mockUser as unknown as User
-            )
-            mockUserRepository.hardDelete.mockResolvedValue(
-                mockUser as unknown as User
-            )
+            mockUserRepository.findById.mockResolvedValue(mockUser)
+            mockUserRepository.hardDelete.mockResolvedValue(mockUser)
 
             const result = await userService.deleteUser('user-123', true)
 
@@ -230,13 +221,13 @@ describe('UserService Unit Tests', () => {
         it('should restore a user', async () => {
             mockUserRepository.restore.mockResolvedValue({
                 ...mockUser,
-                status: 'active'
-            } as unknown as User)
+                status: 'active' as const
+            })
 
             const result = await userService.restoreUser('user-123')
 
             expect(mockUserRepository.restore).toHaveBeenCalledWith('user-123')
-            expect(result).toEqual({ ...mockUser, status: 'active' })
+            expect(result).toEqual({ ...mockUser, status: 'active' as const })
         })
 
         it('should throw an error if restoration fails', async () => {
