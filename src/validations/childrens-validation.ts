@@ -111,6 +111,8 @@ export const getChildrenQuerySchema = z
             .optional()
             .openapi({ example: 'posyandu-id-uuid' }),
 
+        parent_id: z.string().optional().openapi({ example: 'parent-id-uuid' }),
+
         gender: z.enum(genderEnum.enumValues).optional(),
         child_category: z.enum(childCategoryEnum.enumValues).optional(),
         search: z.string().optional(),

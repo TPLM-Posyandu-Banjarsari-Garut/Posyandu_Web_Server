@@ -43,12 +43,10 @@ export const getMidwifesQuerySchema = z
     .object({
         ...paginationQuerySchema,
 
-        user_id: z.string().optional().openapi({ example: 'user-id-uuid' }),
-
-        health_center_id: z
+        str_number: z
             .string()
             .optional()
-            .openapi({ example: 'health-center-id-uuid' }),
+            .openapi({ example: '1203521209876543' }),
 
         status: z.enum(accountStatusEnum.enumValues).optional(),
         search: z.string().optional(),
