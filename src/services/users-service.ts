@@ -6,6 +6,7 @@ import {
 } from '@/repositories/user-repository'
 
 import { AuthService } from '@/services/auth-service'
+import { createPaginationMeta } from '@/utils/pagination'
 
 export class UserService {
     constructor(private readonly user_repository: UserRepository) {}
@@ -43,12 +44,7 @@ export class UserService {
 
         return {
             data,
-            meta: {
-                page,
-                limit,
-                total_items: totalItems,
-                total_pages: Math.ceil(totalItems / limit)
-            }
+            meta: createPaginationMeta(page, limit, totalItems)
         }
     }
 

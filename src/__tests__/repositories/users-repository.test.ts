@@ -43,15 +43,13 @@ describe('UserRepository CRUD Unit Tests', () => {
         it('should insert and return the newly created user', async () => {
             mockDb.returning.mockResolvedValue([mockUser])
 
-            const newUser = {
+            const newUser: NewUser = {
                 id: 'user-123',
                 name: 'Budi Santoso',
                 email: 'budi.santoso@example.com'
             }
 
-            const result = await userRepository.create(
-                newUser as unknown as NewUser
-            )
+            const result = await userRepository.create(newUser)
 
             expect(mockDb.insert).toHaveBeenCalledWith(users)
             expect(mockDb.values).toHaveBeenCalledWith(newUser)
@@ -99,7 +97,7 @@ describe('UserRepository CRUD Unit Tests', () => {
 
     describe('softDelete', () => {
         it('should update user status to inactive', async () => {
-            const deletedUser = { ...mockUser, status: 'inactive' }
+            const deletedUser = { ...mockUser, status: 'inactive' as const }
             mockDb.returning.mockResolvedValue([deletedUser])
 
             const result = await userRepository.softDelete('user-123')

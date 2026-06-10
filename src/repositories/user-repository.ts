@@ -1,5 +1,5 @@
 import { NewUser, User, users } from '@/db'
-import { and, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, eq, ilike, or, sql, SQL } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface UserQueryFilters {
@@ -70,22 +70,25 @@ export class UserRepository {
         }
     }
 
-    async findById(public_id: string): Promise<User | undefined> {
+    private async findByCondition(
+        condition: SQL | undefined
+    ): Promise<User | undefined> {
         const [user] = await this.db
             .select()
             .from(users)
-            .where(and(eq(users.id, public_id), eq(users.status, 'active')))
+            .where(condition)
             .limit(1)
         return user
     }
 
+    async findById(public_id: string): Promise<User | undefined> {
+        return this.findByCondition(
+            and(eq(users.id, public_id), eq(users.status, 'active'))
+        )
+    }
+
     async findByPublicId(public_id: string): Promise<User | undefined> {
-        const [user] = await this.db
-            .select()
-            .from(users)
-            .where(eq(users.id, public_id))
-            .limit(1)
-        return user
+        return this.findByCondition(eq(users.id, public_id))
     }
 
     async findByPublicIdWithTransaction(
@@ -110,26 +113,18 @@ export class UserRepository {
     }
 
     async findByPhoneNumber(phone_number: string): Promise<User | undefined> {
-        const [user] = await this.db
-            .select()
-            .from(users)
-            .where(
-                and(
-                    eq(users.phone_number, phone_number),
-                    eq(users.status, 'active')
-                )
+        return this.findByCondition(
+            and(
+                eq(users.phone_number, phone_number),
+                eq(users.status, 'active')
             )
-            .limit(1)
-        return user
+        )
     }
 
     async findByEmail(email: string): Promise<User | undefined> {
-        const [user] = await this.db
-            .select()
-            .from(users)
-            .where(and(eq(users.email, email), eq(users.status, 'active')))
-            .limit(1)
-        return user
+        return this.findByCondition(
+            and(eq(users.email, email), eq(users.status, 'active'))
+        )
     }
 
     async update(
@@ -152,15 +147,20 @@ export class UserRepository {
         await trx.update(users).set(user_data).where(eq(users.id, public_id))
     }
 
-    async softDelete(public_id: string): Promise<User | undefined> {
+    private async updateStatus(
+        public_id: string,
+        status: 'active' | 'inactive'
+    ): Promise<User | undefined> {
         const [user] = await this.db
             .update(users)
-            .set({
-                status: 'inactive'
-            })
+            .set({ status })
             .where(eq(users.id, public_id))
             .returning()
         return user
+    }
+
+    async softDelete(public_id: string): Promise<User | undefined> {
+        return this.updateStatus(public_id, 'inactive')
     }
 
     async hardDelete(public_id: string): Promise<User | undefined> {
@@ -172,36 +172,30 @@ export class UserRepository {
     }
 
     async restore(public_id: string): Promise<User | undefined> {
+        return this.updateStatus(public_id, 'active')
+    }
+
+    private async checkExists(condition: SQL | undefined): Promise<boolean> {
         const [user] = await this.db
-            .update(users)
-            .set({
-                status: 'active'
-            })
-            .where(eq(users.id, public_id))
-            .returning()
-        return user
+            .select({ id: users.id })
+            .from(users)
+            .where(condition)
+            .limit(1)
+        return !!user
     }
 
     async existsByEmail(email: string): Promise<boolean> {
-        const [user] = await this.db
-            .select({ id: users.id })
-            .from(users)
-            .where(and(eq(users.email, email), eq(users.status, 'active')))
-            .limit(1)
-        return !!user
+        return this.checkExists(
+            and(eq(users.email, email), eq(users.status, 'active'))
+        )
     }
 
     async existsByPhoneNumber(phone_number: string): Promise<boolean> {
-        const [user] = await this.db
-            .select({ id: users.id })
-            .from(users)
-            .where(
-                and(
-                    eq(users.phone_number, phone_number),
-                    eq(users.status, 'active')
-                )
+        return this.checkExists(
+            and(
+                eq(users.phone_number, phone_number),
+                eq(users.status, 'active')
             )
-            .limit(1)
-        return !!user
+        )
     }
 }
