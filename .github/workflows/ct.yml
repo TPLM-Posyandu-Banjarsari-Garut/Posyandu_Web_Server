@@ -1,0 +1,53 @@
+name: Continuous Testing
+
+on:
+    push:
+        branches: [main, dev]
+    pull_request:
+        branches: [main, dev]
+
+jobs:
+    test:
+        name: Run Unit Tests
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+            - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+              with:
+                  bun-version: 1.2.15
+
+            - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+              with:
+                  node-version: 22
+
+            - name: Cache dependencies
+              uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+              with:
+                  path: ~/.bun/install/cache
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+                  restore-keys: |
+                      ${{ runner.os }}-bun-
+
+            - name: Install dependencies
+              run: bun install --frozen-lockfile --ignore-scripts
+
+            - name: Run Unit Tests with Coverage
+              run: bun run test:coverage
+
+            - name: Upload Jest HTML Report
+              uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
+              if: always()
+              with:
+                  name: jest-test-report
+                  path: test-report.html
+                  retention-days: 14
+
+            - name: Upload Coverage HTML Report
+              uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
+              if: always()
+              with:
+                  name: jest-coverage-report
+                  path: coverage/lcov-report/
+                  retention-days: 14

@@ -12,6 +12,7 @@
         "alwaysStrict": true,
         "useUnknownInCatchVariables": true,
         "forceConsistentCasingInFileNames": true,
+        "types": ["jest", "node"],
         "paths": {
             "@/*": ["./src/*"]
         }

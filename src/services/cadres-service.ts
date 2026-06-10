@@ -3,6 +3,7 @@ import {
     CadreRepository,
     CadreQueryFilters
 } from '@/repositories/cadres-repository'
+import { createPaginationMeta } from '@/utils/pagination'
 
 export class CadreService {
     constructor(private readonly cadre_repository: CadreRepository) {}
@@ -29,12 +30,7 @@ export class CadreService {
 
         return {
             data,
-            meta: {
-                page,
-                limit,
-                total_items: totalItems,
-                total_pages: Math.ceil(totalItems / limit)
-            }
+            meta: createPaginationMeta(page, limit, totalItems)
         }
     }
 
