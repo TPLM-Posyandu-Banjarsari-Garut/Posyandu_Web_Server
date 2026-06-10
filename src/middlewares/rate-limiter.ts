@@ -33,7 +33,7 @@ export const rateLimiter = rateLimit({
  */
 export const authRateLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
-    max: 5, // Limit each IP to 5 failed attempts per hour
+    max: 100, // Limit each IP to 5 failed attempts per hour
     handler: (req, res, next, options) => {
         next(
             ApiError.tooManyRequests(
