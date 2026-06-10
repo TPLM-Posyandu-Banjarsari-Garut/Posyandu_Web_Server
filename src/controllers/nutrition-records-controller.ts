@@ -3,6 +3,11 @@ import { NutritionRecordService } from '@/services/nutrition-records-service'
 import { NutritionRecordQueryFilters } from '@/repositories/nutrition-records-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
+import {
+    handleDeleteRequest,
+    handleGetByIdRequest,
+    handleRestoreRequest
+} from '@/utils/controller-handlers'
 
 export class NutritionRecordController {
     constructor(
@@ -43,20 +48,13 @@ export class NutritionRecordController {
     }
 
     getNutritionRecordById = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info(
-            { public_id },
-            'Incoming request: Get Nutrition Record By ID'
-        )
-
-        const record =
-            await this.nutrition_record_service.getNutritionRecordById(
-                public_id
-            )
-        return ApiResponse.ok(
+        return handleGetByIdRequest(
+            req,
             res,
-            'Nutrition Record retrieved successfully',
-            record
+            'NutritionRecord',
+            this.nutrition_record_service.getNutritionRecordById.bind(
+                this.nutrition_record_service
+            )
         )
     }
 
@@ -80,37 +78,24 @@ export class NutritionRecordController {
     }
 
     deleteNutritionRecord = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        const is_permanent = req.query.permanent === 'true'
-        logger.warn(
-            { public_id, is_permanent },
-            'Incoming request: Delete Nutrition Record'
-        )
-
-        const record =
-            await this.nutrition_record_service.deleteNutritionRecord(
-                public_id,
-                is_permanent
-            )
-        return ApiResponse.ok(
+        return handleDeleteRequest(
+            req,
             res,
-            'Nutrition Record deleted successfully',
-            record
+            'NutritionRecord',
+            this.nutrition_record_service.deleteNutritionRecord.bind(
+                this.nutrition_record_service
+            )
         )
     }
 
     restoreNutritionRecord = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Restore Nutrition Record')
-
-        const record =
-            await this.nutrition_record_service.restoreNutritionRecord(
-                public_id
-            )
-        return ApiResponse.ok(
+        return handleRestoreRequest(
+            req,
             res,
-            'Nutrition Record restored successfully',
-            record
+            'NutritionRecord',
+            this.nutrition_record_service.restoreNutritionRecord.bind(
+                this.nutrition_record_service
+            )
         )
     }
 }

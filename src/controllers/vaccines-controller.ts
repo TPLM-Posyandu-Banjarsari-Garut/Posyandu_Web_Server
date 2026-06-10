@@ -3,6 +3,11 @@ import { VaccineService } from '@/services/vaccines-service'
 import { VaccineQueryFilters } from '@/repositories/vaccines-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
+import {
+    handleDeleteRequest,
+    handleGetByIdRequest,
+    handleRestoreRequest
+} from '@/utils/controller-handlers'
 
 export class VaccineController {
     constructor(private readonly vaccine_service: VaccineService) {}
@@ -25,11 +30,12 @@ export class VaccineController {
     }
 
     getVaccineById = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Get Vaccine By ID')
-
-        const vaccine = await this.vaccine_service.getVaccineById(public_id)
-        return ApiResponse.ok(res, 'Vaccine retrieved successfully', vaccine)
+        return handleGetByIdRequest(
+            req,
+            res,
+            'Vaccine',
+            this.vaccine_service.getVaccineById.bind(this.vaccine_service)
+        )
     }
 
     updateVaccine = async (req: Request, res: Response) => {
@@ -47,25 +53,20 @@ export class VaccineController {
     }
 
     deleteVaccine = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        const is_permanent = req.query.permanent === 'true'
-        logger.warn(
-            { public_id, is_permanent },
-            'Incoming request: Delete Vaccine'
+        return handleDeleteRequest(
+            req,
+            res,
+            'Vaccine',
+            this.vaccine_service.deleteVaccine.bind(this.vaccine_service)
         )
-
-        const vaccine = await this.vaccine_service.deleteVaccine(
-            public_id,
-            is_permanent
-        )
-        return ApiResponse.ok(res, 'Vaccine deleted successfully', vaccine)
     }
 
     restoreVaccine = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Restore Vaccine')
-
-        const vaccine = await this.vaccine_service.restoreVaccine(public_id)
-        return ApiResponse.ok(res, 'Vaccine restored successfully', vaccine)
+        return handleRestoreRequest(
+            req,
+            res,
+            'Vaccine',
+            this.vaccine_service.restoreVaccine.bind(this.vaccine_service)
+        )
     }
 }

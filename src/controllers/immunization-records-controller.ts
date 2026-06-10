@@ -3,6 +3,11 @@ import { ImmunizationRecordService } from '@/services/immunization-records-servi
 import { ImmunizationRecordQueryFilters } from '@/repositories/immunization-records-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
+import {
+    handleDeleteRequest,
+    handleGetByIdRequest,
+    handleRestoreRequest
+} from '@/utils/controller-handlers'
 
 export class ImmunizationRecordController {
     constructor(
@@ -45,20 +50,13 @@ export class ImmunizationRecordController {
     }
 
     getImmunizationRecordById = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info(
-            { public_id },
-            'Incoming request: Get Immunization Record By ID'
-        )
-
-        const record =
-            await this.immunization_record_service.getImmunizationRecordById(
-                public_id
-            )
-        return ApiResponse.ok(
+        return handleGetByIdRequest(
+            req,
             res,
-            'Immunization Record retrieved successfully',
-            record
+            'ImmunizationRecord',
+            this.immunization_record_service.getImmunizationRecordById.bind(
+                this.immunization_record_service
+            )
         )
     }
 
@@ -82,40 +80,24 @@ export class ImmunizationRecordController {
     }
 
     deleteImmunizationRecord = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        const is_permanent = req.query.permanent === 'true'
-        logger.warn(
-            { public_id, is_permanent },
-            'Incoming request: Delete Immunization Record'
-        )
-
-        const record =
-            await this.immunization_record_service.deleteImmunizationRecord(
-                public_id,
-                is_permanent
-            )
-        return ApiResponse.ok(
+        return handleDeleteRequest(
+            req,
             res,
-            'Immunization Record deleted successfully',
-            record
+            'ImmunizationRecord',
+            this.immunization_record_service.deleteImmunizationRecord.bind(
+                this.immunization_record_service
+            )
         )
     }
 
     restoreImmunizationRecord = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info(
-            { public_id },
-            'Incoming request: Restore Immunization Record'
-        )
-
-        const record =
-            await this.immunization_record_service.restoreImmunizationRecord(
-                public_id
-            )
-        return ApiResponse.ok(
+        return handleRestoreRequest(
+            req,
             res,
-            'Immunization Record restored successfully',
-            record
+            'ImmunizationRecord',
+            this.immunization_record_service.restoreImmunizationRecord.bind(
+                this.immunization_record_service
+            )
         )
     }
 }

@@ -3,6 +3,11 @@ import { PosyanduService } from '@/services/posyandus-service'
 import { PosyanduQueryFilters } from '@/repositories/posyandus-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
+import {
+    handleDeleteRequest,
+    handleGetByIdRequest,
+    handleRestoreRequest
+} from '@/utils/controller-handlers'
 
 export class PosyanduController {
     constructor(private readonly posyandu_service: PosyanduService) {}
@@ -32,11 +37,12 @@ export class PosyanduController {
     }
 
     getPosyanduById = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Get Posyandu By ID')
-
-        const posyandu = await this.posyandu_service.getPosyanduById(public_id)
-        return ApiResponse.ok(res, 'Posyandu retrieved successfully', posyandu)
+        return handleGetByIdRequest(
+            req,
+            res,
+            'Posyandu',
+            this.posyandu_service.getPosyanduById.bind(this.posyandu_service)
+        )
     }
 
     updatePosyandu = async (req: Request, res: Response) => {
@@ -54,25 +60,20 @@ export class PosyanduController {
     }
 
     deletePosyandu = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        const is_permanent = req.query.permanent === 'true'
-        logger.warn(
-            { public_id, is_permanent },
-            'Incoming request: Delete Posyandu'
+        return handleDeleteRequest(
+            req,
+            res,
+            'Posyandu',
+            this.posyandu_service.deletePosyandu.bind(this.posyandu_service)
         )
-
-        const posyandu = await this.posyandu_service.deletePosyandu(
-            public_id,
-            is_permanent
-        )
-        return ApiResponse.ok(res, 'Posyandu deleted successfully', posyandu)
     }
 
     restorePosyandu = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Restore Posyandu')
-
-        const posyandu = await this.posyandu_service.restorePosyandu(public_id)
-        return ApiResponse.ok(res, 'Posyandu restored successfully', posyandu)
+        return handleRestoreRequest(
+            req,
+            res,
+            'Posyandu',
+            this.posyandu_service.restorePosyandu.bind(this.posyandu_service)
+        )
     }
 }

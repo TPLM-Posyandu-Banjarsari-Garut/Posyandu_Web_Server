@@ -3,6 +3,11 @@ import { HealthCenterService } from '@/services/health-centers-service'
 import { HealthCenterQueryFilters } from '@/repositories/health-centers-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
+import {
+    handleDeleteRequest,
+    handleGetByIdRequest,
+    handleRestoreRequest
+} from '@/utils/controller-handlers'
 
 export class HealthCenterController {
     constructor(private readonly health_center_service: HealthCenterService) {}
@@ -40,15 +45,13 @@ export class HealthCenterController {
     }
 
     getHealthCenterById = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Get Health Center By ID')
-
-        const health_center =
-            await this.health_center_service.getHealthCenterById(public_id)
-        return ApiResponse.ok(
+        return handleGetByIdRequest(
+            req,
             res,
-            'Health Center retrieved successfully',
-            health_center
+            'HealthCenter',
+            this.health_center_service.getHealthCenterById.bind(
+                this.health_center_service
+            )
         )
     }
 
@@ -72,35 +75,24 @@ export class HealthCenterController {
     }
 
     deleteHealthCenter = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        const is_permanent = req.query.permanent === 'true'
-        logger.warn(
-            { public_id, is_permanent },
-            'Incoming request: Delete Health Center'
-        )
-
-        const health_center =
-            await this.health_center_service.deleteHealthCenter(
-                public_id,
-                is_permanent
-            )
-        return ApiResponse.ok(
+        return handleDeleteRequest(
+            req,
             res,
-            'Health Center deleted successfully',
-            health_center
+            'HealthCenter',
+            this.health_center_service.deleteHealthCenter.bind(
+                this.health_center_service
+            )
         )
     }
 
     restoreHealthCenter = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Restore Health Center')
-
-        const health_center =
-            await this.health_center_service.restoreHealthCenter(public_id)
-        return ApiResponse.ok(
+        return handleRestoreRequest(
+            req,
             res,
-            'Health Center restored successfully',
-            health_center
+            'HealthCenter',
+            this.health_center_service.restoreHealthCenter.bind(
+                this.health_center_service
+            )
         )
     }
 }
