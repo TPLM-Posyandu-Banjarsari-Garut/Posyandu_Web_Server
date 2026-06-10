@@ -7,16 +7,14 @@ extendZodWithOpenApi(z)
 
 export const createMidwifeSchema = createInsertSchema(midwifes, {
     user_id: z
-        .number('User ID must be a number')
-        .int()
-        .positive()
-        .openapi({ example: 2 }),
+        .string()
+        .min(1, 'User ID is required')
+        .openapi({ example: 'user-id-uuid' }),
 
     posyandu_id: z
-        .number('Posyandu ID must be a number')
-        .int()
-        .positive()
-        .openapi({ example: 1 }),
+        .string()
+        .min(1, 'Posyandu ID is required')
+        .openapi({ example: 'posyandu-id-uuid' }),
 
     identity_number: z
         .string()
@@ -58,17 +56,12 @@ export const getMidwifesQuerySchema = z
             .transform(val => Number.parseInt(val, 10))
             .openapi({ type: 'string', default: '10', example: '10' }),
 
-        user_id: z
-            .string()
-            .optional()
-            .transform(val => (val ? Number.parseInt(val, 10) : undefined))
-            .openapi({ type: 'string', example: '2' }),
+        user_id: z.string().optional().openapi({ example: 'user-id-uuid' }),
 
         health_center_id: z
             .string()
             .optional()
-            .transform(val => (val ? Number.parseInt(val, 10) : undefined))
-            .openapi({ type: 'string', example: '1' }),
+            .openapi({ example: 'health-center-id-uuid' }),
 
         status: z.enum(accountStatusEnum.enumValues).optional(),
         search: z.string().optional(),

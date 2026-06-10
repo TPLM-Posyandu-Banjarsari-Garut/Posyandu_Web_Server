@@ -7,10 +7,9 @@ extendZodWithOpenApi(z)
 
 export const createChildSchema = createInsertSchema(childrens, {
     posyandu_id: z
-        .number('Posyandu ID must be a number')
-        .int()
-        .positive()
-        .openapi({ example: 1 }),
+        .string()
+        .min(1, 'Posyandu ID is required')
+        .openapi({ example: 'posyandu-id-uuid' }),
 
     name: z
         .string()
@@ -120,8 +119,7 @@ export const getChildrenQuerySchema = z
         posyandu_id: z
             .string()
             .optional()
-            .transform(val => (val ? Number.parseInt(val, 10) : undefined))
-            .openapi({ type: 'string', example: '1' }),
+            .openapi({ example: 'posyandu-id-uuid' }),
 
         gender: z.enum(genderEnum.enumValues).optional(),
         child_category: z.enum(childCategoryEnum.enumValues).optional(),

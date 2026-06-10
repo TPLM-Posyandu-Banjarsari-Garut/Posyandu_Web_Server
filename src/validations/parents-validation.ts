@@ -7,10 +7,9 @@ extendZodWithOpenApi(z)
 
 export const createParentSchema = createInsertSchema(parents, {
     user_id: z
-        .number('User ID must be a number')
-        .int()
-        .positive()
-        .openapi({ example: 4 }),
+        .string()
+        .min(1, 'User ID is required')
+        .openapi({ example: 'user-id-uuid' }),
 
     identity_number: z
         .string()
@@ -110,11 +109,7 @@ export const getParentsQuerySchema = z
             .transform(val => Number.parseInt(val, 10))
             .openapi({ type: 'string', default: '10', example: '10' }),
 
-        user_id: z
-            .string()
-            .optional()
-            .transform(val => (val ? Number.parseInt(val, 10) : undefined))
-            .openapi({ type: 'string', example: '4' }),
+        user_id: z.string().optional().openapi({ example: 'user-id-uuid' }),
 
         blood_type: z.enum(bloodTypeEnum.enumValues).optional(),
         status: z.enum(accountStatusEnum.enumValues).optional(),

@@ -7,16 +7,14 @@ extendZodWithOpenApi(z)
 
 export const createCadreSchema = createInsertSchema(cadres, {
     user_id: z
-        .number('User ID must be a number')
-        .int()
-        .positive()
-        .openapi({ example: 1 }),
+        .string()
+        .min(1, 'User ID is required')
+        .openapi({ example: 'user-id-uuid' }),
 
     posyandu_id: z
-        .number('Posyandu ID must be a number')
-        .int()
-        .positive()
-        .openapi({ example: 3 }),
+        .string()
+        .min(1, 'Posyandu ID is required')
+        .openapi({ example: 'posyandu-id-uuid' }),
 
     identity_number: z
         .string()
@@ -61,17 +59,12 @@ export const getCadresQuerySchema = z
             .transform(val => Number.parseInt(val, 10))
             .openapi({ type: 'string', default: '10', example: '10' }),
 
-        user_id: z
-            .string()
-            .optional()
-            .transform(val => (val ? Number.parseInt(val, 10) : undefined))
-            .openapi({ type: 'string', example: '1' }),
+        user_id: z.string().optional().openapi({ example: 'user-id-uuid' }),
 
         posyandu_id: z
             .string()
             .optional()
-            .transform(val => (val ? Number.parseInt(val, 10) : undefined))
-            .openapi({ type: 'string', example: '3' }),
+            .openapi({ example: 'posyandu-id-uuid' }),
 
         position: z.enum(cadrePositionEnum.enumValues).optional(),
         status: z.enum(accountStatusEnum.enumValues).optional(),

@@ -1,4 +1,4 @@
-import { accountStatusEnum, users } from '@/db'
+import { accountRoleEnum, accountStatusEnum, users } from '@/db'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
@@ -24,7 +24,7 @@ export const createUserSchema = createInsertSchema(users, {
         .nullable()
         .openapi({ example: '08123456789' }),
 
-    role: z.enum(['admin', 'midwife', 'cadre']).openapi({ example: 'cadre' }),
+    role: z.enum(accountRoleEnum.enumValues).openapi({ example: 'cadre' }),
 
     status: z.enum(accountStatusEnum.enumValues).default('active')
 })
@@ -59,7 +59,7 @@ export const getUsersQuerySchema = z
             .transform(val => Number.parseInt(val, 10))
             .openapi({ type: 'string', default: '10', example: '10' }),
 
-        role: z.enum(['admin', 'midwife', 'cadre']).optional(),
+        role: z.enum(accountRoleEnum.enumValues).optional(),
         status: z.enum(accountStatusEnum.enumValues).optional(),
         search: z.string().optional(),
         includeDeleted: z

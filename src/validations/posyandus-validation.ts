@@ -7,10 +7,9 @@ extendZodWithOpenApi(z)
 
 export const createPosyanduSchema = createInsertSchema(posyandus, {
     health_center_id: z
-        .number('Health Center ID must be a number')
-        .int()
-        .positive()
-        .openapi({ example: 1 }),
+        .string()
+        .min(1, 'Health Center ID is required')
+        .openapi({ example: 'health-center-id-uuid' }),
 
     name: z
         .string()
@@ -82,8 +81,7 @@ export const getPosyandusQuerySchema = z
         health_center_id: z
             .string()
             .optional()
-            .transform(val => (val ? Number.parseInt(val, 10) : undefined))
-            .openapi({ type: 'string', example: '1' }),
+            .openapi({ example: 'health-center-id-uuid' }),
 
         status: z.enum(accountStatusEnum.enumValues).optional(),
         search: z.string().optional(),
