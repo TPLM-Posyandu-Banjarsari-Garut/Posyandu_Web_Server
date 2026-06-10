@@ -23,7 +23,7 @@ export class AuthService {
                 password,
                 name,
                 image: avatar_url || undefined,
-                role,
+                role: role || 'parent',
                 status: 'active'
             }
         })
