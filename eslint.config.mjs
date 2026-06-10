@@ -21,7 +21,6 @@ export default [
             '@typescript-eslint/no-unused-vars': 'off',
             '@typescript-eslint/no-unused-expressions': 'off',
             'no-console': 'warn',
-            quotes: ['error', 'single'],
             'prettier/prettier': 'error'
         }
     }

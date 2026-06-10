@@ -20,6 +20,7 @@ import { registerEducationCategoriesRoutes } from '@/docs/education-categories-d
 import { registerEducationsRoutes } from '@/docs/educations-docs'
 
 import { registerAuthRoutes } from '@/docs/auth-docs'
+import env from '@/configs/env'
 
 export const registry = new OpenAPIRegistry()
 
@@ -70,7 +71,7 @@ export function generateOpenApiDocs() {
         },
         servers: [
             {
-                url: 'http://localhost:3000',
+                url: env.CORS_ORIGIN,
                 description: 'Development Server'
             }
         ]

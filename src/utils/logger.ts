@@ -2,7 +2,7 @@ import pino, { type LoggerOptions } from 'pino'
 import env from '@/configs/env'
 
 const { NODE_ENV, LOG_LEVEL } = env
-const isDev = NODE_ENV !== 'production'
+const isDev = NODE_ENV === 'development' && !process.env.VERCEL
 
 const devOptions: LoggerOptions = {
     level: LOG_LEVEL,

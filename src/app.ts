@@ -27,7 +27,32 @@ app.use(
         credentials: true
     })
 )
-app.use(helmet())
+app.use(
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
+                scriptSrcElem: [
+                    "'self'",
+                    "'unsafe-inline'",
+                    'https://unpkg.com'
+                ],
+                styleSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
+                styleSrcElem: [
+                    "'self'",
+                    "'unsafe-inline'",
+                    'https://unpkg.com'
+                ],
+                imgSrc: ["'self'", 'data:'],
+                connectSrc: ["'self'", 'https://unpkg.com'],
+                fontSrc: ["'self'"],
+                objectSrc: ["'none'"],
+                frameAncestors: ["'none'"]
+            }
+        }
+    })
+)
 app.use(cookieParser())
 
 morgan.token('user', (req: Request, res: Response) => {
@@ -50,7 +75,7 @@ app.all('/api/auth/*splat', toNodeHandler(auth))
 app.get('/favicon.ico', (req, res) => res.status(204).end())
 
 app.get('/', (req: Request, res: Response) => {
-    res.redirect('/api/docs')
+    res.redirect(env.NODE_ENV === 'development' ? '/api/docs' : '/api/health')
 })
 
 app.get('/api/auth/me', async (req, res) => {
