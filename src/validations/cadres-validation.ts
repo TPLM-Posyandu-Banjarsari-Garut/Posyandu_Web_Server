@@ -2,19 +2,18 @@ import { accountStatusEnum, cadrePositionEnum, cadres } from '@/db'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
+import {
+    relationIdSchema,
+    paginationQuerySchema,
+    deleteQuerySchema
+} from './shared-validation'
 
 extendZodWithOpenApi(z)
 
 export const createCadreSchema = createInsertSchema(cadres, {
-    user_id: z
-        .string()
-        .min(1, 'User ID is required')
-        .openapi({ example: 'user-id-uuid' }),
+    user_id: relationIdSchema('User ID'),
 
-    posyandu_id: z
-        .string()
-        .min(1, 'Posyandu ID is required')
-        .openapi({ example: 'posyandu-id-uuid' }),
+    posyandu_id: relationIdSchema('Posyandu ID'),
 
     identity_number: z
         .string()
@@ -45,19 +44,7 @@ export const createCadreSchema = createInsertSchema(cadres, {
 
 export const getCadresQuerySchema = z
     .object({
-        page: z
-            .string()
-            .optional()
-            .default('1')
-            .transform(val => Number.parseInt(val, 10))
-            .openapi({ type: 'string', default: '1', example: '1' }),
-
-        limit: z
-            .string()
-            .optional()
-            .default('10')
-            .transform(val => Number.parseInt(val, 10))
-            .openapi({ type: 'string', default: '10', example: '10' }),
+        ...paginationQuerySchema,
 
         user_id: z.string().optional().openapi({ example: 'user-id-uuid' }),
 
@@ -90,19 +77,7 @@ export const cadreParamsSchema = z
     })
     .openapi('CadreParams')
 
-export const deleteCadreQuerySchema = z
-    .object({
-        permanent: z
-            .string()
-            .optional()
-            .transform(val => val === 'true')
-            .openapi({
-                type: 'string',
-                enum: ['true', 'false'],
-                example: 'false'
-            })
-    })
-    .openapi('DeleteCadreQuery')
+export const deleteCadreQuerySchema = deleteQuerySchema
 
 export const updateCadreSchema = createCadreSchema
     .partial()
