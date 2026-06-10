@@ -15,7 +15,7 @@ export const registerMidwifesRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'post',
-        path: '/api/midwife',
+        path: '/api/midwifes',
         tags: MIDWIFE_TAG,
         summary: 'Create a new midwife [Roles: admin, midwife]',
         request: {
@@ -31,7 +31,7 @@ export const registerMidwifesRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'get',
-        path: '/api/midwife',
+        path: '/api/midwifes',
         tags: MIDWIFE_TAG,
         summary: 'Get list of midwife [Roles: admin, midwife]',
         request: { query: getMidwifesQuerySchema },
@@ -42,7 +42,7 @@ export const registerMidwifesRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'get',
-        path: '/api/midwife/{public_id}',
+        path: '/api/midwifes/{public_id}',
         tags: MIDWIFE_TAG,
         summary: 'Get midwife by public ID [Roles: admin, midwife]',
         request: { params: midwifeParamsSchema },
@@ -54,7 +54,7 @@ export const registerMidwifesRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'put',
-        path: '/api/midwife/{public_id}',
+        path: '/api/midwifes/{public_id}',
         tags: MIDWIFE_TAG,
         summary: 'Update midwife data [Roles: admin, midwife]',
         request: {
@@ -72,7 +72,7 @@ export const registerMidwifesRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'delete',
-        path: '/api/midwife/{public_id}',
+        path: '/api/midwifes/{public_id}',
         tags: MIDWIFE_TAG,
         summary: 'Delete midwife [Roles: admin, midwife]',
         request: {
@@ -87,7 +87,7 @@ export const registerMidwifesRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'post',
-        path: '/api/midwife/{public_id}/restore',
+        path: '/api/midwifes/{public_id}/restore',
         tags: MIDWIFE_TAG,
         summary: 'Restore soft-deleted midwife [Roles: admin, midwife]',
         request: { params: midwifeParamsSchema },
