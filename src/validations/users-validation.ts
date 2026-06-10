@@ -1,6 +1,11 @@
-import { accountStatusEnum, users } from '@/db'
+import { accountRoleEnum, accountStatusEnum, users } from '@/db'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
+import {
+    relationIdSchema,
+    paginationQuerySchema,
+    deleteQuerySchema
+} from './shared-validation'
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
 
 extendZodWithOpenApi(z)
@@ -24,7 +29,7 @@ export const createUserSchema = createInsertSchema(users, {
         .nullable()
         .openapi({ example: '08123456789' }),
 
-    role: z.enum(['admin', 'midwife', 'cadre']).openapi({ example: 'cadre' }),
+    role: z.enum(accountRoleEnum.enumValues).openapi({ example: 'cadre' }),
 
     status: z.enum(accountStatusEnum.enumValues).default('active')
 })
@@ -45,21 +50,9 @@ export const createUserSchema = createInsertSchema(users, {
 
 export const getUsersQuerySchema = z
     .object({
-        page: z
-            .string()
-            .optional()
-            .default('1')
-            .transform(val => Number.parseInt(val, 10))
-            .openapi({ type: 'string', default: '1', example: '1' }),
+        ...paginationQuerySchema,
 
-        limit: z
-            .string()
-            .optional()
-            .default('10')
-            .transform(val => Number.parseInt(val, 10))
-            .openapi({ type: 'string', default: '10', example: '10' }),
-
-        role: z.enum(['admin', 'midwife', 'cadre']).optional(),
+        role: z.enum(accountRoleEnum.enumValues).optional(),
         status: z.enum(accountStatusEnum.enumValues).optional(),
         search: z.string().optional(),
         includeDeleted: z

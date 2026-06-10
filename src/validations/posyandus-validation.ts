@@ -2,15 +2,16 @@ import { accountStatusEnum, posyandus } from '@/db'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
+import {
+    relationIdSchema,
+    paginationQuerySchema,
+    deleteQuerySchema
+} from './shared-validation'
 
 extendZodWithOpenApi(z)
 
 export const createPosyanduSchema = createInsertSchema(posyandus, {
-    health_center_id: z
-        .number('Health Center ID must be a number')
-        .int()
-        .positive()
-        .openapi({ example: 1 }),
+    health_center_id: relationIdSchema('Health Center ID'),
 
     name: z
         .string()
@@ -65,25 +66,12 @@ export const createPosyanduSchema = createInsertSchema(posyandus, {
 
 export const getPosyandusQuerySchema = z
     .object({
-        page: z
-            .string()
-            .optional()
-            .default('1')
-            .transform(val => Number.parseInt(val, 10))
-            .openapi({ type: 'string', default: '1', example: '1' }),
-
-        limit: z
-            .string()
-            .optional()
-            .default('10')
-            .transform(val => Number.parseInt(val, 10))
-            .openapi({ type: 'string', default: '10', example: '10' }),
+        ...paginationQuerySchema,
 
         health_center_id: z
             .string()
             .optional()
-            .transform(val => (val ? Number.parseInt(val, 10) : undefined))
-            .openapi({ type: 'string', example: '1' }),
+            .openapi({ example: 'health-center-id-uuid' }),
 
         status: z.enum(accountStatusEnum.enumValues).optional(),
         search: z.string().optional(),
@@ -108,19 +96,7 @@ export const posyanduParamsSchema = z
     })
     .openapi('PosyanduParams')
 
-export const deletePosyanduQuerySchema = z
-    .object({
-        permanent: z
-            .string()
-            .optional()
-            .transform(val => val === 'true')
-            .openapi({
-                type: 'string',
-                enum: ['true', 'false'],
-                example: 'false'
-            })
-    })
-    .openapi('DeletePosyanduQuery')
+export const deletePosyanduQuerySchema = deleteQuerySchema
 
 export const updatePosyanduSchema = createPosyanduSchema
     .partial()

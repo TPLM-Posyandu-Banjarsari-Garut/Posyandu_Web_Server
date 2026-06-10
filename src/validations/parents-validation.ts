@@ -2,15 +2,16 @@ import { accountStatusEnum, bloodTypeEnum, parents } from '@/db'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
+import {
+    relationIdSchema,
+    paginationQuerySchema,
+    deleteQuerySchema
+} from './shared-validation'
 
 extendZodWithOpenApi(z)
 
 export const createParentSchema = createInsertSchema(parents, {
-    user_id: z
-        .number('User ID must be a number')
-        .int()
-        .positive()
-        .openapi({ example: 4 }),
+    user_id: relationIdSchema('User ID'),
 
     identity_number: z
         .string()
@@ -96,25 +97,9 @@ export const createParentSchema = createInsertSchema(parents, {
 
 export const getParentsQuerySchema = z
     .object({
-        page: z
-            .string()
-            .optional()
-            .default('1')
-            .transform(val => Number.parseInt(val, 10))
-            .openapi({ type: 'string', default: '1', example: '1' }),
+        ...paginationQuerySchema,
 
-        limit: z
-            .string()
-            .optional()
-            .default('10')
-            .transform(val => Number.parseInt(val, 10))
-            .openapi({ type: 'string', default: '10', example: '10' }),
-
-        user_id: z
-            .string()
-            .optional()
-            .transform(val => (val ? Number.parseInt(val, 10) : undefined))
-            .openapi({ type: 'string', example: '4' }),
+        user_id: z.string().optional().openapi({ example: 'user-id-uuid' }),
 
         blood_type: z.enum(bloodTypeEnum.enumValues).optional(),
         status: z.enum(accountStatusEnum.enumValues).optional(),
@@ -140,19 +125,7 @@ export const parentParamsSchema = z
     })
     .openapi('ParentParams')
 
-export const deleteParentQuerySchema = z
-    .object({
-        permanent: z
-            .string()
-            .optional()
-            .transform(val => val === 'true')
-            .openapi({
-                type: 'string',
-                enum: ['true', 'false'],
-                example: 'false'
-            })
-    })
-    .openapi('DeleteParentQuery')
+export const deleteParentQuerySchema = deleteQuerySchema
 
 export const updateParentSchema = createParentSchema
     .partial()

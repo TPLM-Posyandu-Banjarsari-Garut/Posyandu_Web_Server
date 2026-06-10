@@ -1,6 +1,11 @@
 import { educations, statusEnum } from '@/db'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
+import {
+    relationIdSchema,
+    paginationQuerySchema,
+    deleteQuerySchema
+} from './shared-validation'
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
 
 extendZodWithOpenApi(z)
@@ -62,19 +67,7 @@ export const createEducationSchema = createInsertSchema(educations, {
 
 export const getEducationsQuerySchema = z
     .object({
-        page: z
-            .string()
-            .optional()
-            .default('1')
-            .transform(val => Number.parseInt(val, 10))
-            .openapi({ type: 'string', default: '1', example: '1' }),
-
-        limit: z
-            .string()
-            .optional()
-            .default('10')
-            .transform(val => Number.parseInt(val, 10))
-            .openapi({ type: 'string', default: '10', example: '10' }),
+        ...paginationQuerySchema,
 
         search: z.string().optional(),
         category_id: z.string().optional(),
