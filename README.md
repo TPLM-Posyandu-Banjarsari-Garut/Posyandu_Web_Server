@@ -151,6 +151,28 @@ Posyandu_Web_Server/
 
 ---
 
+## CI/CD Pipeline
+
+Proyek ini telah dikonfigurasi dengan alur kerja (*workflow*) GitHub Actions untuk mengotomatisasi integrasi dan pengujian kode secara kontinu (*Continuous Integration* & *Continuous Testing*):
+
+### 1. Continuous Integration (CI)
+Berkas konfigurasi: `.github/workflows/ci.yml`
+Berjalan otomatis pada setiap *Push* ke branch `main` dan *Pull Request* ke branch `main` & `dev`.
+Tahapan yang dilakukan:
+- **Instalasi Dependensi**: Mengunduh dan meng-cache modul dari `bun.lockb`.
+- **Typecheck**: Memastikan kode TypeScript bebas dari error tipe statik (`bun run typecheck`).
+- **Linting & Formatting**: Memvalidasi standar penulisan kode (`bun run lint:check` dan `bun run format:check`).
+- **Build**: Menguji kompilasi kode untuk memastikan tidak ada masalah saat _build_ rilis (`bun run build`).
+
+### 2. Continuous Testing (CT)
+Berkas konfigurasi: `.github/workflows/ct.yml`
+Berjalan otomatis bersamaan dengan alur CI untuk memastikan fungsionalitas logika program tetap berjalan baik.
+Tahapan yang dilakukan:
+- **Unit Testing dengan Coverage**: Menjalankan seluruh pengujian (tes) unit otomatis menggunakan Jest (`bun run test:coverage`).
+- **Laporan Otomatis (Artifacts)**: Mengunggah hasil dari laporan HTML pengujian (`jest-test-report`) dan *code coverage* (`jest-coverage-report`) yang dapat diunduh langsung dari menu *Artifacts* di halaman eksekusi GitHub Actions.
+
+---
+
 ## Daftar Route API
 
 Semua endpoint API didaftarkan menggunakan prefix `/api`. Berikut adalah daftar endpoint yang tersedia:
