@@ -3,6 +3,11 @@ import { ParentService } from '@/services/parents-service'
 import { ParentQueryFilters } from '@/repositories/parents-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
+import {
+    handleDeleteRequest,
+    handleGetByIdRequest,
+    handleRestoreRequest
+} from '@/utils/controller-handlers'
 
 export class ParentController {
     constructor(private readonly parent_service: ParentService) {}
@@ -25,11 +30,12 @@ export class ParentController {
     }
 
     getParentById = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Get Parent By ID')
-
-        const parent = await this.parent_service.getParentById(public_id)
-        return ApiResponse.ok(res, 'Parent retrieved successfully', parent)
+        return handleGetByIdRequest(
+            req,
+            res,
+            'Parent',
+            this.parent_service.getParentById.bind(this.parent_service)
+        )
     }
 
     updateParent = async (req: Request, res: Response) => {
@@ -47,25 +53,20 @@ export class ParentController {
     }
 
     deleteParent = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        const is_permanent = req.query.permanent === 'true'
-        logger.warn(
-            { public_id, is_permanent },
-            'Incoming request: Delete Parent'
+        return handleDeleteRequest(
+            req,
+            res,
+            'Parent',
+            this.parent_service.deleteParent.bind(this.parent_service)
         )
-
-        const parent = await this.parent_service.deleteParent(
-            public_id,
-            is_permanent
-        )
-        return ApiResponse.ok(res, 'Parent deleted successfully', parent)
     }
 
     restoreParent = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Restore Parent')
-
-        const parent = await this.parent_service.restoreParent(public_id)
-        return ApiResponse.ok(res, 'Parent restored successfully', parent)
+        return handleRestoreRequest(
+            req,
+            res,
+            'Parent',
+            this.parent_service.restoreParent.bind(this.parent_service)
+        )
     }
 }

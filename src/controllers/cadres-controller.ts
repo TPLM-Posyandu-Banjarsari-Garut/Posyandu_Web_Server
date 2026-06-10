@@ -3,6 +3,11 @@ import { CadreService } from '@/services/cadres-service'
 import { CadreQueryFilters } from '@/repositories/cadres-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
+import {
+    handleDeleteRequest,
+    handleGetByIdRequest,
+    handleRestoreRequest
+} from '@/utils/controller-handlers'
 
 export class CadreController {
     constructor(private readonly cadre_service: CadreService) {}
@@ -25,11 +30,12 @@ export class CadreController {
     }
 
     getCadreById = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Get Cadre By ID')
-
-        const cadre = await this.cadre_service.getCadreById(public_id)
-        return ApiResponse.ok(res, 'Cadre retrieved successfully', cadre)
+        return handleGetByIdRequest(
+            req,
+            res,
+            'Cadre',
+            this.cadre_service.getCadreById.bind(this.cadre_service)
+        )
     }
 
     updateCadre = async (req: Request, res: Response) => {
@@ -44,25 +50,20 @@ export class CadreController {
     }
 
     deleteCadre = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        const is_permanent = req.query.permanent === 'true'
-        logger.warn(
-            { public_id, is_permanent },
-            'Incoming request: Delete Cadre'
+        return handleDeleteRequest(
+            req,
+            res,
+            'Cadre',
+            this.cadre_service.deleteCadre.bind(this.cadre_service)
         )
-
-        const cadre = await this.cadre_service.deleteCadre(
-            public_id,
-            is_permanent
-        )
-        return ApiResponse.ok(res, 'Cadre deleted successfully', cadre)
     }
 
     restoreCadre = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Restore Cadre')
-
-        const cadre = await this.cadre_service.restoreCadre(public_id)
-        return ApiResponse.ok(res, 'Cadre restored successfully', cadre)
+        return handleRestoreRequest(
+            req,
+            res,
+            'Cadre',
+            this.cadre_service.restoreCadre.bind(this.cadre_service)
+        )
     }
 }

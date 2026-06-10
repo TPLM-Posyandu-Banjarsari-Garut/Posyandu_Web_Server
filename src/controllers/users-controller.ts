@@ -3,6 +3,11 @@ import { UserService } from '@/services/users-service'
 import { UserQueryFilters } from '@/repositories/user-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
+import {
+    handleDeleteRequest,
+    handleGetByIdRequest,
+    handleRestoreRequest
+} from '@/utils/controller-handlers'
 
 export class UserController {
     constructor(private readonly user_service: UserService) {}
@@ -25,11 +30,12 @@ export class UserController {
     }
 
     getUserById = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Get User By ID')
-
-        const user = await this.user_service.getUserById(public_id)
-        return ApiResponse.ok(res, 'User retrieved successfully', user)
+        return handleGetByIdRequest(
+            req,
+            res,
+            'User',
+            this.user_service.getUserById.bind(this.user_service)
+        )
     }
 
     updateUser = async (req: Request, res: Response) => {
@@ -44,22 +50,20 @@ export class UserController {
     }
 
     deleteUser = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        const is_permanent = req.query.permanent === 'true'
-        logger.warn(
-            { public_id, is_permanent },
-            'Incoming request: Delete User'
+        return handleDeleteRequest(
+            req,
+            res,
+            'User',
+            this.user_service.deleteUser.bind(this.user_service)
         )
-
-        const user = await this.user_service.deleteUser(public_id, is_permanent)
-        return ApiResponse.ok(res, 'User deleted successfully', user)
     }
 
     restoreUser = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Restore User')
-
-        const user = await this.user_service.restoreUser(public_id)
-        return ApiResponse.ok(res, 'User restored successfully', user)
+        return handleRestoreRequest(
+            req,
+            res,
+            'User',
+            this.user_service.restoreUser.bind(this.user_service)
+        )
     }
 }
