@@ -153,23 +153,27 @@ Posyandu_Web_Server/
 
 ## CI/CD Pipeline
 
-Proyek ini telah dikonfigurasi dengan alur kerja (*workflow*) GitHub Actions untuk mengotomatisasi integrasi dan pengujian kode secara kontinu (*Continuous Integration* & *Continuous Testing*):
+Proyek ini telah dikonfigurasi dengan alur kerja (_workflow_) GitHub Actions untuk mengotomatisasi integrasi dan pengujian kode secara kontinu (_Continuous Integration_ & _Continuous Testing_):
 
 ### 1. Continuous Integration (CI)
+
 Berkas konfigurasi: `.github/workflows/ci.yml`
-Berjalan otomatis pada setiap *Push* ke branch `main` dan *Pull Request* ke branch `main` & `dev`.
+Berjalan otomatis pada setiap _Push_ ke branch `main` dan _Pull Request_ ke branch `main` & `dev`.
 Tahapan yang dilakukan:
+
 - **Instalasi Dependensi**: Mengunduh dan meng-cache modul dari `bun.lockb`.
 - **Typecheck**: Memastikan kode TypeScript bebas dari error tipe statik (`bun run typecheck`).
 - **Linting & Formatting**: Memvalidasi standar penulisan kode (`bun run lint:check` dan `bun run format:check`).
 - **Build**: Menguji kompilasi kode untuk memastikan tidak ada masalah saat _build_ rilis (`bun run build`).
 
 ### 2. Continuous Testing (CT)
+
 Berkas konfigurasi: `.github/workflows/ct.yml`
 Berjalan otomatis bersamaan dengan alur CI untuk memastikan fungsionalitas logika program tetap berjalan baik.
 Tahapan yang dilakukan:
+
 - **Unit Testing dengan Coverage**: Menjalankan seluruh pengujian (tes) unit otomatis menggunakan Jest (`bun run test:coverage`).
-- **Laporan Otomatis (Artifacts)**: Mengunggah hasil dari laporan HTML pengujian (`jest-test-report`) dan *code coverage* (`jest-coverage-report`) yang dapat diunduh langsung dari menu *Artifacts* di halaman eksekusi GitHub Actions.
+- **Laporan Otomatis (Artifacts)**: Mengunggah hasil dari laporan HTML pengujian (`jest-test-report`) dan _code coverage_ (`jest-coverage-report`) yang dapat diunduh langsung dari menu _Artifacts_ di halaman eksekusi GitHub Actions.
 
 ---
 
