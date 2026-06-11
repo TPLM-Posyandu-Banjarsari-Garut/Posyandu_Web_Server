@@ -14,7 +14,7 @@ export const verifyAuth = async (
 ) => {
     try {
         const authHeader = req.headers.authorization
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        if (!authHeader?.startsWith('Bearer ')) {
             throw new Error('Unauthorized access: Bearer token is required')
         }
 
