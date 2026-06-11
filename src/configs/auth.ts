@@ -1,5 +1,6 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { bearer } from 'better-auth/plugins'
 import * as schema from '@/db'
 import db from '@/configs/db'
 import env from '@/configs/env'
@@ -17,6 +18,7 @@ export const auth = betterAuth({
             verification: schema.verifications
         }
     }),
+    plugins: [bearer()],
     emailAndPassword: {
         enabled: true,
         autoSignIn: true,
