@@ -1,5 +1,5 @@
 import { NewPosyandu, Posyandu, posyandus } from '@/db'
-import { and, eq, ilike, sql, SQL } from 'drizzle-orm'
+import { and, eq, ilike, sql, SQL, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface PosyanduQueryFilters {
@@ -9,6 +9,7 @@ export interface PosyanduQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class PosyanduRepository {
@@ -36,7 +37,8 @@ export class PosyanduRepository {
             status,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         let statusCondition = undefined
@@ -59,6 +61,11 @@ export class PosyanduRepository {
                 .select()
                 .from(posyandus)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(posyandus.created_at)
+                        : desc(posyandus.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db

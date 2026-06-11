@@ -1,5 +1,5 @@
 import { NewKipiDetail, KipiDetail, kipiDetails } from '@/db'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, sql, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface KipiDetailQueryFilters {
@@ -9,6 +9,7 @@ export interface KipiDetailQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class KipiDetailRepository {
@@ -29,7 +30,8 @@ export class KipiDetailRepository {
             referred,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         const conditions = []
@@ -59,6 +61,11 @@ export class KipiDetailRepository {
                 .select()
                 .from(kipiDetails)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(kipiDetails.created_at)
+                        : desc(kipiDetails.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db

@@ -1,5 +1,5 @@
 import { NewHealthCenter, HealthCenter, healthCenters } from '@/db'
-import { and, eq, ilike, sql, SQL } from 'drizzle-orm'
+import { and, eq, ilike, sql, SQL, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface HealthCenterQueryFilters {
@@ -8,6 +8,7 @@ export interface HealthCenterQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class HealthCenterRepository {
@@ -34,7 +35,8 @@ export class HealthCenterRepository {
             status,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         let statusCondition = undefined
@@ -54,6 +56,11 @@ export class HealthCenterRepository {
                 .select()
                 .from(healthCenters)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(healthCenters.created_at)
+                        : desc(healthCenters.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db

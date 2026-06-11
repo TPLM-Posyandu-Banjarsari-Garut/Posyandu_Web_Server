@@ -3,7 +3,7 @@ import {
     EducationCategory,
     educationCategories
 } from '@/db'
-import { and, eq, ilike, sql, or } from 'drizzle-orm'
+import { and, eq, ilike, sql, or, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface EducationCategoryQueryFilters {
@@ -12,6 +12,7 @@ export interface EducationCategoryQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class EducationCategoryRepository {
@@ -33,7 +34,8 @@ export class EducationCategoryRepository {
             status,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         const conditions = []
@@ -62,6 +64,11 @@ export class EducationCategoryRepository {
                 .select()
                 .from(educationCategories)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(educationCategories.created_at)
+                        : desc(educationCategories.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db

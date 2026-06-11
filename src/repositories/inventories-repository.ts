@@ -1,5 +1,5 @@
 import { NewInventory, Inventory, inventories } from '@/db'
-import { and, eq, ilike, sql } from 'drizzle-orm'
+import { and, eq, ilike, sql, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface InventoryQueryFilters {
@@ -10,6 +10,7 @@ export interface InventoryQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class InventoryRepository {
@@ -31,7 +32,8 @@ export class InventoryRepository {
             condition,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         const conditions = []
@@ -63,6 +65,11 @@ export class InventoryRepository {
                 .select()
                 .from(inventories)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(inventories.created_at)
+                        : desc(inventories.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db

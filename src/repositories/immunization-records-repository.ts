@@ -3,7 +3,7 @@ import {
     ImmunizationRecord,
     immunizationRecords
 } from '@/db'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, sql, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ImmunizationRecordQueryFilters {
@@ -16,6 +16,7 @@ export interface ImmunizationRecordQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class ImmunizationRecordRepository {
@@ -41,7 +42,8 @@ export class ImmunizationRecordRepository {
             status,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         const conditions = []
@@ -81,6 +83,11 @@ export class ImmunizationRecordRepository {
                 .select()
                 .from(immunizationRecords)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(immunizationRecords.created_at)
+                        : desc(immunizationRecords.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db
