@@ -1,5 +1,5 @@
 import { NewParent, Parent, parents } from '@/db'
-import { and, eq, ilike, or, sql, SQL } from 'drizzle-orm'
+import { and, eq, ilike, or, sql, SQL, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ParentQueryFilters {
@@ -10,6 +10,7 @@ export interface ParentQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class ParentRepository {
@@ -35,7 +36,8 @@ export class ParentRepository {
             status,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         let statusCondition = undefined
@@ -62,6 +64,11 @@ export class ParentRepository {
                 .select()
                 .from(parents)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(parents.created_at)
+                        : desc(parents.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db

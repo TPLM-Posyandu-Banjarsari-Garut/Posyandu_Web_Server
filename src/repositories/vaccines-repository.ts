@@ -1,5 +1,5 @@
 import { NewVaccine, Vaccine, vaccines } from '@/db'
-import { and, eq, ilike, sql } from 'drizzle-orm'
+import { and, eq, ilike, sql, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface VaccineQueryFilters {
@@ -8,6 +8,7 @@ export interface VaccineQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class VaccineRepository {
@@ -34,7 +35,8 @@ export class VaccineRepository {
             route,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         const conditions = []
@@ -58,6 +60,11 @@ export class VaccineRepository {
                 .select()
                 .from(vaccines)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(vaccines.created_at)
+                        : desc(vaccines.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db

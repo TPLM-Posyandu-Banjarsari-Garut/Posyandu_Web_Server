@@ -1,5 +1,5 @@
 import { NewMidwife, Midwife, midwifes } from '@/db'
-import { and, eq, ilike, or, sql, SQL } from 'drizzle-orm'
+import { and, eq, ilike, or, sql, SQL, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface MidwifeQueryFilters {
@@ -9,6 +9,7 @@ export interface MidwifeQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class MidwifeRepository {
@@ -36,7 +37,8 @@ export class MidwifeRepository {
             status,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         let statusCondition = undefined
@@ -62,6 +64,11 @@ export class MidwifeRepository {
                 .select()
                 .from(midwifes)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(midwifes.created_at)
+                        : desc(midwifes.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db

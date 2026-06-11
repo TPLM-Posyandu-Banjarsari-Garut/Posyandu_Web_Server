@@ -22,7 +22,18 @@ export const paginationQuerySchema = {
         .optional()
         .default('10')
         .transform(val => Number.parseInt(val, 10))
-        .openapi({ type: 'string', default: '10', example: '10' })
+        .openapi({ type: 'string', default: '10', example: '10' }),
+
+    order: z
+        .enum(['asc', 'desc'])
+        .optional()
+        .default('desc')
+        .openapi({
+            type: 'string',
+            enum: ['asc', 'desc'],
+            default: 'desc',
+            example: 'desc'
+        })
 }
 
 export const deleteQuerySchema = z

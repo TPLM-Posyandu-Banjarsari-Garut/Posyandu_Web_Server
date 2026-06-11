@@ -1,5 +1,5 @@
 import { NewVitamin, Vitamin, vitamins } from '@/db'
-import { and, eq, ilike, sql } from 'drizzle-orm'
+import { and, eq, ilike, sql, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface VitaminQueryFilters {
@@ -8,6 +8,7 @@ export interface VitaminQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class VitaminRepository {
@@ -34,7 +35,8 @@ export class VitaminRepository {
             capsule_color,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         const conditions = []
@@ -58,6 +60,11 @@ export class VitaminRepository {
                 .select()
                 .from(vitamins)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(vitamins.created_at)
+                        : desc(vitamins.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db

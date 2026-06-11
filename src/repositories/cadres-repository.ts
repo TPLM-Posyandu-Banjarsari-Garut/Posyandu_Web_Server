@@ -1,5 +1,5 @@
 import { NewCadre, Cadre, cadres } from '@/db'
-import { and, eq, ilike, or, sql, SQL } from 'drizzle-orm'
+import { and, eq, ilike, or, sql, SQL, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface CadreQueryFilters {
@@ -11,6 +11,7 @@ export interface CadreQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class CadreRepository {
@@ -37,7 +38,8 @@ export class CadreRepository {
             status,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         let statusCondition = undefined
@@ -65,6 +67,11 @@ export class CadreRepository {
                 .select()
                 .from(cadres)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(cadres.created_at)
+                        : desc(cadres.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db
