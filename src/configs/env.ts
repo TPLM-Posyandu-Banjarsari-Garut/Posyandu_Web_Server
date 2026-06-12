@@ -21,7 +21,11 @@ export const envSchema = z.object({
 
     GOOGLE_CLIENT_ID: z.string().min(1, 'GOOGLE_CLIENT_ID is required'),
 
-    GOOGLE_CLIENT_SECRET: z.string().min(1, 'GOOGLE_CLIENT_SECRET is required')
+    GOOGLE_CLIENT_SECRET: z.string().min(1, 'GOOGLE_CLIENT_SECRET is required'),
+
+    RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
+
+    SENDER_EMAIL: z.string().email('Invalid sender email format')
 })
 
 export type Env = z.infer<typeof envSchema>
