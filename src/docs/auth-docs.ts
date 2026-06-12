@@ -24,37 +24,90 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
 
     const AUTH_TAG = ['Authentication (Better Auth)']
 
-    registry.registerPath({
-        method: 'post',
-        path: '/api/auth/sign-up/email',
-        tags: AUTH_TAG,
-        summary: 'Register a new user',
-        request: {
-            body: {
-                content: { 'application/json': { schema: signUpSchema } }
+    const registerSimplePost = (
+        path: string,
+        summary: string,
+        schema: z.ZodTypeAny,
+        successDescription: string,
+        errorStatus: number = 400,
+        errorDescription: string = 'Bad Request'
+    ) => {
+        registry.registerPath({
+            method: 'post',
+            path,
+            tags: AUTH_TAG,
+            summary,
+            request: {
+                body: {
+                    content: {
+                        'application/json': { schema }
+                    }
+                }
+            },
+            responses: {
+                200: { description: successDescription },
+                [errorStatus]: { description: errorDescription }
             }
-        },
-        responses: {
-            200: { description: 'User registered successfully' },
-            400: { description: 'Bad Request' }
-        }
-    })
+        })
+    }
 
-    registry.registerPath({
-        method: 'post',
-        path: '/api/auth/sign-in/email',
-        tags: AUTH_TAG,
-        summary: 'Login using email and password',
-        request: {
-            body: {
-                content: { 'application/json': { schema: signInSchema } }
-            }
-        },
-        responses: {
-            200: { description: 'Login successful' },
-            401: { description: 'Unauthorized / Invalid credentials' }
-        }
-    })
+    registerSimplePost(
+        '/api/auth/sign-up/email',
+        'Register a new user',
+        signUpSchema,
+        'User registered successfully'
+    )
+
+    registerSimplePost(
+        '/api/auth/sign-in/email',
+        'Login using email and password',
+        signInSchema,
+        'Login successful',
+        401,
+        'Unauthorized / Invalid credentials'
+    )
+
+    registerSimplePost(
+        '/api/auth/email-otp/verify-email',
+        'Verify email address with OTP code',
+        verifyEmailOTPSchema,
+        'Verification successful'
+    )
+
+    registerSimplePost(
+        '/api/auth/email-otp/send-verification-otp',
+        'Resend email verification OTP code',
+        sendVerificationOTPSchema,
+        'OTP sent successfully'
+    )
+
+    registerSimplePost(
+        '/api/auth/email-otp/request-password-reset',
+        'Request a password reset OTP',
+        sendVerificationOTPSchema,
+        'Reset password OTP sent successfully'
+    )
+
+    registerSimplePost(
+        '/api/auth/email-otp/reset-password',
+        'Reset password using OTP code',
+        resetPasswordOTPSchema,
+        'Password reset successful'
+    )
+
+    registerSimplePost(
+        '/api/auth/forget-password',
+        'Request a password reset link',
+        forgetPasswordSchema,
+        'Reset link sent'
+    )
+
+    registerSimplePost(
+        '/api/auth/reset-password',
+        'Reset password using token',
+        resetPasswordSchema,
+        'Password reset successful'
+    )
 
     registry.registerPath({
         method: 'post',
@@ -81,78 +134,6 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'post',
-        path: '/api/auth/email-otp/verify-email',
-        tags: AUTH_TAG,
-        summary: 'Verify email address with OTP code',
-        request: {
-            body: {
-                content: {
-                    'application/json': { schema: verifyEmailOTPSchema }
-                }
-            }
-        },
-        responses: {
-            200: { description: 'Verification successful' },
-            400: { description: 'Bad Request' }
-        }
-    })
-
-    registry.registerPath({
-        method: 'post',
-        path: '/api/auth/email-otp/send-verification-otp',
-        tags: AUTH_TAG,
-        summary: 'Resend email verification OTP code',
-        request: {
-            body: {
-                content: {
-                    'application/json': { schema: sendVerificationOTPSchema }
-                }
-            }
-        },
-        responses: {
-            200: { description: 'OTP sent successfully' },
-            400: { description: 'Bad Request' }
-        }
-    })
-
-    registry.registerPath({
-        method: 'post',
-        path: '/api/auth/email-otp/request-password-reset',
-        tags: AUTH_TAG,
-        summary: 'Request a password reset OTP',
-        request: {
-            body: {
-                content: {
-                    'application/json': { schema: sendVerificationOTPSchema }
-                }
-            }
-        },
-        responses: {
-            200: { description: 'Reset password OTP sent successfully' },
-            400: { description: 'Bad Request' }
-        }
-    })
-
-    registry.registerPath({
-        method: 'post',
-        path: '/api/auth/email-otp/reset-password',
-        tags: AUTH_TAG,
-        summary: 'Reset password using OTP code',
-        request: {
-            body: {
-                content: {
-                    'application/json': { schema: resetPasswordOTPSchema }
-                }
-            }
-        },
-        responses: {
-            200: { description: 'Password reset successful' },
-            400: { description: 'Bad Request' }
-        }
-    })
-
-    registry.registerPath({
-        method: 'post',
         path: '/api/auth/sign-out',
         tags: AUTH_TAG,
         summary: 'Logout current session',
@@ -172,40 +153,6 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
         responses: {
             200: { description: 'Session retrieved' },
             401: { description: 'Unauthorized' }
-        }
-    })
-
-    registry.registerPath({
-        method: 'post',
-        path: '/api/auth/forget-password',
-        tags: AUTH_TAG,
-        summary: 'Request a password reset link',
-        request: {
-            body: {
-                content: {
-                    'application/json': { schema: forgetPasswordSchema }
-                }
-            }
-        },
-        responses: {
-            200: { description: 'Reset link sent' },
-            400: { description: 'Bad Request' }
-        }
-    })
-
-    registry.registerPath({
-        method: 'post',
-        path: '/api/auth/reset-password',
-        tags: AUTH_TAG,
-        summary: 'Reset password using token',
-        request: {
-            body: {
-                content: { 'application/json': { schema: resetPasswordSchema } }
-            }
-        },
-        responses: {
-            200: { description: 'Password reset successful' },
-            400: { description: 'Bad Request' }
         }
     })
 }
