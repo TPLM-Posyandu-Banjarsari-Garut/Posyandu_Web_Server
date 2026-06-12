@@ -23,6 +23,8 @@ export const auth = betterAuth({
         bearer(),
         emailOTP({
             sendVerificationOnSignUp: true,
+            storeOTP: 'encrypted',
+            overrideDefaultEmailVerification: true,
             async sendVerificationOTP({ email, otp, type }, request) {
                 await EmailService.sendVerificationOTP(email, otp, type)
             }

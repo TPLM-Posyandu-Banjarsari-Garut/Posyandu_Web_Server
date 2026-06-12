@@ -31,6 +31,22 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
         })
         .openapi('SendVerificationOTPInput')
 
+    const resetPasswordOTPSchema = z
+        .object({
+            email: z.string().email().openapi({ example: 'user@example.com' }),
+            otp: z.string().openapi({ example: '123456' }),
+            password: z
+                .string()
+                .min(8, 'Password must be at least 8 characters')
+                .max(100, 'Password cannot exceed 100 characters')
+                .regex(
+                    /^(?=.*[a-zA-Z])(?=.*\d).+$/,
+                    'Password must contain at least one letter and one number'
+                )
+                .openapi({ example: 'NewP@ssword123' })
+        })
+        .openapi('ResetPasswordOTPInput')
+
     registry.register('SignUpInput', signUpSchema)
     registry.register('SignInInput', signInSchema)
     registry.register('ForgetPasswordInput', forgetPasswordSchema)
@@ -38,6 +54,7 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
     registry.register('SignInSocialInput', signInSocialSchema)
     registry.register('VerifyEmailOTPInput', verifyEmailOTPSchema)
     registry.register('SendVerificationOTPInput', sendVerificationOTPSchema)
+    registry.register('ResetPasswordOTPInput', resetPasswordOTPSchema)
 
     const AUTH_TAG = ['Authentication (Better Auth)']
 
@@ -128,6 +145,42 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
         },
         responses: {
             200: { description: 'OTP sent successfully' },
+            400: { description: 'Bad Request' }
+        }
+    })
+
+    registry.registerPath({
+        method: 'post',
+        path: '/api/auth/email-otp/request-password-reset',
+        tags: AUTH_TAG,
+        summary: 'Request a password reset OTP',
+        request: {
+            body: {
+                content: {
+                    'application/json': { schema: sendVerificationOTPSchema }
+                }
+            }
+        },
+        responses: {
+            200: { description: 'Reset password OTP sent successfully' },
+            400: { description: 'Bad Request' }
+        }
+    })
+
+    registry.registerPath({
+        method: 'post',
+        path: '/api/auth/email-otp/reset-password',
+        tags: AUTH_TAG,
+        summary: 'Reset password using OTP code',
+        request: {
+            body: {
+                content: {
+                    'application/json': { schema: resetPasswordOTPSchema }
+                }
+            }
+        },
+        responses: {
+            200: { description: 'Password reset successful' },
             400: { description: 'Bad Request' }
         }
     })

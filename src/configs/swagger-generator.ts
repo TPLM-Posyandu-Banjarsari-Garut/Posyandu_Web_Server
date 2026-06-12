@@ -71,7 +71,7 @@ export function generateOpenApiDocs() {
         },
         servers: [
             {
-                url: env.CORS_ORIGIN,
+                url: env.BETTER_AUTH_URL,
                 description: 'Development Server'
             }
         ],
