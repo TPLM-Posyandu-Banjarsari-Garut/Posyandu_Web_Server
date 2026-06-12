@@ -26,7 +26,7 @@ export class EmailService {
             )
         } catch (error) {
             logger.error(
-                error as Error,
+                error,
                 `Failed to send email to ${to} [Subject: ${subject}]`
             )
             throw error
