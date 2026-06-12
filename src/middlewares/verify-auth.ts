@@ -21,9 +21,17 @@ export const verifyAuth = async (
         const webHeaders = new Headers()
         webHeaders.set('authorization', authHeader)
         const currentUser = await authService.verifyActiveSession(webHeaders)
+
+        if (!currentUser.email_verified) {
+            throw ApiError.forbidden('Email address must be verified')
+        }
+
         res.locals.user = currentUser
         next()
     } catch (error: unknown) {
+        if (error instanceof ApiError) {
+            return next(error)
+        }
         const errorMessage =
             error instanceof Error ? error.message : 'Unauthorized access'
         next(ApiError.unauthorized(errorMessage))
