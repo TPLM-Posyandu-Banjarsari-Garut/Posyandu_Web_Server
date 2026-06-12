@@ -84,6 +84,21 @@ export class EmailService {
     }
 
     /**
+     * 2.1 Forgot Password / Reset Password Request (Link)
+     */
+    static async sendResetPasswordLink(
+        email: string,
+        url: string
+    ): Promise<void> {
+        const html = emailTemplates.resetPasswordLink(email, url)
+        await this.sendMail(
+            email,
+            'Permintaan Reset Kata Sandi - Sampurasun Posyandu',
+            html
+        )
+    }
+
+    /**
      * 3. Password Successfully Changed
      */
     static async sendPasswordChangedNotification(email: string): Promise<void> {
