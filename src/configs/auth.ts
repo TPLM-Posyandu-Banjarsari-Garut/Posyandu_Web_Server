@@ -38,7 +38,15 @@ export const auth = betterAuth({
     },
     emailVerification: {
         autoSignInAfterVerification: false,
-        sendOnSignIn: true
+        sendOnSignIn: true,
+        sendVerificationEmail: async ({ user }, request) => {
+            await auth.api.sendVerificationOTP({
+                body: {
+                    email: user.email,
+                    type: 'email-verification'
+                }
+            })
+        }
     },
     socialProviders: {
         google: {
