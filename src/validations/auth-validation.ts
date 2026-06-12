@@ -91,7 +91,15 @@ export const verifyEmailOTPSchema = z
 
 export const sendVerificationOTPSchema = z
     .object({
-        email: z.string().email().openapi({ example: 'user@example.com' })
+        email: z.string().email().openapi({ example: 'user@example.com' }),
+        type: z
+            .enum([
+                'email-verification',
+                'sign-in',
+                'forget-password',
+                'change-email'
+            ])
+            .openapi({ example: 'email-verification' })
     })
     .openapi('SendVerificationOTPInput')
 
