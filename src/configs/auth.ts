@@ -37,7 +37,8 @@ export const auth = betterAuth({
         }
     },
     emailVerification: {
-        autoSignInAfterVerification: false
+        autoSignInAfterVerification: false,
+        sendOnSignIn: true
     },
     socialProviders: {
         google: {
