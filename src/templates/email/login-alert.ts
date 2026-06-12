@@ -1,4 +1,4 @@
-import { getBaseTemplate, escapeHtml } from './base-layout'
+import { getBaseTemplate, escapeHtml } from '@/templates/email/base-layout'
 
 export function loginAlert(
     email: string,

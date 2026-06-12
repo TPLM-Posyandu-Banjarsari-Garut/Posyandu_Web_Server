@@ -1,4 +1,4 @@
-import { getBaseTemplate } from './base-layout'
+import { getBaseTemplate } from '@/templates/email/base-layout'
 
 export function resetPasswordLink(email: string, url: string): string {
     const contentHtml = `

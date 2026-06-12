@@ -1,4 +1,4 @@
-import { getBaseTemplate } from './base-layout'
+import { getBaseTemplate } from '@/templates/email/base-layout'
 
 export function verificationOTP(otp: string): string {
     const contentHtml = `
