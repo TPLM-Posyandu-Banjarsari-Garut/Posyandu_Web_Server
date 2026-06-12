@@ -21,7 +21,7 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
     const verifyEmailOTPSchema = z
         .object({
             email: z.string().email().openapi({ example: 'user@example.com' }),
-            code: z.string().openapi({ example: '123456' })
+            otp: z.string().openapi({ example: '123456' })
         })
         .openapi('VerifyEmailOTPInput')
 
@@ -98,7 +98,7 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'post',
-        path: '/api/auth/verify-email',
+        path: '/api/auth/email-otp/verify-email',
         tags: AUTH_TAG,
         summary: 'Verify email address with OTP code',
         request: {
