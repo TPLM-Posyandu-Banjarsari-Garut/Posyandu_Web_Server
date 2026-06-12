@@ -27,6 +27,13 @@ export const auth = betterAuth({
             console.log(`Password reset link for ${user.email}: ${url}`)
         }
     },
+    socialProviders: {
+        google: {
+            prompt: 'select_account',
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET
+        }
+    },
     user: {
         fields: {
             image: 'avatar_url',
