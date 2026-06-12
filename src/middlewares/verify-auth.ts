@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express'
-import { fromNodeHeaders } from 'better-auth/node'
 import { AuthService } from '@/services/auth-service'
 import { UserRepository } from '@/repositories/user-repository'
 import db from '@/configs/db'
@@ -14,7 +13,13 @@ export const verifyAuth = async (
     next: NextFunction
 ) => {
     try {
-        const webHeaders = fromNodeHeaders(req.headers)
+        const authHeader = req.headers.authorization
+        if (!authHeader?.startsWith('Bearer ')) {
+            throw new Error('Unauthorized access: Bearer token is required')
+        }
+
+        const webHeaders = new Headers()
+        webHeaders.set('authorization', authHeader)
         const currentUser = await authService.verifyActiveSession(webHeaders)
         res.locals.user = currentUser
         next()

@@ -1,5 +1,5 @@
 import { NewUser, User, users } from '@/db'
-import { and, eq, ilike, or, sql, SQL } from 'drizzle-orm'
+import { and, eq, ilike, or, sql, SQL, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface UserQueryFilters {
@@ -9,6 +9,7 @@ export interface UserQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class UserRepository {
@@ -30,7 +31,8 @@ export class UserRepository {
             status,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         let statusCondition = undefined
@@ -56,6 +58,11 @@ export class UserRepository {
                 .select()
                 .from(users)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(users.created_at)
+                        : desc(users.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db

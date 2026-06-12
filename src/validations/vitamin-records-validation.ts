@@ -7,6 +7,11 @@ import {
 } from '@/db'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
+import {
+    relationIdSchema,
+    paginationQuerySchema,
+    deleteQuerySchema
+} from './shared-validation'
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
 
 extendZodWithOpenApi(z)
@@ -99,19 +104,7 @@ export const createVitaminRecordSchema = createInsertSchema(vitaminRecords, {
 
 export const getVitaminRecordsQuerySchema = z
     .object({
-        page: z
-            .string()
-            .optional()
-            .default('1')
-            .transform(val => Number.parseInt(val, 10))
-            .openapi({ type: 'string', default: '1', example: '1' }),
-
-        limit: z
-            .string()
-            .optional()
-            .default('10')
-            .transform(val => Number.parseInt(val, 10))
-            .openapi({ type: 'string', default: '10', example: '10' }),
+        ...paginationQuerySchema,
 
         children_id: z.string().optional(),
         vitamin_id: z.string().optional(),

@@ -3,6 +3,11 @@ import { VitaminRecordService } from '@/services/vitamin-records-service'
 import { VitaminRecordQueryFilters } from '@/repositories/vitamin-records-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
+import {
+    handleDeleteRequest,
+    handleGetByIdRequest,
+    handleRestoreRequest
+} from '@/utils/controller-handlers'
 
 export class VitaminRecordController {
     constructor(
@@ -44,15 +49,13 @@ export class VitaminRecordController {
     }
 
     getVitaminRecordById = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Get Vitamin Record By ID')
-
-        const record =
-            await this.vitamin_record_service.getVitaminRecordById(public_id)
-        return ApiResponse.ok(
+        return handleGetByIdRequest(
+            req,
             res,
-            'Vitamin Record retrieved successfully',
-            record
+            'VitaminRecord',
+            this.vitamin_record_service.getVitaminRecordById.bind(
+                this.vitamin_record_service
+            )
         )
     }
 
@@ -75,34 +78,24 @@ export class VitaminRecordController {
     }
 
     deleteVitaminRecord = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        const is_permanent = req.query.permanent === 'true'
-        logger.warn(
-            { public_id, is_permanent },
-            'Incoming request: Delete Vitamin Record'
-        )
-
-        const record = await this.vitamin_record_service.deleteVitaminRecord(
-            public_id,
-            is_permanent
-        )
-        return ApiResponse.ok(
+        return handleDeleteRequest(
+            req,
             res,
-            'Vitamin Record deleted successfully',
-            record
+            'VitaminRecord',
+            this.vitamin_record_service.deleteVitaminRecord.bind(
+                this.vitamin_record_service
+            )
         )
     }
 
     restoreVitaminRecord = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Restore Vitamin Record')
-
-        const record =
-            await this.vitamin_record_service.restoreVitaminRecord(public_id)
-        return ApiResponse.ok(
+        return handleRestoreRequest(
+            req,
             res,
-            'Vitamin Record restored successfully',
-            record
+            'VitaminRecord',
+            this.vitamin_record_service.restoreVitaminRecord.bind(
+                this.vitamin_record_service
+            )
         )
     }
 }

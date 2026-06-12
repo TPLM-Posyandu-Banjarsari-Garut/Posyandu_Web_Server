@@ -1,14 +1,16 @@
 import { NewParent, Parent, parents } from '@/db'
-import { and, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, eq, ilike, or, sql, SQL, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ParentQueryFilters {
     search?: string
     user_id?: string
     blood_type?: Parent['blood_type']
+    status?: Parent['status']
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class ParentRepository {
@@ -31,9 +33,19 @@ export class ParentRepository {
             search,
             user_id,
             blood_type,
+            status,
             page = 1,
-            limit = 10
+            limit = 10,
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
+
+        let statusCondition = undefined
+        if (status) {
+            statusCondition = eq(parents.status, status)
+        } else if (!includeDeleted) {
+            statusCondition = eq(parents.status, 'active')
+        }
 
         const whereClause = and(
             search
@@ -43,7 +55,8 @@ export class ParentRepository {
                   )
                 : undefined,
             user_id ? eq(parents.user_id, user_id) : undefined,
-            blood_type ? eq(parents.blood_type, blood_type) : undefined
+            blood_type ? eq(parents.blood_type, blood_type) : undefined,
+            statusCondition
         )
 
         const [data, countResult] = await Promise.all([
@@ -51,6 +64,11 @@ export class ParentRepository {
                 .select()
                 .from(parents)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(parents.created_at)
+                        : desc(parents.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db
@@ -66,12 +84,9 @@ export class ParentRepository {
     }
 
     async findById(public_id: string): Promise<Parent | undefined> {
-        const [parent] = await this.db
-            .select()
-            .from(parents)
-            .where(eq(parents.id, public_id))
-            .limit(1)
-        return parent
+        return this.findByCondition(
+            and(eq(parents.id, public_id), eq(parents.status, 'active'))
+        )
     }
 
     async findByUserId(user_id: string): Promise<Parent | undefined> {
@@ -105,16 +120,40 @@ export class ParentRepository {
             .returning()
         return parent
     }
+    private async findByCondition(
+        condition: SQL | undefined
+    ): Promise<Parent | undefined> {
+        const [row] = await this.db
+            .select()
+            .from(parents)
+            .where(condition)
+            .limit(1)
+        return row
+    }
 
-    async softDelete(public_id: string): Promise<Parent | undefined> {
-        const [parent] = await this.db
+    private async updateStatus(
+        public_id: string,
+        status: 'active' | 'inactive'
+    ): Promise<Parent | undefined> {
+        const [row] = await this.db
             .update(parents)
-            .set({
-                status: 'inactive'
-            })
+            .set({ status })
             .where(eq(parents.id, public_id))
             .returning()
-        return parent
+        return row
+    }
+
+    private async checkExists(condition: SQL | undefined): Promise<boolean> {
+        const [row] = await this.db
+            .select({ id: parents.id })
+            .from(parents)
+            .where(condition)
+            .limit(1)
+        return !!row
+    }
+
+    async softDelete(public_id: string): Promise<Parent | undefined> {
+        return this.updateStatus(public_id, 'inactive')
     }
 
     async hardDelete(public_id: string): Promise<Parent | undefined> {
@@ -126,14 +165,7 @@ export class ParentRepository {
     }
 
     async restore(public_id: string): Promise<Parent | undefined> {
-        const [parent] = await this.db
-            .update(parents)
-            .set({
-                status: 'active'
-            })
-            .where(eq(parents.id, public_id))
-            .returning()
-        return parent
+        return this.updateStatus(public_id, 'active')
     }
 
     async existsByIdentityNumber(identity_number: string): Promise<boolean> {

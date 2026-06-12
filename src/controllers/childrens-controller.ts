@@ -3,6 +3,11 @@ import { ChildrenService } from '@/services/childrens-service'
 import { ChildrenQueryFilters } from '@/repositories/childrens-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
+import {
+    handleDeleteRequest,
+    handleGetByIdRequest,
+    handleRestoreRequest
+} from '@/utils/controller-handlers'
 
 export class ChildrenController {
     constructor(private readonly children_service: ChildrenService) {}
@@ -47,22 +52,16 @@ export class ChildrenController {
 
     getChildrenById = async (req: Request, res: Response) => {
         const user = res.locals.user
-        const public_id = req.params.public_id as string
 
-        logger.info(
-            { userId: user?.id, public_id },
-            'Incoming request: Get Children By ID'
-        )
-
-        if (user?.role === 'parent') {
-            await this.children_service.verifyParentAccess(
-                public_id,
-                user.parent_id
-            )
-        }
-
-        const child = await this.children_service.getChildrenById(public_id)
-        return ApiResponse.ok(res, 'Children retrieved successfully', child)
+        return handleGetByIdRequest(req, res, 'Children', async public_id => {
+            if (user?.role === 'parent') {
+                await this.children_service.verifyParentAccess(
+                    public_id,
+                    user.parent_id
+                )
+            }
+            return this.children_service.getChildrenById(public_id)
+        })
     }
 
     updateChildren = async (req: Request, res: Response) => {
@@ -90,33 +89,32 @@ export class ChildrenController {
 
     deleteChildren = async (req: Request, res: Response) => {
         const user = res.locals.user
-        const public_id = req.params.public_id as string
-        const is_permanent = req.query.permanent === 'true'
 
-        logger.warn(
-            { userId: user?.id, public_id, is_permanent },
-            'Incoming request: Delete Children'
+        return handleDeleteRequest(
+            req,
+            res,
+            'Children',
+            async (public_id, is_permanent) => {
+                if (user?.role === 'parent') {
+                    await this.children_service.verifyParentAccess(
+                        public_id,
+                        user.parent_id
+                    )
+                }
+                return this.children_service.deleteChildren(
+                    public_id,
+                    is_permanent
+                )
+            }
         )
-
-        if (user?.role === 'parent') {
-            await this.children_service.verifyParentAccess(
-                public_id,
-                user.parent_id
-            )
-        }
-
-        const child = await this.children_service.deleteChildren(
-            public_id,
-            is_permanent
-        )
-        return ApiResponse.ok(res, 'Children deleted successfully', child)
     }
 
     restoreChildren = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Restore Children')
-
-        const child = await this.children_service.restoreChildren(public_id)
-        return ApiResponse.ok(res, 'Children restored successfully', child)
+        return handleRestoreRequest(
+            req,
+            res,
+            'Children',
+            this.children_service.restoreChildren.bind(this.children_service)
+        )
     }
 }

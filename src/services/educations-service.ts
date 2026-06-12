@@ -1,3 +1,4 @@
+import { createPaginationMeta } from '@/utils/pagination'
 import { NewEducation, Education } from '@/db'
 import {
     EducationRepository,
@@ -30,12 +31,7 @@ export class EducationService {
 
         return {
             data,
-            meta: {
-                page,
-                limit,
-                total_items: totalItems,
-                total_pages: Math.ceil(totalItems / limit)
-            }
+            meta: createPaginationMeta(page, limit, totalItems)
         }
     }
 

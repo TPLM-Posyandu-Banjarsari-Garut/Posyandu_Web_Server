@@ -34,7 +34,8 @@ export const setupSwagger = (app: Express): void => {
                     SwaggerUIStandalonePreset
                 ],
                 layout: 'StandaloneLayout',
-                validatorUrl: null
+                validatorUrl: null,
+                persistAuthorization: true
             });
         };
     </script>

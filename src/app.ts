@@ -17,6 +17,8 @@ sourceMapSupport.install()
 
 const app: Express = express()
 
+app.set('trust proxy', 1)
+
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(
@@ -71,12 +73,6 @@ app.use(autoAuditMiddleware)
 setupSwagger(app)
 
 app.use('/api/auth', authRateLimiter)
-app.all('/api/auth/*splat', toNodeHandler(auth))
-app.get('/favicon.ico', (req, res) => res.status(204).end())
-
-app.get('/', (req: Request, res: Response) => {
-    res.redirect(env.NODE_ENV === 'development' ? '/api/docs' : '/api/health')
-})
 
 app.get('/api/auth/me', async (req, res) => {
     const session = await auth.api.getSession({
@@ -88,6 +84,13 @@ app.get('/api/auth/me', async (req, res) => {
     }
 
     res.json({ user: session.user })
+})
+
+app.all('/api/auth/*splat', toNodeHandler(auth))
+app.get('/favicon.ico', (req, res) => res.status(204).end())
+
+app.get('/', (req: Request, res: Response) => {
+    res.redirect(env.NODE_ENV === 'development' ? '/api/docs' : '/api/health')
 })
 
 app.use(apiRoutes)

@@ -2,21 +2,18 @@ import { accountStatusEnum, cadrePositionEnum, cadres } from '@/db'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
+import {
+    relationIdSchema,
+    paginationQuerySchema,
+    deleteQuerySchema
+} from './shared-validation'
 
 extendZodWithOpenApi(z)
 
 export const createCadreSchema = createInsertSchema(cadres, {
-    user_id: z
-        .number('User ID must be a number')
-        .int()
-        .positive()
-        .openapi({ example: 1 }),
+    user_id: relationIdSchema('User ID'),
 
-    posyandu_id: z
-        .number('Posyandu ID must be a number')
-        .int()
-        .positive()
-        .openapi({ example: 3 }),
+    posyandu_id: relationIdSchema('Posyandu ID'),
 
     identity_number: z
         .string()
@@ -47,31 +44,14 @@ export const createCadreSchema = createInsertSchema(cadres, {
 
 export const getCadresQuerySchema = z
     .object({
-        page: z
-            .string()
-            .optional()
-            .default('1')
-            .transform(val => Number.parseInt(val, 10))
-            .openapi({ type: 'string', default: '1', example: '1' }),
+        ...paginationQuerySchema,
 
-        limit: z
-            .string()
-            .optional()
-            .default('10')
-            .transform(val => Number.parseInt(val, 10))
-            .openapi({ type: 'string', default: '10', example: '10' }),
-
-        user_id: z
-            .string()
-            .optional()
-            .transform(val => (val ? Number.parseInt(val, 10) : undefined))
-            .openapi({ type: 'string', example: '1' }),
+        user_id: z.string().optional().openapi({ example: 'user-id-uuid' }),
 
         posyandu_id: z
             .string()
             .optional()
-            .transform(val => (val ? Number.parseInt(val, 10) : undefined))
-            .openapi({ type: 'string', example: '3' }),
+            .openapi({ example: 'posyandu-id-uuid' }),
 
         position: z.enum(cadrePositionEnum.enumValues).optional(),
         status: z.enum(accountStatusEnum.enumValues).optional(),
@@ -97,19 +77,7 @@ export const cadreParamsSchema = z
     })
     .openapi('CadreParams')
 
-export const deleteCadreQuerySchema = z
-    .object({
-        permanent: z
-            .string()
-            .optional()
-            .transform(val => val === 'true')
-            .openapi({
-                type: 'string',
-                enum: ['true', 'false'],
-                example: 'false'
-            })
-    })
-    .openapi('DeleteCadreQuery')
+export const deleteCadreQuerySchema = deleteQuerySchema
 
 export const updateCadreSchema = createCadreSchema
     .partial()

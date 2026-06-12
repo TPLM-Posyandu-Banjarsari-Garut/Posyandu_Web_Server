@@ -1,5 +1,5 @@
 import { NewEducation, Education, educations } from '@/db'
-import { and, eq, ilike, sql, or } from 'drizzle-orm'
+import { and, eq, ilike, sql, or, SQL, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface EducationQueryFilters {
@@ -10,6 +10,7 @@ export interface EducationQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class EducationRepository {
@@ -31,7 +32,8 @@ export class EducationRepository {
             status,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         const conditions = []
@@ -69,6 +71,11 @@ export class EducationRepository {
                 .select()
                 .from(educations)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(educations.created_at)
+                        : desc(educations.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db
@@ -84,17 +91,9 @@ export class EducationRepository {
     }
 
     async findById(public_id: string): Promise<Education | undefined> {
-        const [education] = await this.db
-            .select()
-            .from(educations)
-            .where(
-                and(
-                    eq(educations.id, public_id),
-                    sql`${educations.deleted_at} IS NULL`
-                )
-            )
-            .limit(1)
-        return education
+        return this.findByCondition(
+            and(eq(educations.id, public_id), eq(educations.status, 'active'))
+        )
     }
 
     async incrementViews(public_id: string): Promise<Education | undefined> {
@@ -119,16 +118,40 @@ export class EducationRepository {
             .returning()
         return education
     }
+    private async findByCondition(
+        condition: SQL | undefined
+    ): Promise<Education | undefined> {
+        const [row] = await this.db
+            .select()
+            .from(educations)
+            .where(condition)
+            .limit(1)
+        return row
+    }
 
-    async softDelete(public_id: string): Promise<Education | undefined> {
-        const [education] = await this.db
+    private async updateStatus(
+        public_id: string,
+        status: 'active' | 'inactive'
+    ): Promise<Education | undefined> {
+        const [row] = await this.db
             .update(educations)
-            .set({
-                deleted_at: new Date()
-            })
+            .set({ status })
             .where(eq(educations.id, public_id))
             .returning()
-        return education
+        return row
+    }
+
+    private async checkExists(condition: SQL | undefined): Promise<boolean> {
+        const [row] = await this.db
+            .select({ id: educations.id })
+            .from(educations)
+            .where(condition)
+            .limit(1)
+        return !!row
+    }
+
+    async softDelete(public_id: string): Promise<Education | undefined> {
+        return this.updateStatus(public_id, 'inactive')
     }
 
     async hardDelete(public_id: string): Promise<Education | undefined> {
@@ -140,13 +163,6 @@ export class EducationRepository {
     }
 
     async restore(public_id: string): Promise<Education | undefined> {
-        const [education] = await this.db
-            .update(educations)
-            .set({
-                deleted_at: null
-            })
-            .where(eq(educations.id, public_id))
-            .returning()
-        return education
+        return this.updateStatus(public_id, 'active')
     }
 }

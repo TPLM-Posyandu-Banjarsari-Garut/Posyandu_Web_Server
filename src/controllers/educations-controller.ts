@@ -3,6 +3,10 @@ import { EducationService } from '@/services/educations-service'
 import { EducationQueryFilters } from '@/repositories/educations-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
+import {
+    handleDeleteRequest,
+    handleRestoreRequest
+} from '@/utils/controller-handlers'
 
 export class EducationController {
     constructor(private readonly educationService: EducationService) {}
@@ -62,26 +66,20 @@ export class EducationController {
     }
 
     deleteEducation = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        const isPermanent = req.query.permanent === 'true'
-        logger.warn(
-            { public_id, isPermanent },
-            'Incoming request: Delete Education'
+        return handleDeleteRequest(
+            req,
+            res,
+            'Education',
+            this.educationService.deleteEducation.bind(this.educationService)
         )
-
-        const education = await this.educationService.deleteEducation(
-            public_id,
-            isPermanent
-        )
-        return ApiResponse.ok(res, 'Education deleted successfully', education)
     }
 
     restoreEducation = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Restore Education')
-
-        const education =
-            await this.educationService.restoreEducation(public_id)
-        return ApiResponse.ok(res, 'Education restored successfully', education)
+        return handleRestoreRequest(
+            req,
+            res,
+            'Education',
+            this.educationService.restoreEducation.bind(this.educationService)
+        )
     }
 }

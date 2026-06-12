@@ -1,3 +1,4 @@
+import { createPaginationMeta } from '@/utils/pagination'
 import { NewImmunizationRecord, ImmunizationRecord } from '@/db'
 import {
     ImmunizationRecordRepository,
@@ -38,12 +39,7 @@ export class ImmunizationRecordService {
 
         return {
             data,
-            meta: {
-                page,
-                limit,
-                total_items: totalItems,
-                total_pages: Math.ceil(totalItems / limit)
-            }
+            meta: createPaginationMeta(page, limit, totalItems)
         }
     }
 

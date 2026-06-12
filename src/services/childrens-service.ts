@@ -1,3 +1,4 @@
+import { createPaginationMeta } from '@/utils/pagination'
 import { NewChildren, Children } from '@/db'
 import {
     ChildrenRepository,
@@ -26,12 +27,7 @@ export class ChildrenService {
 
         return {
             data,
-            meta: {
-                page,
-                limit,
-                total_items: totalItems,
-                total_pages: Math.ceil(totalItems / limit)
-            }
+            meta: createPaginationMeta(page, limit, totalItems)
         }
     }
 

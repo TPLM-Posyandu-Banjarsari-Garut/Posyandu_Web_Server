@@ -1,5 +1,5 @@
 import { NewHealthCenter, HealthCenter, healthCenters } from '@/db'
-import { and, eq, ilike, sql } from 'drizzle-orm'
+import { and, eq, ilike, sql, SQL, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface HealthCenterQueryFilters {
@@ -8,6 +8,7 @@ export interface HealthCenterQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class HealthCenterRepository {
@@ -34,7 +35,8 @@ export class HealthCenterRepository {
             status,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         let statusCondition = undefined
@@ -54,6 +56,11 @@ export class HealthCenterRepository {
                 .select()
                 .from(healthCenters)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(healthCenters.created_at)
+                        : desc(healthCenters.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db
@@ -69,17 +76,12 @@ export class HealthCenterRepository {
     }
 
     async findById(public_id: string): Promise<HealthCenter | undefined> {
-        const [health_center] = await this.db
-            .select()
-            .from(healthCenters)
-            .where(
-                and(
-                    eq(healthCenters.id, public_id),
-                    eq(healthCenters.status, 'active')
-                )
+        return this.findByCondition(
+            and(
+                eq(healthCenters.id, public_id),
+                eq(healthCenters.status, 'active')
             )
-            .limit(1)
-        return health_center
+        )
     }
 
     async update(
@@ -93,16 +95,40 @@ export class HealthCenterRepository {
             .returning()
         return health_center
     }
+    private async findByCondition(
+        condition: SQL | undefined
+    ): Promise<HealthCenter | undefined> {
+        const [row] = await this.db
+            .select()
+            .from(healthCenters)
+            .where(condition)
+            .limit(1)
+        return row
+    }
 
-    async softDelete(public_id: string): Promise<HealthCenter | undefined> {
-        const [health_center] = await this.db
+    private async updateStatus(
+        public_id: string,
+        status: 'active' | 'inactive'
+    ): Promise<HealthCenter | undefined> {
+        const [row] = await this.db
             .update(healthCenters)
-            .set({
-                status: 'inactive'
-            })
+            .set({ status })
             .where(eq(healthCenters.id, public_id))
             .returning()
-        return health_center
+        return row
+    }
+
+    private async checkExists(condition: SQL | undefined): Promise<boolean> {
+        const [row] = await this.db
+            .select({ id: healthCenters.id })
+            .from(healthCenters)
+            .where(condition)
+            .limit(1)
+        return !!row
+    }
+
+    async softDelete(public_id: string): Promise<HealthCenter | undefined> {
+        return this.updateStatus(public_id, 'inactive')
     }
 
     async hardDelete(public_id: string): Promise<HealthCenter | undefined> {
@@ -114,14 +140,7 @@ export class HealthCenterRepository {
     }
 
     async restore(public_id: string): Promise<HealthCenter | undefined> {
-        const [health_center] = await this.db
-            .update(healthCenters)
-            .set({
-                status: 'active'
-            })
-            .where(eq(healthCenters.id, public_id))
-            .returning()
-        return health_center
+        return this.updateStatus(public_id, 'active')
     }
 
     async existsByName(name: string): Promise<boolean> {

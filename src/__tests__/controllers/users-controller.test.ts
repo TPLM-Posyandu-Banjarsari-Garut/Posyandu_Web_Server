@@ -29,7 +29,7 @@ describe('UserController Unit Tests', () => {
         id: 'user-123',
         name: 'Budi Santoso',
         email: 'budi.santoso@example.com',
-        emailVerified: false,
+        email_verified: false,
         phone_number: '081234567890',
         avatar_url: null,
         role: 'parent',

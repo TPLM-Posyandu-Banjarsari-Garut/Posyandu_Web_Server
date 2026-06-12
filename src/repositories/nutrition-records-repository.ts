@@ -1,5 +1,5 @@
 import { NewNutritionRecord, NutritionRecord, nutritionRecords } from '@/db'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, sql, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface NutritionRecordQueryFilters {
@@ -10,6 +10,7 @@ export interface NutritionRecordQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class NutritionRecordRepository {
@@ -31,7 +32,8 @@ export class NutritionRecordRepository {
             nutrition_status,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         const conditions = []
@@ -65,6 +67,11 @@ export class NutritionRecordRepository {
                 .select()
                 .from(nutritionRecords)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(nutritionRecords.created_at)
+                        : desc(nutritionRecords.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db

@@ -3,6 +3,11 @@ import { KipiDetailService } from '@/services/kipi-details-service'
 import { KipiDetailQueryFilters } from '@/repositories/kipi-details-repository'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
+import {
+    handleDeleteRequest,
+    handleGetByIdRequest,
+    handleRestoreRequest
+} from '@/utils/controller-handlers'
 
 export class KipiDetailController {
     constructor(private readonly kipi_detail_service: KipiDetailService) {}
@@ -33,11 +38,14 @@ export class KipiDetailController {
     }
 
     getKipiDetailById = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Get KIPI Detail By ID')
-
-        const kipi = await this.kipi_detail_service.getKipiDetailById(public_id)
-        return ApiResponse.ok(res, 'KIPI Detail retrieved successfully', kipi)
+        return handleGetByIdRequest(
+            req,
+            res,
+            'Kipi',
+            this.kipi_detail_service.getKipiDetailById.bind(
+                this.kipi_detail_service
+            )
+        )
     }
 
     updateKipiDetail = async (req: Request, res: Response) => {
@@ -55,25 +63,24 @@ export class KipiDetailController {
     }
 
     deleteKipiDetail = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        const is_permanent = req.query.permanent === 'true'
-        logger.warn(
-            { public_id, is_permanent },
-            'Incoming request: Delete KIPI Detail'
+        return handleDeleteRequest(
+            req,
+            res,
+            'Kipi',
+            this.kipi_detail_service.deleteKipiDetail.bind(
+                this.kipi_detail_service
+            )
         )
-
-        const kipi = await this.kipi_detail_service.deleteKipiDetail(
-            public_id,
-            is_permanent
-        )
-        return ApiResponse.ok(res, 'KIPI Detail deleted successfully', kipi)
     }
 
     restoreKipiDetail = async (req: Request, res: Response) => {
-        const public_id = req.params.public_id as string
-        logger.info({ public_id }, 'Incoming request: Restore KIPI Detail')
-
-        const kipi = await this.kipi_detail_service.restoreKipiDetail(public_id)
-        return ApiResponse.ok(res, 'KIPI Detail restored successfully', kipi)
+        return handleRestoreRequest(
+            req,
+            res,
+            'Kipi',
+            this.kipi_detail_service.restoreKipiDetail.bind(
+                this.kipi_detail_service
+            )
+        )
     }
 }

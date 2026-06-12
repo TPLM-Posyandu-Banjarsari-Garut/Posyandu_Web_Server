@@ -1,3 +1,4 @@
+import { createPaginationMeta } from '@/utils/pagination'
 import { NewVitaminRecord, VitaminRecord } from '@/db'
 import {
     VitaminRecordRepository,
@@ -36,12 +37,7 @@ export class VitaminRecordService {
 
         return {
             data,
-            meta: {
-                page,
-                limit,
-                total_items: totalItems,
-                total_pages: Math.ceil(totalItems / limit)
-            }
+            meta: createPaginationMeta(page, limit, totalItems)
         }
     }
 

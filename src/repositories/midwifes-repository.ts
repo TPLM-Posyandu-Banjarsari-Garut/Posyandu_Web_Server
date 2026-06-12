@@ -1,15 +1,15 @@
 import { NewMidwife, Midwife, midwifes } from '@/db'
-import { and, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, eq, ilike, or, sql, SQL, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface MidwifeQueryFilters {
     search?: string
-    user_id?: string
     str_number?: string
     status?: Midwife['status']
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class MidwifeRepository {
@@ -33,12 +33,12 @@ export class MidwifeRepository {
     async getMidwifes(filters?: MidwifeQueryFilters) {
         const {
             search,
-            user_id,
             str_number,
             status,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         let statusCondition = undefined
@@ -55,7 +55,6 @@ export class MidwifeRepository {
                       ilike(midwifes.license_number, `%${search}%`)
                   )
                 : undefined,
-            user_id ? eq(midwifes.user_id, user_id) : undefined,
             str_number ? eq(midwifes.license_number, str_number) : undefined,
             statusCondition
         )
@@ -65,6 +64,11 @@ export class MidwifeRepository {
                 .select()
                 .from(midwifes)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(midwifes.created_at)
+                        : desc(midwifes.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db
@@ -80,14 +84,9 @@ export class MidwifeRepository {
     }
 
     async findById(public_id: string): Promise<Midwife | undefined> {
-        const [midwife] = await this.db
-            .select()
-            .from(midwifes)
-            .where(
-                and(eq(midwifes.id, public_id), eq(midwifes.status, 'active'))
-            )
-            .limit(1)
-        return midwife
+        return this.findByCondition(
+            and(eq(midwifes.id, public_id), eq(midwifes.status, 'active'))
+        )
     }
 
     async findByUserId(user_id: string): Promise<Midwife | undefined> {
@@ -131,16 +130,40 @@ export class MidwifeRepository {
             .returning()
         return midwife
     }
+    private async findByCondition(
+        condition: SQL | undefined
+    ): Promise<Midwife | undefined> {
+        const [row] = await this.db
+            .select()
+            .from(midwifes)
+            .where(condition)
+            .limit(1)
+        return row
+    }
 
-    async softDelete(public_id: string): Promise<Midwife | undefined> {
-        const [midwife] = await this.db
+    private async updateStatus(
+        public_id: string,
+        status: 'active' | 'inactive'
+    ): Promise<Midwife | undefined> {
+        const [row] = await this.db
             .update(midwifes)
-            .set({
-                status: 'inactive'
-            })
+            .set({ status })
             .where(eq(midwifes.id, public_id))
             .returning()
-        return midwife
+        return row
+    }
+
+    private async checkExists(condition: SQL | undefined): Promise<boolean> {
+        const [row] = await this.db
+            .select({ id: midwifes.id })
+            .from(midwifes)
+            .where(condition)
+            .limit(1)
+        return !!row
+    }
+
+    async softDelete(public_id: string): Promise<Midwife | undefined> {
+        return this.updateStatus(public_id, 'inactive')
     }
 
     async hardDelete(public_id: string): Promise<Midwife | undefined> {
@@ -152,14 +175,7 @@ export class MidwifeRepository {
     }
 
     async restore(public_id: string): Promise<Midwife | undefined> {
-        const [midwife] = await this.db
-            .update(midwifes)
-            .set({
-                status: 'active'
-            })
-            .where(eq(midwifes.id, public_id))
-            .returning()
-        return midwife
+        return this.updateStatus(public_id, 'active')
     }
 
     async existsByStrNumber(str_number: string): Promise<boolean> {

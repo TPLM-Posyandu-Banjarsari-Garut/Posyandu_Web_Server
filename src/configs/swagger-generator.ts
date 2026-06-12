@@ -74,6 +74,7 @@ export function generateOpenApiDocs() {
                 url: env.CORS_ORIGIN,
                 description: 'Development Server'
             }
-        ]
+        ],
+        security: [{ BearerAuth: [] }]
     })
 }

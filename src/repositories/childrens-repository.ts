@@ -1,5 +1,5 @@
 import { NewChildren, Children, childrens, relationChildrens } from '@/db'
-import { and, eq, ilike, sql, inArray } from 'drizzle-orm'
+import { and, eq, ilike, sql, inArray, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ChildrenQueryFilters {
@@ -11,6 +11,7 @@ export interface ChildrenQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class ChildrenRepository {
@@ -33,7 +34,8 @@ export class ChildrenRepository {
             child_category,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         const conditions = []
@@ -74,6 +76,11 @@ export class ChildrenRepository {
                 .select()
                 .from(childrens)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(childrens.created_at)
+                        : desc(childrens.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db

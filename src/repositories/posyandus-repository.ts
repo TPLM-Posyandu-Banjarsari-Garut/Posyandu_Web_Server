@@ -1,5 +1,5 @@
 import { NewPosyandu, Posyandu, posyandus } from '@/db'
-import { and, eq, ilike, sql } from 'drizzle-orm'
+import { and, eq, ilike, sql, SQL, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface PosyanduQueryFilters {
@@ -9,6 +9,7 @@ export interface PosyanduQueryFilters {
     page?: number
     limit?: number
     includeDeleted?: boolean
+    order?: 'asc' | 'desc'
 }
 
 export class PosyanduRepository {
@@ -36,7 +37,8 @@ export class PosyanduRepository {
             status,
             page = 1,
             limit = 10,
-            includeDeleted = false
+            includeDeleted = false,
+            order = 'desc'
         } = filters || {}
 
         let statusCondition = undefined
@@ -59,6 +61,11 @@ export class PosyanduRepository {
                 .select()
                 .from(posyandus)
                 .where(whereClause)
+                .orderBy(
+                    order === 'asc'
+                        ? asc(posyandus.created_at)
+                        : desc(posyandus.created_at)
+                )
                 .limit(limit)
                 .offset((page - 1) * limit),
             this.db
@@ -74,14 +81,9 @@ export class PosyanduRepository {
     }
 
     async findById(public_id: string): Promise<Posyandu | undefined> {
-        const [posyandu] = await this.db
-            .select()
-            .from(posyandus)
-            .where(
-                and(eq(posyandus.id, public_id), eq(posyandus.status, 'active'))
-            )
-            .limit(1)
-        return posyandu
+        return this.findByCondition(
+            and(eq(posyandus.id, public_id), eq(posyandus.status, 'active'))
+        )
     }
 
     async findByHealthCenterId(health_center_id: string): Promise<Posyandu[]> {
@@ -107,16 +109,40 @@ export class PosyanduRepository {
             .returning()
         return posyandu
     }
+    private async findByCondition(
+        condition: SQL | undefined
+    ): Promise<Posyandu | undefined> {
+        const [row] = await this.db
+            .select()
+            .from(posyandus)
+            .where(condition)
+            .limit(1)
+        return row
+    }
 
-    async softDelete(public_id: string): Promise<Posyandu | undefined> {
-        const [posyandu] = await this.db
+    private async updateStatus(
+        public_id: string,
+        status: 'active' | 'inactive'
+    ): Promise<Posyandu | undefined> {
+        const [row] = await this.db
             .update(posyandus)
-            .set({
-                status: 'inactive'
-            })
+            .set({ status })
             .where(eq(posyandus.id, public_id))
             .returning()
-        return posyandu
+        return row
+    }
+
+    private async checkExists(condition: SQL | undefined): Promise<boolean> {
+        const [row] = await this.db
+            .select({ id: posyandus.id })
+            .from(posyandus)
+            .where(condition)
+            .limit(1)
+        return !!row
+    }
+
+    async softDelete(public_id: string): Promise<Posyandu | undefined> {
+        return this.updateStatus(public_id, 'inactive')
     }
 
     async hardDelete(public_id: string): Promise<Posyandu | undefined> {
@@ -128,14 +154,7 @@ export class PosyanduRepository {
     }
 
     async restore(public_id: string): Promise<Posyandu | undefined> {
-        const [posyandu] = await this.db
-            .update(posyandus)
-            .set({
-                status: 'active'
-            })
-            .where(eq(posyandus.id, public_id))
-            .returning()
-        return posyandu
+        return this.updateStatus(public_id, 'active')
     }
 
     async existsByName(name: string): Promise<boolean> {

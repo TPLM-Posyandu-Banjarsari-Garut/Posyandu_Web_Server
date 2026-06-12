@@ -5,6 +5,7 @@ import userRoutes from '@/routes/users-routes'
 import cadreRoutes from '@/routes/cadres-route'
 import parentRoutes from '@/routes/parents-route'
 import midwifeRoutes from '@/routes/midwifes-route'
+import childrenRoutes from '@/routes/childrens-route'
 import posyanduRoutes from '@/routes/posyandus-route'
 import healthCenterRoutes from '@/routes/health-centers-route'
 import vitaminRoutes from '@/routes/vitamins-route'
@@ -25,6 +26,7 @@ router.use('/api/health', healthRoutes)
 router.use('/api/users', userRoutes)
 router.use('/api/cadres', cadreRoutes)
 router.use('/api/midwifes', midwifeRoutes)
+router.use('/api/childrens', childrenRoutes)
 router.use('/api/parents', parentRoutes)
 router.use('/api/posyandus', posyanduRoutes)
 router.use('/api/health-centers', healthCenterRoutes)
