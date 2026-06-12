@@ -5,48 +5,14 @@ import {
     signUpSchema,
     signInSchema,
     forgetPasswordSchema,
-    resetPasswordSchema
+    resetPasswordSchema,
+    signInSocialSchema,
+    verifyEmailOTPSchema,
+    sendVerificationOTPSchema,
+    resetPasswordOTPSchema
 } from '@/validations/auth-validation'
 
 export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
-    const signInSocialSchema = z
-        .object({
-            provider: z.enum(['google']).openapi({ example: 'google' }),
-            callbackURL: z
-                .string()
-                .openapi({ example: 'http://localhost:3000/dashboard' })
-        })
-        .openapi('SignInSocialInput')
-
-    const verifyEmailOTPSchema = z
-        .object({
-            email: z.string().email().openapi({ example: 'user@example.com' }),
-            otp: z.string().openapi({ example: '123456' })
-        })
-        .openapi('VerifyEmailOTPInput')
-
-    const sendVerificationOTPSchema = z
-        .object({
-            email: z.string().email().openapi({ example: 'user@example.com' })
-        })
-        .openapi('SendVerificationOTPInput')
-
-    const resetPasswordOTPSchema = z
-        .object({
-            email: z.string().email().openapi({ example: 'user@example.com' }),
-            otp: z.string().openapi({ example: '123456' }),
-            password: z
-                .string()
-                .min(8, 'Password must be at least 8 characters')
-                .max(100, 'Password cannot exceed 100 characters')
-                .regex(
-                    /^(?=.*[a-zA-Z])(?=.*\d).+$/,
-                    'Password must contain at least one letter and one number'
-                )
-                .openapi({ example: 'NewP@ssword123' })
-        })
-        .openapi('ResetPasswordOTPInput')
-
     registry.register('SignUpInput', signUpSchema)
     registry.register('SignInInput', signInSchema)
     registry.register('ForgetPasswordInput', forgetPasswordSchema)
