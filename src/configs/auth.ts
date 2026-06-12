@@ -1,9 +1,10 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { bearer } from 'better-auth/plugins'
+import { bearer, emailOTP } from 'better-auth/plugins'
 import * as schema from '@/db'
 import db from '@/configs/db'
 import env from '@/configs/env'
+import { EmailService } from '@/services/email-service'
 
 export const auth = betterAuth({
     appName: 'Sampurasun Web Server',
@@ -18,13 +19,30 @@ export const auth = betterAuth({
             verification: schema.verifications
         }
     }),
-    plugins: [bearer()],
+    plugins: [
+        bearer(),
+        emailOTP({
+            async sendVerificationOTP({ email, otp, type }, request) {
+                await EmailService.sendVerificationOTP(email, otp, type)
+            }
+        })
+    ],
     emailAndPassword: {
         enabled: true,
-        autoSignIn: true,
+        autoSignIn: false,
+        requireEmailVerification: true,
         sendResetPassword: async ({ user, url, token }, request) => {
-            // TODO: Implement actual email sending logic here
-            console.log(`Password reset link for ${user.email}: ${url}`)
+            await EmailService.sendResetPasswordLink(user.email, url)
+        }
+    },
+    emailVerification: {
+        autoSignInAfterVerification: false
+    },
+    socialProviders: {
+        google: {
+            prompt: 'select_account',
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET
         }
     },
     user: {

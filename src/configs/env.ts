@@ -11,13 +11,21 @@ export const envSchema = z.object({
         .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
         .default('info'),
 
-    CORS_ORIGIN: z.url('Format CORS salah'),
+    CORS_ORIGIN: z.url('Invalid CORS origin URL format'),
 
-    DATABASE_URL: z.url('Database URL salah'),
+    DATABASE_URL: z.url('Invalid Database URL format'),
 
     BETTER_AUTH_SECRET: z.string().min(1, 'BETTER_AUTH_SECRET is required'),
 
-    BETTER_AUTH_URL: z.url('BETTER_AUTH_URL salah')
+    BETTER_AUTH_URL: z.url('Invalid BETTER_AUTH_URL format'),
+
+    GOOGLE_CLIENT_ID: z.string().min(1, 'GOOGLE_CLIENT_ID is required'),
+
+    GOOGLE_CLIENT_SECRET: z.string().min(1, 'GOOGLE_CLIENT_SECRET is required'),
+
+    RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
+
+    SENDER_EMAIL: z.string().email('Invalid sender email format')
 })
 
 export type Env = z.infer<typeof envSchema>

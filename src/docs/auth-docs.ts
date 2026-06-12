@@ -1,4 +1,5 @@
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi'
+import { z } from 'zod'
 
 import {
     signUpSchema,
@@ -8,10 +9,35 @@ import {
 } from '@/validations/auth-validation'
 
 export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
+    const signInSocialSchema = z
+        .object({
+            provider: z.enum(['google']).openapi({ example: 'google' }),
+            callbackURL: z
+                .string()
+                .openapi({ example: 'http://localhost:3000/dashboard' })
+        })
+        .openapi('SignInSocialInput')
+
+    const verifyEmailOTPSchema = z
+        .object({
+            email: z.string().email().openapi({ example: 'user@example.com' }),
+            code: z.string().openapi({ example: '123456' })
+        })
+        .openapi('VerifyEmailOTPInput')
+
+    const sendVerificationOTPSchema = z
+        .object({
+            email: z.string().email().openapi({ example: 'user@example.com' })
+        })
+        .openapi('SendVerificationOTPInput')
+
     registry.register('SignUpInput', signUpSchema)
     registry.register('SignInInput', signInSchema)
     registry.register('ForgetPasswordInput', forgetPasswordSchema)
     registry.register('ResetPasswordInput', resetPasswordSchema)
+    registry.register('SignInSocialInput', signInSocialSchema)
+    registry.register('VerifyEmailOTPInput', verifyEmailOTPSchema)
+    registry.register('SendVerificationOTPInput', sendVerificationOTPSchema)
 
     const AUTH_TAG = ['Authentication (Better Auth)']
 
@@ -49,6 +75,65 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'post',
+        path: '/api/auth/sign-in/social',
+        tags: AUTH_TAG,
+        summary: 'Social login provider initiator',
+        request: {
+            body: {
+                content: { 'application/json': { schema: signInSocialSchema } }
+            }
+        },
+        responses: {
+            200: {
+                description: 'Returns OAuth redirection URL',
+                content: {
+                    'application/json': {
+                        schema: z.object({ url: z.string() })
+                    }
+                }
+            },
+            400: { description: 'Bad Request' }
+        }
+    })
+
+    registry.registerPath({
+        method: 'post',
+        path: '/api/auth/verify-email',
+        tags: AUTH_TAG,
+        summary: 'Verify email address with OTP code',
+        request: {
+            body: {
+                content: {
+                    'application/json': { schema: verifyEmailOTPSchema }
+                }
+            }
+        },
+        responses: {
+            200: { description: 'Verification successful' },
+            400: { description: 'Bad Request' }
+        }
+    })
+
+    registry.registerPath({
+        method: 'post',
+        path: '/api/auth/email-otp/send-verification-otp',
+        tags: AUTH_TAG,
+        summary: 'Resend email verification OTP code',
+        request: {
+            body: {
+                content: {
+                    'application/json': { schema: sendVerificationOTPSchema }
+                }
+            }
+        },
+        responses: {
+            200: { description: 'OTP sent successfully' },
+            400: { description: 'Bad Request' }
+        }
+    })
+
+    registry.registerPath({
+        method: 'post',
         path: '/api/auth/sign-out',
         tags: AUTH_TAG,
         summary: 'Logout current session',
@@ -71,7 +156,6 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
         }
     })
 
-    // Forget Password
     registry.registerPath({
         method: 'post',
         path: '/api/auth/forget-password',
@@ -90,7 +174,6 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
         }
     })
 
-    // Reset Password
     registry.registerPath({
         method: 'post',
         path: '/api/auth/reset-password',
