@@ -13,6 +13,11 @@ export const envSchema = z.object({
 
     CORS_ORIGIN: z.url('Invalid CORS origin URL format'),
 
+    TRUSTED_ORIGINS: z
+        .string()
+        .default('')
+        .transform(val => (val ? val.split(',').map(url => url.trim()) : [])),
+
     DATABASE_URL: z.url('Invalid Database URL format'),
 
     BETTER_AUTH_SECRET: z.string().min(1, 'BETTER_AUTH_SECRET is required'),
