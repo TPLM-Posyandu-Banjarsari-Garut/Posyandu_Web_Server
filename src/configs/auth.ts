@@ -9,7 +9,7 @@ import { EmailService } from '@/services/email-service'
 export const auth = betterAuth({
     appName: 'Sampurasun Web Server',
     baseURL: env.BETTER_AUTH_URL,
-    trustedOrigins: [env.CORS_ORIGIN],
+    trustedOrigins: [env.CORS_ORIGIN, ...env.TRUSTED_ORIGINS],
     database: drizzleAdapter(db, {
         provider: 'pg',
         schema: {
