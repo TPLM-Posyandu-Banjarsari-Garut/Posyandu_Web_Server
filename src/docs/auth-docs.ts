@@ -84,7 +84,7 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
     registerSimplePost(
         '/api/auth/email-otp/request-password-reset',
         'Request a password reset OTP',
-        sendVerificationOTPSchema,
+        forgetPasswordSchema,
         'Reset password OTP sent successfully'
     )
 
