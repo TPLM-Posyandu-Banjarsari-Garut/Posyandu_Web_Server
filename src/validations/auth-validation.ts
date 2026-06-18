@@ -2,6 +2,8 @@ import { z } from 'zod'
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
 import env from '@/configs/env'
 
+const TRUSTED_CALLBACK_ORIGINS = [env.CORS_ORIGIN, ...env.TRUSTED_ORIGINS]
+
 extendZodWithOpenApi(z)
 
 export const signUpSchema = z
@@ -86,6 +88,18 @@ export const signInSocialSchema = z
         provider: z.enum(['google']).openapi({ example: 'google' }),
         callbackURL: z
             .string()
+            .url('callbackURL must be a valid absolute URL')
+            .refine(
+                url =>
+                    TRUSTED_CALLBACK_ORIGINS.some(origin =>
+                        url.startsWith(origin)
+                    ),
+                {
+                    message:
+                        'callbackURL must point to a trusted origin. Use the full absolute URL of the client app'
+                }
+            )
+            .default(`${env.CORS_ORIGIN}/`)
             .openapi({ example: `${env.CORS_ORIGIN}/dashboard` })
     })
     .openapi('SignInSocialInput')
