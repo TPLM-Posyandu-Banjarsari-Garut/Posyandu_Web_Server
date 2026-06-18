@@ -30,7 +30,26 @@ export const envSchema = z.object({
 
     RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
 
-    SENDER_EMAIL: z.string().email('Invalid sender email format')
+    SENDER_EMAIL: z.string().email('Invalid sender email format'),
+
+    RATE_LIMIT_GLOBAL_WINDOW_MINUTES: z.coerce.number().default(15),
+    RATE_LIMIT_GLOBAL_MAX: z.coerce.number().default(100),
+    RATE_LIMIT_AUTH_WINDOW_MINUTES: z.coerce.number().default(60),
+    RATE_LIMIT_AUTH_MAX: z.coerce.number().default(5),
+    RATE_LIMIT_SIGNIN_WINDOW_MINUTES: z.coerce.number().default(15),
+    RATE_LIMIT_SIGNIN_MAX: z.coerce.number().default(5),
+    RATE_LIMIT_SIGNUP_WINDOW_MINUTES: z.coerce.number().default(15),
+    RATE_LIMIT_SIGNUP_MAX: z.coerce.number().default(5),
+    RATE_LIMIT_OTP_REQ_WINDOW_MINUTES: z.coerce.number().default(10),
+    RATE_LIMIT_OTP_REQ_MAX: z.coerce.number().default(6),
+    RATE_LIMIT_OTP_VERIFY_WINDOW_MINUTES: z.coerce.number().default(10),
+    RATE_LIMIT_OTP_VERIFY_MAX: z.coerce.number().default(6),
+    RATE_LIMIT_RESET_PWD_WINDOW_MINUTES: z.coerce.number().default(15),
+    RATE_LIMIT_RESET_PWD_MAX: z.coerce.number().default(6),
+    RATE_LIMIT_DELETE_ACC_WINDOW_MINUTES: z.coerce.number().default(15),
+    RATE_LIMIT_DELETE_ACC_MAX: z.coerce.number().default(5),
+    RATE_LIMIT_CHANGE_PWD_WINDOW_MINUTES: z.coerce.number().default(15),
+    RATE_LIMIT_CHANGE_PWD_MAX: z.coerce.number().default(5)
 })
 
 export type Env = z.infer<typeof envSchema>
