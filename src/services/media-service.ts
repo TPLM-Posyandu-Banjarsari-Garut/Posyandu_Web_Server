@@ -8,7 +8,6 @@ import {
 import { Media, NewMedia } from '@/db'
 import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
-import sharp from 'sharp'
 
 export class MediaService {
     constructor(private readonly media_repository: MediaRepository) {}
@@ -32,39 +31,13 @@ export class MediaService {
         )
     }
 
-    private async compressImage(
-        buffer: Buffer,
-        originalName: string,
-        maxSizeBytes: number
-    ): Promise<Buffer> {
-        try {
-            const compressed = await sharp(buffer)
-                .webp({ quality: 80 })
-                .toBuffer()
-
-            if (compressed.length > maxSizeBytes) {
-                throw ApiError.badRequest(
-                    `Image ${originalName} still exceeds the ${env.MEDIA_UPLOAD_MAX_SIZE_MB}MB limit even after compression.`
-                )
-            }
-            return compressed
-        } catch (error: unknown) {
-            if (error instanceof ApiError) throw error
-            const message =
-                error instanceof Error ? error.message : String(error)
-            throw ApiError.badRequest(
-                `Failed to compress image ${originalName}: ${message}`
-            )
-        }
-    }
-
     private async processAndUploadFile(
         file: Express.Multer.File,
         maxSizeBytes: number,
         allowedExtensions: string[],
         userId: string
     ): Promise<Media> {
-        let ext = file.originalname.split('.').pop()?.toLowerCase() || ''
+        const ext = file.originalname.split('.').pop()?.toLowerCase() || ''
 
         if (!allowedExtensions.includes(ext)) {
             throw ApiError.badRequest(
@@ -73,31 +46,15 @@ export class MediaService {
         }
 
         const category = this.getFileCategory(ext)
-        let buffer = file.buffer
-        let size = file.size
-        let mimeType = file.mimetype
-        let originalName = file.originalname
+        const buffer = file.buffer
+        const size = file.size
+        const mimeType = file.mimetype
+        const originalName = file.originalname
 
         if (size > maxSizeBytes) {
-            if (category !== 'image') {
-                throw ApiError.badRequest(
-                    `File ${originalName} exceeds the limit of ${env.MEDIA_UPLOAD_MAX_SIZE_MB}MB.`
-                )
-            }
-
-            buffer = await this.compressImage(
-                buffer,
-                originalName,
-                maxSizeBytes
+            throw ApiError.badRequest(
+                `File ${originalName} exceeds the limit of ${env.MEDIA_UPLOAD_MAX_SIZE_MB}MB.`
             )
-            size = buffer.length
-            mimeType = 'image/webp'
-            ext = 'webp'
-
-            const baseName =
-                originalName.substring(0, originalName.lastIndexOf('.')) ||
-                originalName
-            originalName = `${baseName}.webp`
         }
 
         const uniqueId = crypto.randomUUID()
