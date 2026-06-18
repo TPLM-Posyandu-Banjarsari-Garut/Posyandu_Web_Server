@@ -25,15 +25,31 @@ export const createConsultationSchema = createInsertSchema(consultations, {
 
     scheduled_at: z
         .preprocess(
-            arg =>
-                typeof arg === 'string' || arg instanceof Date
+            arg => {
+                if (Array.isArray(arg)) {
+                    return arg.map(v =>
+                        typeof v === 'string' || v instanceof Date
+                            ? new Date(v)
+                            : v
+                    )
+                }
+                return typeof arg === 'string' || arg instanceof Date
                     ? new Date(arg)
-                    : arg,
-            z.date({ message: 'Scheduled date and time is required' })
+                    : arg
+            },
+            z.union([
+                z.date({ message: 'Scheduled date and time is required' }),
+                z.array(z.date()).min(1).max(2)
+            ])
         )
         .openapi({
-            type: 'string',
-            format: 'date-time',
+            oneOf: [
+                { type: 'string', format: 'date-time' },
+                {
+                    type: 'array',
+                    items: { type: 'string', format: 'date-time' }
+                }
+            ],
             example: '2026-06-20T10:00:00Z'
         }),
 

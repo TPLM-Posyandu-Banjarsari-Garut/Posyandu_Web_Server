@@ -18,6 +18,13 @@ import { registerInventoriesRoutes } from '@/docs/inventories-docs'
 import { registerEducationCategoriesRoutes } from '@/docs/education-categories-docs'
 import { registerEducationsRoutes } from '@/docs/educations-docs'
 import { registerConsultationsRoutes } from '@/docs/consultations-docs'
+import { registerMediasRoutes } from '@/docs/medias-docs'
+import { registerNotificationsRoutes } from '@/docs/notifications-docs'
+import { registerHealthRoutes } from '@/docs/health-docs'
+import { registerPregnancyRecordsRoutes } from '@/docs/pregnancy-records-docs'
+import { registerExaminationsRoutes } from '@/docs/examinations-docs'
+import { registerExaminationSchedulesRoutes } from '@/docs/examination-schedules-docs'
+import { registerExaminationRecordsRoutes } from '@/docs/examination-records-docs'
 
 import { registerAuthRoutes } from '@/docs/auth-docs'
 import env from '@/configs/env'
@@ -60,6 +67,23 @@ registerEducationsRoutes(registry)
 
 // consultations
 registerConsultationsRoutes(registry)
+
+// medias
+registerMediasRoutes(registry)
+
+// notifications
+registerNotificationsRoutes(registry)
+
+// health-check
+registerHealthRoutes(registry)
+
+// pregnancy-records
+registerPregnancyRecordsRoutes(registry)
+
+// examinations
+registerExaminationsRoutes(registry)
+registerExaminationSchedulesRoutes(registry)
+registerExaminationRecordsRoutes(registry)
 
 export function generateOpenApiDocs() {
     const generator = new OpenApiGeneratorV3(registry.definitions)

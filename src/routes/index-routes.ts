@@ -19,6 +19,11 @@ import educationRoutes from '@/routes/educations-route'
 import consultationRoutes from '@/routes/consultations-route'
 import notificationRoutes from '@/routes/notifications-route'
 import mediasRoute from '@/routes/medias-route'
+import pregnancyRecordsRoute from '@/routes/pregnancy-records-route'
+import examinationsRoute from '@/routes/examinations-route'
+import examinationSchedulesRoute from '@/routes/examination-schedules-route'
+import examinationRecordsRoute from '@/routes/examination-records-route'
+
 import { rateLimiter } from '@/middlewares/rate-limiter'
 
 const router = Router()
@@ -43,5 +48,9 @@ router.use('/api/educations', educationRoutes)
 router.use('/api/consultations', consultationRoutes)
 router.use('/api/notifications', notificationRoutes)
 router.use('/api/medias', mediasRoute)
+router.use('/api/pregnancy-records', pregnancyRecordsRoute)
+router.use('/api/examinations', examinationsRoute)
+router.use('/api/examination-schedules', examinationSchedulesRoute)
+router.use('/api/examination-records', examinationRecordsRoute)
 
 export default router
