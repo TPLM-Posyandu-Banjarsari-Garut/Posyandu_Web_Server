@@ -7,6 +7,8 @@ export interface NutritionRecordQueryFilters {
     cadre_id?: string
     midwife_id?: string
     nutrition_status?: NutritionRecord['nutrition_status']
+    parent_id?: string
+    posyandu_id?: string
     page?: number
     limit?: number
     includeDeleted?: boolean
@@ -30,6 +32,8 @@ export class NutritionRecordRepository {
             cadre_id,
             midwife_id,
             nutrition_status,
+            parent_id,
+            posyandu_id,
             page = 1,
             limit = 10,
             includeDeleted = false,
@@ -57,6 +61,22 @@ export class NutritionRecordRepository {
         if (nutrition_status) {
             conditions.push(
                 eq(nutritionRecords.nutrition_status, nutrition_status)
+            )
+        }
+
+        if (parent_id) {
+            conditions.push(
+                sql`${nutritionRecords.children_id} IN (
+                    SELECT children_id FROM relation_childrens WHERE parent_id = ${parent_id} AND deleted_at IS NULL
+                )`
+            )
+        }
+
+        if (posyandu_id) {
+            conditions.push(
+                sql`${nutritionRecords.children_id} IN (
+                    SELECT id FROM childrens WHERE posyandu_id = ${posyandu_id} AND deleted_at IS NULL
+                )`
             )
         }
 

@@ -4,7 +4,6 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface PosyanduQueryFilters {
     search?: string
-    health_center_id?: string
     status?: Posyandu['status']
     page?: number
     limit?: number
@@ -33,7 +32,6 @@ export class PosyanduRepository {
     async getPosyandus(filters?: PosyanduQueryFilters) {
         const {
             search,
-            health_center_id,
             status,
             page = 1,
             limit = 10,
@@ -50,9 +48,6 @@ export class PosyanduRepository {
 
         const whereClause = and(
             search ? ilike(posyandus.name, `%${search}%`) : undefined,
-            health_center_id
-                ? eq(posyandus.health_center_id, health_center_id)
-                : undefined,
             statusCondition
         )
 
@@ -84,18 +79,6 @@ export class PosyanduRepository {
         return this.findByCondition(
             and(eq(posyandus.id, public_id), eq(posyandus.status, 'active'))
         )
-    }
-
-    async findByHealthCenterId(health_center_id: string): Promise<Posyandu[]> {
-        return this.db
-            .select()
-            .from(posyandus)
-            .where(
-                and(
-                    eq(posyandus.health_center_id, health_center_id),
-                    eq(posyandus.status, 'active')
-                )
-            )
     }
 
     async update(

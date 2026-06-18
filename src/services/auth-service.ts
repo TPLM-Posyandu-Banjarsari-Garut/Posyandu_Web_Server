@@ -8,6 +8,13 @@ import {
     RegisterMultiRolePayload
 } from '@/types/auth-types'
 
+export interface AuthenticatedUser extends User {
+    parent_id?: string
+    midwife_id?: string
+    cadre_id?: string
+    posyandu_id?: string
+}
+
 export class AuthService {
     constructor(private readonly user_repository: UserRepository) {}
 
@@ -80,7 +87,9 @@ export class AuthService {
         }
     }
 
-    async verifyActiveSession(request_headers: Headers): Promise<User> {
+    async verifyActiveSession(
+        request_headers: Headers
+    ): Promise<AuthenticatedUser> {
         const active_session = await auth.api.getSession({
             headers: request_headers
         })
@@ -91,13 +100,29 @@ export class AuthService {
             )
         }
 
-        const current_user = await this.user_repository.findByPublicId(
-            active_session.user.id
-        )
+        const current_user: AuthenticatedUser | undefined =
+            await this.user_repository.findByPublicId(active_session.user.id)
         if (!current_user) {
             throw new Error(
                 'The database user profile linked to this session could not be found'
             )
+        }
+
+        const { id, role } = current_user
+        if (role === 'parent') {
+            const parent = await this.user_repository.findParentByUserId(id)
+            if (parent) {
+                current_user.parent_id = parent.id
+            }
+        } else if (role === 'midwife' || role === 'cadre') {
+            const profile =
+                role === 'midwife'
+                    ? await this.user_repository.findMidwifeByUserId(id)
+                    : await this.user_repository.findCadreByUserId(id)
+            if (profile) {
+                current_user[`${role}_id`] = profile.id
+                current_user.posyandu_id = profile.posyandu_id
+            }
         }
 
         return current_user

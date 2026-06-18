@@ -3,7 +3,6 @@ import {
     OpenApiGeneratorV3
 } from '@asteasolutions/zod-to-openapi'
 import { registerCadresRoutes } from '@/docs/cadres-docs'
-import { registerHealthCentersRoutes } from '@/docs/health-centers-docs'
 import { registerPosyandusRoutes } from '@/docs/posyandus-docs'
 import { registerMidwifesRoutes } from '@/docs/midwifes-docs'
 import { registerUsersRoutes } from '@/docs/users-docs'
@@ -18,6 +17,7 @@ import { registerNutritionRecordsRoutes } from '@/docs/nutrition-records-docs'
 import { registerInventoriesRoutes } from '@/docs/inventories-docs'
 import { registerEducationCategoriesRoutes } from '@/docs/education-categories-docs'
 import { registerEducationsRoutes } from '@/docs/educations-docs'
+import { registerConsultationsRoutes } from '@/docs/consultations-docs'
 
 import { registerAuthRoutes } from '@/docs/auth-docs'
 import env from '@/configs/env'
@@ -42,7 +42,6 @@ registerCadresRoutes(registry)
 registerMidwifesRoutes(registry)
 
 // health-facility
-registerHealthCentersRoutes(registry)
 registerPosyandusRoutes(registry)
 
 // children
@@ -58,6 +57,9 @@ registerInventoriesRoutes(registry)
 // education
 registerEducationCategoriesRoutes(registry)
 registerEducationsRoutes(registry)
+
+// consultations
+registerConsultationsRoutes(registry)
 
 export function generateOpenApiDocs() {
     const generator = new OpenApiGeneratorV3(registry.definitions)
@@ -80,7 +82,7 @@ export function generateOpenApiDocs() {
         },
         servers: [
             {
-                url: env.CORS_ORIGIN,
+                url: env.BETTER_AUTH_URL,
                 description: `${env.NODE_ENV === 'development' ? 'Development' : 'Production'} Server`
             }
         ],

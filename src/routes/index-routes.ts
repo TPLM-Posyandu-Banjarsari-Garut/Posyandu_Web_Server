@@ -7,7 +7,6 @@ import parentRoutes from '@/routes/parents-route'
 import midwifeRoutes from '@/routes/midwifes-route'
 import childrenRoutes from '@/routes/childrens-route'
 import posyanduRoutes from '@/routes/posyandus-route'
-import healthCenterRoutes from '@/routes/health-centers-route'
 import vitaminRoutes from '@/routes/vitamins-route'
 import immunizationRecordRoutes from '@/routes/immunization-records-route'
 import vitaminRecordRoutes from '@/routes/vitamin-records-route'
@@ -17,6 +16,7 @@ import nutritionRecordRoutes from '@/routes/nutrition-records-route'
 import inventoryRoutes from '@/routes/inventories-route'
 import educationCategoryRoutes from '@/routes/education-categories-route'
 import educationRoutes from '@/routes/educations-route'
+import consultationRoutes from '@/routes/consultations-route'
 import { rateLimiter } from '@/middlewares/rate-limiter'
 
 const router = Router()
@@ -29,7 +29,6 @@ router.use('/api/midwifes', midwifeRoutes)
 router.use('/api/childrens', childrenRoutes)
 router.use('/api/parents', parentRoutes)
 router.use('/api/posyandus', posyanduRoutes)
-router.use('/api/health-centers', healthCenterRoutes)
 router.use('/api/vitamins', vitaminRoutes)
 router.use('/api/immunization-records', immunizationRecordRoutes)
 router.use('/api/vitamin-records', vitaminRecordRoutes)
@@ -39,5 +38,6 @@ router.use('/api/nutrition-records', nutritionRecordRoutes)
 router.use('/api/inventories', inventoryRoutes)
 router.use('/api/education-categories', educationCategoryRoutes)
 router.use('/api/educations', educationRoutes)
+router.use('/api/consultations', consultationRoutes)
 
 export default router

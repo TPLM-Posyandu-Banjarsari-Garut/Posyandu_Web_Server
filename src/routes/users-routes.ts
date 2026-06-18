@@ -10,7 +10,8 @@ import {
     createUserSchema,
     updateUserSchema,
     getUsersQuerySchema,
-    userParamsSchema
+    userParamsSchema,
+    deleteUserQuerySchema
 } from '@/validations/users-validation'
 import db from '@/configs/db'
 
@@ -58,7 +59,7 @@ router.delete(
     '/:public_id',
     verifyAuth,
     authorizeRoles('admin'),
-    validateRequest({ params: userParamsSchema }),
+    validateRequest({ params: userParamsSchema, query: deleteUserQuerySchema }),
     AsyncHandler(user_controller.deleteUser)
 )
 

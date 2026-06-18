@@ -29,6 +29,34 @@
             "when": 1780914743906,
             "tag": "0003_bored_jigsaw",
             "breakpoints": true
+        },
+        {
+            "idx": 4,
+            "version": "7",
+            "when": 1781800339464,
+            "tag": "0004_mature_shaman",
+            "breakpoints": true
+        },
+        {
+            "idx": 5,
+            "version": "7",
+            "when": 1781804407204,
+            "tag": "0005_great_tigra",
+            "breakpoints": true
+        },
+        {
+            "idx": 6,
+            "version": "7",
+            "when": 1781804719781,
+            "tag": "0006_flawless_omega_sentinel",
+            "breakpoints": true
+        },
+        {
+            "idx": 7,
+            "version": "7",
+            "when": 1781807854879,
+            "tag": "0007_serious_barracuda",
+            "breakpoints": true
         }
     ]
 }

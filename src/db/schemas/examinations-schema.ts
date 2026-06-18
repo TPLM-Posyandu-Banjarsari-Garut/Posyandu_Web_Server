@@ -7,7 +7,9 @@ import {
     pgTable,
     text,
     uniqueIndex,
-    varchar
+    varchar,
+    boolean,
+    jsonb
 } from 'drizzle-orm/pg-core'
 
 export const examinations = pgTable(
@@ -23,6 +25,9 @@ export const examinations = pgTable(
         description: text('description'),
         examination_type: examinationTypeEnum('examination_type').notNull(),
         target_age_months: integer('target_age_months'),
+        target_trimester: varchar('target_trimester', { length: 50 }),
+        checklist_items: jsonb('checklist_items'),
+        is_active: boolean('is_active').notNull().default(true),
 
         ...timestamps
     },

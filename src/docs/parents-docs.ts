@@ -33,7 +33,7 @@ export const registerParentsRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/parents',
         tags: PARENT_TAG,
-        summary: 'Get list of parents [Roles: admin, parent]',
+        summary: 'Get list of parents [Roles: admin, midwife, cadre]',
         request: { query: getParentsQuerySchema },
         responses: {
             200: { description: 'Success get list of parents' }
