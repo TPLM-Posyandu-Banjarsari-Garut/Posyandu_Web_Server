@@ -2,6 +2,7 @@ import app from '@/app'
 import env from '@/configs/env'
 import { logger } from '@/utils/logger'
 import { configureGracefulShutdown } from '@/utils/shutdown'
+import { CronService } from '@/services/cron-service'
 
 const port = env.PORT || 9000
 
@@ -14,6 +15,10 @@ const server = app.listen(port, () => {
     logger.info(`🌍 Environment  : ${env.NODE_ENV.toUpperCase()}`)
     logger.info(`📖 Swagger Docs : http://localhost:${port}/api/docs`)
     logger.info(divider)
+
+    CronService.start()
 })
 
-configureGracefulShutdown(server)
+configureGracefulShutdown(server, () => {
+    CronService.stop()
+})

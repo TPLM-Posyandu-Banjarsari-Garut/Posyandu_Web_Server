@@ -23,12 +23,25 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(
     cors({
-        origin: env.CORS_ORIGIN,
+        origin: [env.CORS_ORIGIN],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
         credentials: true
     })
 )
+app.use(
+    express.json({
+        limit: '2mb',
+        verify: (
+            req: import('node:http').IncomingMessage & { rawBody?: Buffer },
+            _res,
+            buf
+        ) => {
+            req.rawBody = buf
+        }
+    })
+)
+app.use(express.urlencoded({ extended: true, limit: '2mb' }))
 app.use(
     helmet({
         contentSecurityPolicy: {
