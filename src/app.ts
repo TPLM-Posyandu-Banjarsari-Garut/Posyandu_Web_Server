@@ -13,6 +13,9 @@ import { toNodeHandler, fromNodeHeaders } from 'better-auth/node'
 import { auth } from '@/configs/auth'
 import { autoAuditMiddleware } from '@/middlewares/auto-audit-middleware'
 import { authRateLimiter } from '@/middlewares/rate-limiter'
+import { AsyncHandler } from '@/utils/async-handler'
+import { ApiResponse } from '@/utils/api-response'
+import { STATUS_CODES } from '@/constants/status-codes'
 sourceMapSupport.install()
 
 const app: Express = express()
@@ -23,12 +26,25 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(
     cors({
-        origin: env.CORS_ORIGIN,
+        origin: [env.CORS_ORIGIN],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
         credentials: true
     })
 )
+app.use(
+    express.json({
+        limit: '2mb',
+        verify: (
+            req: import('node:http').IncomingMessage & { rawBody?: Buffer },
+            _res,
+            buf
+        ) => {
+            req.rawBody = buf
+        }
+    })
+)
+app.use(express.urlencoded({ extended: true, limit: '2mb' }))
 app.use(
     helmet({
         contentSecurityPolicy: {
@@ -74,17 +90,27 @@ setupSwagger(app)
 
 app.use('/api/auth', authRateLimiter)
 
-app.get('/api/auth/me', async (req, res) => {
-    const session = await auth.api.getSession({
-        headers: fromNodeHeaders(req.headers)
+app.get(
+    '/api/auth/me',
+    AsyncHandler(async (req: Request, res: Response) => {
+        const session = await auth.api.getSession({
+            headers: fromNodeHeaders(req.headers)
+        })
+
+        if (!session) {
+            return ApiResponse.error(
+                res,
+                'Unauthorized',
+                STATUS_CODES.UNAUTHORIZED
+            )
+        }
+
+        return ApiResponse.ok(res, 'Session retrieved successfully', {
+            session: session.session,
+            user: session.user
+        })
     })
-
-    if (!session) {
-        return res.status(401).json({ error: 'Unauthorized' })
-    }
-
-    res.json({ user: session.user })
-})
+)
 
 app.all('/api/auth/*splat', toNodeHandler(auth))
 app.get('/favicon.ico', (req, res) => res.status(204).end())

@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { bearer, emailOTP } from 'better-auth/plugins'
+import { redisSecondaryStorage } from '@/configs/redis'
 import * as schema from '@/db'
 import db from '@/configs/db'
 import env from '@/configs/env'
@@ -9,7 +10,7 @@ import { EmailService } from '@/services/email-service'
 export const auth = betterAuth({
     appName: 'Sampurasun Web Server',
     baseURL: env.BETTER_AUTH_URL,
-    trustedOrigins: [env.CORS_ORIGIN],
+    trustedOrigins: [env.CORS_ORIGIN, ...env.TRUSTED_ORIGINS],
     database: drizzleAdapter(db, {
         provider: 'pg',
         schema: {
@@ -19,9 +20,21 @@ export const auth = betterAuth({
             verification: schema.verifications
         }
     }),
+    secondaryStorage: redisSecondaryStorage,
+    advanced: {
+        defaultCookieAttributes: {
+            sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+            secure: env.NODE_ENV === 'production',
+            httpOnly: true,
+            path: '/'
+        }
+    },
     plugins: [
         bearer(),
         emailOTP({
+            sendVerificationOnSignUp: true,
+            storeOTP: 'encrypted',
+            overrideDefaultEmailVerification: true,
             async sendVerificationOTP({ email, otp, type }, request) {
                 await EmailService.sendVerificationOTP(email, otp, type)
             }
@@ -31,12 +44,23 @@ export const auth = betterAuth({
         enabled: true,
         autoSignIn: false,
         requireEmailVerification: true,
+        minPasswordLength: 8,
+        maxPasswordLength: 100,
         sendResetPassword: async ({ user, url, token }, request) => {
             await EmailService.sendResetPasswordLink(user.email, url)
         }
     },
     emailVerification: {
-        autoSignInAfterVerification: false
+        autoSignInAfterVerification: false,
+        sendOnSignIn: true,
+        sendVerificationEmail: async ({ user }, request) => {
+            await auth.api.sendVerificationOTP({
+                body: {
+                    email: user.email,
+                    type: 'email-verification'
+                }
+            })
+        }
     },
     socialProviders: {
         google: {
@@ -58,6 +82,12 @@ export const auth = betterAuth({
         }
     },
     session: {
+        expiresIn: 60 * 60 * 8, // 8 hours
+        updateAge: 60 * 60, // 1 hour active update
+        cookieCache: {
+            enabled: true,
+            maxAge: 5 * 60 // 5 minutes cache
+        },
         fields: {
             expiresAt: 'expires_at',
             ipAddress: 'ip_address',

@@ -155,6 +155,14 @@ export const INVENTORY_ITEM_TYPE_VALUES = [
     'general'
 ] as const
 
+export const CONSULTATION_TYPE_VALUES = [
+    'pregnancy',
+    'child_development',
+    'general'
+] as const
+
+export const PREGNANCY_RISK_VALUES = ['low', 'moderate', 'high'] as const
+
 export type Status = (typeof STATUS_VALUES)[number]
 export type AccountStatus = (typeof ACCOUNT_STATUS_VALUES)[number]
 export type AccountRole = (typeof ACCOUNT_ROLE_VALUES)[number]
@@ -184,6 +192,8 @@ export type VitaminRecordStatus = (typeof VITAMIN_RECORD_STATUS_VALUES)[number]
 export type KipiSeverity = (typeof KIPI_SEVERITY_VALUES)[number]
 export type VaccineRoute = (typeof VACCINE_ROUTE_VALUES)[number]
 export type InventoryItemType = (typeof INVENTORY_ITEM_TYPE_VALUES)[number]
+export type ConsultationType = (typeof CONSULTATION_TYPE_VALUES)[number]
+export type PregnancyRisk = (typeof PREGNANCY_RISK_VALUES)[number]
 
 export const statusEnum = pgEnum('status', STATUS_VALUES)
 export const accountStatusEnum = pgEnum('account_status', ACCOUNT_STATUS_VALUES)
@@ -285,6 +295,13 @@ export const inventoryItemTypeEnum = pgEnum(
     INVENTORY_ITEM_TYPE_VALUES
 )
 
+export const consultationTypeEnum = pgEnum(
+    'consultation_type',
+    CONSULTATION_TYPE_VALUES
+)
+
+export const pregnancyRiskEnum = pgEnum('pregnancy_risk', PREGNANCY_RISK_VALUES)
+
 /** All pgEnum definitions for Drizzle schema & migrations */
 export const pgEnums = {
     status: statusEnum,
@@ -315,7 +332,9 @@ export const pgEnums = {
     vitamin_record_status: vitaminRecordStatusEnum,
     kipi_severity: kipiSeverityEnum,
     vaccine_route: vaccineRouteEnum,
-    inventory_item_type: inventoryItemTypeEnum
+    inventory_item_type: inventoryItemTypeEnum,
+    consultation_type: consultationTypeEnum,
+    pregnancy_risk: pregnancyRiskEnum
 } as const
 
 export const toPgEnumSql = (
@@ -355,7 +374,9 @@ export const allPgEnumSql = Object.entries({
     vitamin_record_status: VITAMIN_RECORD_STATUS_VALUES,
     kipi_severity: KIPI_SEVERITY_VALUES,
     vaccine_route: VACCINE_ROUTE_VALUES,
-    inventory_item_type: INVENTORY_ITEM_TYPE_VALUES
+    inventory_item_type: INVENTORY_ITEM_TYPE_VALUES,
+    consultation_type: CONSULTATION_TYPE_VALUES,
+    pregnancy_risk: PREGNANCY_RISK_VALUES
 } as const)
     .map(([name, values]) => toPgEnumSql(name, values))
     .join('\n')

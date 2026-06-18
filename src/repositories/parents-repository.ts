@@ -1,4 +1,4 @@
-import { NewParent, Parent, parents } from '@/db'
+import { NewParent, Parent, parents, relationChildrens } from '@/db'
 import { and, eq, ilike, or, sql, SQL, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
@@ -175,5 +175,22 @@ export class ParentRepository {
             .where(eq(parents.identity_number, identity_number))
             .limit(1)
         return !!parent
+    }
+
+    async isChildAssociatedWithParent(
+        parent_id: string,
+        children_id: string
+    ): Promise<boolean> {
+        const [relation] = await this.db
+            .select({ id: relationChildrens.id })
+            .from(relationChildrens)
+            .where(
+                and(
+                    eq(relationChildrens.parent_id, parent_id),
+                    eq(relationChildrens.children_id, children_id)
+                )
+            )
+            .limit(1)
+        return !!relation
     }
 }

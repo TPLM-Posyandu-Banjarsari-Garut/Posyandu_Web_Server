@@ -29,12 +29,19 @@ export class ImmunizationRecordService {
     }
 
     async getImmunizationRecords(
-        query_filters?: ImmunizationRecordQueryFilters
+        query_filters?: ImmunizationRecordQueryFilters,
+        currentUser?: { id: string; role: string }
     ) {
         const { page = 1, limit = 10 } = query_filters || {}
+
+        const filters = { ...query_filters }
+        if (currentUser?.role === 'parent') {
+            filters.parent_user_id = currentUser.id
+        }
+
         const { data, totalItems } =
             await this.immunization_record_repository.getImmunizationRecords(
-                query_filters
+                filters
             )
 
         return {
@@ -44,11 +51,24 @@ export class ImmunizationRecordService {
     }
 
     async getImmunizationRecordById(
-        public_id: string
+        public_id: string,
+        currentUser?: { id: string; role: string }
     ): Promise<ImmunizationRecord> {
         const record =
             await this.immunization_record_repository.findById(public_id)
         if (!record) throw new Error('Immunization record not found')
+
+        if (currentUser?.role === 'parent') {
+            const isOwned =
+                await this.immunization_record_repository.isChildAssociatedWithParentUser(
+                    currentUser.id,
+                    record.children_id
+                )
+            if (!isOwned) {
+                throw new Error('Immunization record not found')
+            }
+        }
+
         return record
     }
 

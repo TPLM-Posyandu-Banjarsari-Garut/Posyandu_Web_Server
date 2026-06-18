@@ -16,7 +16,7 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'post',
-        path: '/api/children',
+        path: '/api/childrens',
         tags: CHILD_TAG,
         summary: 'Create a new child [Roles: admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
@@ -35,7 +35,7 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'get',
-        path: '/api/children',
+        path: '/api/childrens',
         tags: CHILD_TAG,
         summary: 'Get list of children [Roles: admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
@@ -49,7 +49,7 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'get',
-        path: '/api/children/{public_id}',
+        path: '/api/childrens/{public_id}',
         tags: CHILD_TAG,
         summary:
             'Get child by public ID [Roles: admin, parent, cadre, midwife]',
@@ -65,7 +65,7 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'put',
-        path: '/api/children/{public_id}',
+        path: '/api/childrens/{public_id}',
         tags: CHILD_TAG,
         summary: 'Update child data [Roles: admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
@@ -86,7 +86,7 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'delete',
-        path: '/api/children/{public_id}',
+        path: '/api/childrens/{public_id}',
         tags: CHILD_TAG,
         summary: 'Delete child [Roles: admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
@@ -101,7 +101,7 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'post',
-        path: '/api/children/{public_id}/restore',
+        path: '/api/childrens/{public_id}/restore',
         tags: CHILD_TAG,
         summary:
             'Restore soft-deleted child [Roles: admin, parent, cadre, midwife]',

@@ -1,7 +1,9 @@
 import {
     NewImmunizationRecord,
     ImmunizationRecord,
-    immunizationRecords
+    immunizationRecords,
+    parents,
+    relationChildrens
 } from '@/db'
 import { and, eq, sql, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
@@ -12,6 +14,7 @@ export interface ImmunizationRecordQueryFilters {
     posyandu_id?: string
     cadre_id?: string
     midwife_id?: string
+    parent_user_id?: string
     status?: ImmunizationRecord['status']
     page?: number
     limit?: number
@@ -39,6 +42,7 @@ export class ImmunizationRecordRepository {
             posyandu_id,
             cadre_id,
             midwife_id,
+            parent_user_id,
             status,
             page = 1,
             limit = 10,
@@ -70,6 +74,18 @@ export class ImmunizationRecordRepository {
 
         if (midwife_id) {
             conditions.push(eq(immunizationRecords.midwife_id, midwife_id))
+        }
+
+        if (parent_user_id) {
+            const parentChildrenSubquery = this.db
+                .select({ id: relationChildrens.children_id })
+                .from(relationChildrens)
+                .innerJoin(parents, eq(relationChildrens.parent_id, parents.id))
+                .where(eq(parents.user_id, parent_user_id))
+
+            conditions.push(
+                sql`${immunizationRecords.children_id} IN (${parentChildrenSubquery})`
+            )
         }
 
         if (status) {
@@ -179,5 +195,23 @@ export class ImmunizationRecordRepository {
             )
             .limit(1)
         return !!record
+    }
+
+    async isChildAssociatedWithParentUser(
+        parent_user_id: string,
+        children_id: string
+    ): Promise<boolean> {
+        const [relation] = await this.db
+            .select({ id: relationChildrens.id })
+            .from(relationChildrens)
+            .innerJoin(parents, eq(relationChildrens.parent_id, parents.id))
+            .where(
+                and(
+                    eq(parents.user_id, parent_user_id),
+                    eq(relationChildrens.children_id, children_id)
+                )
+            )
+            .limit(1)
+        return !!relation
     }
 }

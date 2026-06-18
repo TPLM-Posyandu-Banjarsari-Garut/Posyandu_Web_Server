@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
+import env from '@/configs/env'
 
 extendZodWithOpenApi(z)
 
@@ -24,7 +25,14 @@ export const signUpSchema = z
                 /^(?=.*[a-zA-Z])(?=.*\d).+$/,
                 'Password must contain at least one letter and one number'
             )
-            .openapi({ example: 'P@ssword123' })
+            .openapi({ example: 'P@ssword123' }),
+
+        phone_number: z
+            .string()
+            .max(20, 'Phone number cannot exceed 20 characters')
+            .optional()
+            .nullable()
+            .openapi({ example: '08123456789' })
     })
     .openapi('SignUpInput')
 
@@ -72,3 +80,55 @@ export type SignUpInput = z.infer<typeof signUpSchema>
 export type SignInInput = z.infer<typeof signInSchema>
 export type ForgetPasswordInput = z.infer<typeof forgetPasswordSchema>
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
+
+export const signInSocialSchema = z
+    .object({
+        provider: z.enum(['google']).openapi({ example: 'google' }),
+        callbackURL: z
+            .string()
+            .openapi({ example: `${env.CORS_ORIGIN}/dashboard` })
+    })
+    .openapi('SignInSocialInput')
+
+export const verifyEmailOTPSchema = z
+    .object({
+        email: z.string().email().openapi({ example: 'user@example.com' }),
+        otp: z.string().openapi({ example: '123456' })
+    })
+    .openapi('VerifyEmailOTPInput')
+
+export const sendVerificationOTPSchema = z
+    .object({
+        email: z.string().email().openapi({ example: 'user@example.com' }),
+        type: z
+            .enum([
+                'email-verification',
+                'sign-in',
+                'forget-password',
+                'change-email'
+            ])
+            .default('email-verification')
+            .openapi({ example: 'email-verification' })
+    })
+    .openapi('SendVerificationOTPInput')
+
+export const resetPasswordOTPSchema = z
+    .object({
+        email: z.string().email().openapi({ example: 'user@example.com' }),
+        otp: z.string().openapi({ example: '123456' }),
+        password: z
+            .string()
+            .min(8, 'Password must be at least 8 characters')
+            .max(100, 'Password cannot exceed 100 characters')
+            .regex(
+                /^(?=.*[a-zA-Z])(?=.*\d).+$/,
+                'Password must contain at least one letter and one number'
+            )
+            .openapi({ example: 'NewP@ssword123' })
+    })
+    .openapi('ResetPasswordOTPInput')
+
+export type SignInSocialInput = z.infer<typeof signInSocialSchema>
+export type VerifyEmailOTPInput = z.infer<typeof verifyEmailOTPSchema>
+export type SendVerificationOTPInput = z.infer<typeof sendVerificationOTPSchema>
+export type ResetPasswordOTPInput = z.infer<typeof resetPasswordOTPSchema>
