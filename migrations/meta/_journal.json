@@ -29,6 +29,13 @@
             "when": 1780914743906,
             "tag": "0003_bored_jigsaw",
             "breakpoints": true
+        },
+        {
+            "idx": 4,
+            "version": "7",
+            "when": 1781800339464,
+            "tag": "0004_mature_shaman",
+            "breakpoints": true
         }
     ]
 }

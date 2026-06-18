@@ -3,7 +3,6 @@ import {
     OpenApiGeneratorV3
 } from '@asteasolutions/zod-to-openapi'
 import { registerCadresRoutes } from '@/docs/cadres-docs'
-import { registerHealthCentersRoutes } from '@/docs/health-centers-docs'
 import { registerPosyandusRoutes } from '@/docs/posyandus-docs'
 import { registerMidwifesRoutes } from '@/docs/midwifes-docs'
 import { registerUsersRoutes } from '@/docs/users-docs'
@@ -42,7 +41,6 @@ registerCadresRoutes(registry)
 registerMidwifesRoutes(registry)
 
 // health-facility
-registerHealthCentersRoutes(registry)
 registerPosyandusRoutes(registry)
 
 // children

@@ -8,7 +8,6 @@ import { educations } from '@/db/schemas/educations-schema'
 import { examinationRecords } from '@/db/schemas/examination-records-schema'
 import { examinationSchedules } from '@/db/schemas/examination-schedules-schema'
 import { examinations } from '@/db/schemas/examinations-schema'
-import { healthCenters } from '@/db/schemas/health-centers-schema'
 import { immunizationRecords } from '@/db/schemas/immunization-records'
 import { inventories } from '@/db/schemas/inventories-schema'
 import { kipiDetails } from '@/db/schemas/kipi-details-schema'
@@ -100,15 +99,7 @@ export const midwifesRelations = relations(midwifes, ({ one, many }) => ({
     managedInventories: many(inventories)
 }))
 
-export const healthCentersRelations = relations(healthCenters, ({ many }) => ({
-    posyandus: many(posyandus)
-}))
-
-export const posyandusRelations = relations(posyandus, ({ one, many }) => ({
-    healthCenter: one(healthCenters, {
-        fields: [posyandus.health_center_id],
-        references: [healthCenters.id]
-    }),
+export const posyandusRelations = relations(posyandus, ({ many }) => ({
     cadres: many(cadres),
     midwifes: many(midwifes),
     childrens: many(childrens),

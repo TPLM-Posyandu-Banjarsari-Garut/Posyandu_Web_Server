@@ -11,8 +11,6 @@ import {
 extendZodWithOpenApi(z)
 
 export const createPosyanduSchema = createInsertSchema(posyandus, {
-    health_center_id: relationIdSchema('Health Center ID'),
-
     name: z
         .string()
         .min(3, 'Posyandu name must be at least 3 characters')
@@ -67,11 +65,6 @@ export const createPosyanduSchema = createInsertSchema(posyandus, {
 export const getPosyandusQuerySchema = z
     .object({
         ...paginationQuerySchema,
-
-        health_center_id: z
-            .string()
-            .optional()
-            .openapi({ example: 'health-center-id-uuid' }),
 
         status: z.enum(accountStatusEnum.enumValues).optional(),
         search: z.string().optional(),
