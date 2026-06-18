@@ -1,7 +1,7 @@
 import { rateLimit } from 'express-rate-limit'
-import { ApiError } from '../utils/api-error'
-import { STATUS_CODES } from '../constants/status-codes'
-import env from '../configs/env'
+import { ApiError } from '@/utils/api-error'
+import { STATUS_CODES } from '@/constants/status-codes'
+import env from '@/configs/env'
 import { rateLimitStore } from '@/configs/redis'
 
 export const rateLimiter = rateLimit({
@@ -124,6 +124,19 @@ export const changePasswordLimiter = rateLimit({
     message: {
         success: false,
         message: 'Too many password change attempts, please try again later.',
+        statusCode: 429
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+})
+
+export const mediaUploadRateLimiter = rateLimit({
+    windowMs: env.RATE_LIMIT_MEDIA_UPLOAD_WINDOW_MINUTES * 60 * 1000,
+    max: env.RATE_LIMIT_MEDIA_UPLOAD_MAX,
+    store: rateLimitStore,
+    message: {
+        success: false,
+        message: 'Too many upload requests. Please try again later.',
         statusCode: 429
     },
     standardHeaders: true,
