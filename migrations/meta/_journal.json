@@ -57,6 +57,13 @@
             "when": 1781807854879,
             "tag": "0007_serious_barracuda",
             "breakpoints": true
+        },
+        {
+            "idx": 8,
+            "version": "7",
+            "when": 1781813004743,
+            "tag": "0008_romantic_nova",
+            "breakpoints": true
         }
     ]
 }
