@@ -56,7 +56,12 @@ export const envSchema = z.object({
     RATE_LIMIT_DELETE_ACC_WINDOW_MINUTES: z.coerce.number(),
     RATE_LIMIT_DELETE_ACC_MAX: z.coerce.number(),
     RATE_LIMIT_CHANGE_PWD_WINDOW_MINUTES: z.coerce.number(),
-    RATE_LIMIT_CHANGE_PWD_MAX: z.coerce.number()
+    RATE_LIMIT_CHANGE_PWD_MAX: z.coerce.number(),
+
+    R2_ACCOUNT_ID: z.string().min(1, 'R2_ACCOUNT_ID is required'),
+    R2_ACCESS_KEY_ID: z.string().min(1, 'R2_ACCESS_KEY_ID is required'),
+    R2_SECRET_ACCESS_KEY: z.string().min(1, 'R2_SECRET_ACCESS_KEY is required'),
+    R2_BUCKET_NAME: z.string().min(1, 'R2_BUCKET_NAME is required')
 })
 
 export type Env = z.infer<typeof envSchema>
