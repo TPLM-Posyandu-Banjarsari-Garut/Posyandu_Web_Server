@@ -110,7 +110,8 @@ export const posyandusRelations = relations(posyandus, ({ many }) => ({
     examinationRecords: many(examinationRecords),
     consultations: many(consultations),
     educations: many(educations),
-    inventories: many(inventories)
+    inventories: many(inventories),
+    pregnancyRecords: many(pregnancyRecords)
 }))
 
 export const childrensRelations = relations(childrens, ({ one, many }) => ({
@@ -229,6 +230,14 @@ export const pregnancyRecordsRelations = relations(
             fields: [pregnancyRecords.parent_id],
             references: [parents.id]
         }),
+        posyandu: one(posyandus, {
+            fields: [pregnancyRecords.posyandu_id],
+            references: [posyandus.id]
+        }),
+        midwife: one(midwifes, {
+            fields: [pregnancyRecords.midwife_id],
+            references: [midwifes.id]
+        }),
         consultations: many(consultations)
     })
 )
@@ -241,6 +250,10 @@ export const consultationsRelations = relations(consultations, ({ one }) => ({
     pregnancyRecord: one(pregnancyRecords, {
         fields: [consultations.pregnancy_record_id],
         references: [pregnancyRecords.id]
+    }),
+    children: one(childrens, {
+        fields: [consultations.children_id],
+        references: [childrens.id]
     }),
     midwife: one(midwifes, {
         fields: [consultations.midwife_id],
@@ -278,6 +291,14 @@ export const examinationSchedulesRelations = relations(
         posyandu: one(posyandus, {
             fields: [examinationSchedules.posyandu_id],
             references: [posyandus.id]
+        }),
+        midwife: one(midwifes, {
+            fields: [examinationSchedules.midwife_id],
+            references: [midwifes.id]
+        }),
+        cadre: one(cadres, {
+            fields: [examinationSchedules.cadre_id],
+            references: [cadres.id]
         }),
         records: many(examinationRecords)
     })

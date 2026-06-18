@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { ParentService } from '@/services/parents-service'
 import { ParentQueryFilters } from '@/repositories/parents-repository'
 import { ApiResponse } from '@/utils/api-response'
+import { ApiError } from '@/utils/api-error'
 import { logger } from '@/utils/logger'
 import {
     handleDeleteRequest,
@@ -30,6 +31,13 @@ export class ParentController {
     }
 
     getParentById = async (req: Request, res: Response) => {
+        const user = res.locals.user
+        const public_id = req.params.public_id as string
+
+        if (user?.role === 'parent' && user.parent_id !== public_id) {
+            throw ApiError.forbidden('You can only access your own profile')
+        }
+
         return handleGetByIdRequest(
             req,
             res,
@@ -39,11 +47,16 @@ export class ParentController {
     }
 
     updateParent = async (req: Request, res: Response) => {
+        const user = res.locals.user
         const public_id = req.params.public_id as string
         logger.info(
             { public_id, body: req.body },
             'Incoming request: Update Parent'
         )
+
+        if (user?.role === 'parent' && user.parent_id !== public_id) {
+            throw ApiError.forbidden('You can only update your own profile')
+        }
 
         const parent = await this.parent_service.updateParent(
             public_id,
@@ -53,6 +66,13 @@ export class ParentController {
     }
 
     deleteParent = async (req: Request, res: Response) => {
+        const user = res.locals.user
+        const public_id = req.params.public_id as string
+
+        if (user?.role === 'parent' && user.parent_id !== public_id) {
+            throw ApiError.forbidden('You can only delete your own profile')
+        }
+
         return handleDeleteRequest(
             req,
             res,
@@ -62,6 +82,13 @@ export class ParentController {
     }
 
     restoreParent = async (req: Request, res: Response) => {
+        const user = res.locals.user
+        const public_id = req.params.public_id as string
+
+        if (user?.role === 'parent' && user.parent_id !== public_id) {
+            throw ApiError.forbidden('You can only restore your own profile')
+        }
+
         return handleRestoreRequest(
             req,
             res,

@@ -32,7 +32,7 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'parent'),
+    authorizeRoles('admin', 'midwife', 'cadre'),
     validateRequest({ query: getParentsQuerySchema }),
     AsyncHandler(parent_controller.getParents)
 )

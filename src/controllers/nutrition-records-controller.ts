@@ -35,8 +35,21 @@ export class NutritionRecordController {
     }
 
     getNutritionRecords = async (req: Request, res: Response) => {
+        const user = res.locals.user
         const query = req.query as unknown as NutritionRecordQueryFilters
-        logger.info({ query }, 'Incoming request: Get Nutrition Records')
+        logger.info(
+            { userId: user?.id, query },
+            'Incoming request: Get Nutrition Records'
+        )
+
+        if (user?.role === 'parent') {
+            query.parent_id = user.parent_id
+        } else if (
+            (user?.role === 'cadre' || user?.role === 'midwife') &&
+            user.posyandu_id
+        ) {
+            query.posyandu_id = user.posyandu_id
+        }
 
         const result =
             await this.nutrition_record_service.getNutritionRecords(query)
