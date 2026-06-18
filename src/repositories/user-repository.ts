@@ -1,4 +1,4 @@
-import { NewUser, User, users } from '@/db'
+import { NewUser, User, users, parents, midwifes, cadres } from '@/db'
 import { and, eq, ilike, or, sql, SQL, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
@@ -204,5 +204,32 @@ export class UserRepository {
                 eq(users.status, 'active')
             )
         )
+    }
+
+    async findParentByUserId(user_id: string) {
+        const [parent] = await this.db
+            .select()
+            .from(parents)
+            .where(eq(parents.user_id, user_id))
+            .limit(1)
+        return parent
+    }
+
+    async findMidwifeByUserId(user_id: string) {
+        const [midwife] = await this.db
+            .select()
+            .from(midwifes)
+            .where(eq(midwifes.user_id, user_id))
+            .limit(1)
+        return midwife
+    }
+
+    async findCadreByUserId(user_id: string) {
+        const [cadre] = await this.db
+            .select()
+            .from(cadres)
+            .where(eq(cadres.user_id, user_id))
+            .limit(1)
+        return cadre
     }
 }

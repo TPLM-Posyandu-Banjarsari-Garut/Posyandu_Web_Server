@@ -16,6 +16,7 @@ import nutritionRecordRoutes from '@/routes/nutrition-records-route'
 import inventoryRoutes from '@/routes/inventories-route'
 import educationCategoryRoutes from '@/routes/education-categories-route'
 import educationRoutes from '@/routes/educations-route'
+import consultationRoutes from '@/routes/consultations-route'
 import { rateLimiter } from '@/middlewares/rate-limiter'
 
 const router = Router()
@@ -37,5 +38,6 @@ router.use('/api/nutrition-records', nutritionRecordRoutes)
 router.use('/api/inventories', inventoryRoutes)
 router.use('/api/education-categories', educationCategoryRoutes)
 router.use('/api/educations', educationRoutes)
+router.use('/api/consultations', consultationRoutes)
 
 export default router
