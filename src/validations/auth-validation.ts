@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
+import env from '@/configs/env'
 
 extendZodWithOpenApi(z)
 
@@ -24,7 +25,14 @@ export const signUpSchema = z
                 /^(?=.*[a-zA-Z])(?=.*\d).+$/,
                 'Password must contain at least one letter and one number'
             )
-            .openapi({ example: 'P@ssword123' })
+            .openapi({ example: 'P@ssword123' }),
+
+        phone_number: z
+            .string()
+            .max(20, 'Phone number cannot exceed 20 characters')
+            .optional()
+            .nullable()
+            .openapi({ example: '08123456789' })
     })
     .openapi('SignUpInput')
 
@@ -78,7 +86,7 @@ export const signInSocialSchema = z
         provider: z.enum(['google']).openapi({ example: 'google' }),
         callbackURL: z
             .string()
-            .openapi({ example: 'http://localhost:3000/dashboard' })
+            .openapi({ example: `${env.CORS_ORIGIN}/dashboard` })
     })
     .openapi('SignInSocialInput')
 
@@ -99,6 +107,7 @@ export const sendVerificationOTPSchema = z
                 'forget-password',
                 'change-email'
             ])
+            .default('email-verification')
             .openapi({ example: 'email-verification' })
     })
     .openapi('SendVerificationOTPInput')

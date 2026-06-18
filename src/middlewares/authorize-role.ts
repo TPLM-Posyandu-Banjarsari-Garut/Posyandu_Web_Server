@@ -23,6 +23,7 @@ export const authorizeRoles = (...allowedRoles: Role[]) => {
         const hasPermission = allowedRoles.some(role => {
             if (role === 'admin') {
                 return (
+                    userRole === 'admin' ||
                     userRole === 'posyandu_admin' ||
                     userRole === 'village_admin'
                 )
