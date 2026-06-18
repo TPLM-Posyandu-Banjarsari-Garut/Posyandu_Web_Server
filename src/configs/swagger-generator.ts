@@ -82,7 +82,7 @@ export function generateOpenApiDocs() {
         },
         servers: [
             {
-                url: env.CORS_ORIGIN,
+                url: env.BETTER_AUTH_URL,
                 description: `${env.NODE_ENV === 'development' ? 'Development' : 'Production'} Server`
             }
         ],
