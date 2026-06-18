@@ -15,7 +15,8 @@ import {
     timestamp,
     check,
     boolean,
-    date
+    date,
+    index
 } from 'drizzle-orm/pg-core'
 
 export const consultations = pgTable(
@@ -64,7 +65,15 @@ export const consultations = pgTable(
         check(
             'consultations_context_check',
             sql`(${table.consultation_type} = 'pregnancy' AND ${table.pregnancy_record_id} IS NOT NULL) OR (${table.consultation_type} = 'child_development' AND ${table.children_id} IS NOT NULL) OR ${table.consultation_type} = 'general'`
-        )
+        ),
+        index('consultations_parent_id_idx').on(table.parent_id),
+        index('consultations_pregnancy_record_id_idx').on(
+            table.pregnancy_record_id
+        ),
+        index('consultations_children_id_idx').on(table.children_id),
+        index('consultations_posyandu_id_idx').on(table.posyandu_id),
+        index('consultations_midwife_id_idx').on(table.midwife_id),
+        index('consultations_cadre_id_idx').on(table.cadre_id)
     ]
 )
 

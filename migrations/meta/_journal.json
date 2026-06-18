@@ -43,6 +43,13 @@
             "when": 1781804407204,
             "tag": "0005_great_tigra",
             "breakpoints": true
+        },
+        {
+            "idx": 6,
+            "version": "7",
+            "when": 1781804719781,
+            "tag": "0006_flawless_omega_sentinel",
+            "breakpoints": true
         }
     ]
 }
