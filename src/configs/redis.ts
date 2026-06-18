@@ -53,7 +53,7 @@ export class UpstashRedisStore implements Store {
         pipeline.zremrangebyscore(key, 0, windowStart)
         pipeline.zadd(key, {
             score: now,
-            member: `${now}-${Math.random()}`
+            member: `${now}-${crypto.randomUUID()}`
         })
         pipeline.zcard(key)
         pipeline.pexpire(key, this.windowMs)
