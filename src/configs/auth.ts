@@ -21,6 +21,14 @@ export const auth = betterAuth({
         }
     }),
     secondaryStorage: redisSecondaryStorage,
+    advanced: {
+        defaultCookieAttributes: {
+            sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+            secure: env.NODE_ENV === 'production',
+            httpOnly: true,
+            path: '/'
+        }
+    },
     plugins: [
         bearer(),
         emailOTP({
