@@ -61,7 +61,14 @@ export const envSchema = z.object({
     R2_ACCOUNT_ID: z.string().min(1, 'R2_ACCOUNT_ID is required'),
     R2_ACCESS_KEY_ID: z.string().min(1, 'R2_ACCESS_KEY_ID is required'),
     R2_SECRET_ACCESS_KEY: z.string().min(1, 'R2_SECRET_ACCESS_KEY is required'),
-    R2_BUCKET_NAME: z.string().min(1, 'R2_BUCKET_NAME is required')
+    R2_BUCKET_NAME: z.string().min(1, 'R2_BUCKET_NAME is required'),
+
+    UPSTASH_REDIS_REST_URL: z
+        .string()
+        .url('Invalid Upstash Redis URL')
+        .optional(),
+    UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+    UPSTASH_REDIS_URL: z.string().optional()
 })
 
 export type Env = z.infer<typeof envSchema>

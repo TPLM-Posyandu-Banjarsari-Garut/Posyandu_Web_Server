@@ -41,7 +41,10 @@ export class ImmunizationRecordController {
         logger.info({ query }, 'Incoming request: Get Immunization Records')
 
         const result =
-            await this.immunization_record_service.getImmunizationRecords(query)
+            await this.immunization_record_service.getImmunizationRecords(
+                query,
+                res.locals.user
+            )
         return ApiResponse.ok(
             res,
             'Immunization Records retrieved successfully',
@@ -50,13 +53,21 @@ export class ImmunizationRecordController {
     }
 
     getImmunizationRecordById = async (req: Request, res: Response) => {
-        return handleGetByIdRequest(
-            req,
-            res,
-            'ImmunizationRecord',
-            this.immunization_record_service.getImmunizationRecordById.bind(
-                this.immunization_record_service
+        const public_id = req.params.public_id as string
+        logger.info(
+            { public_id },
+            'Incoming request: Get Immunization Record By ID'
+        )
+
+        const result =
+            await this.immunization_record_service.getImmunizationRecordById(
+                public_id,
+                res.locals.user
             )
+        return ApiResponse.ok(
+            res,
+            'ImmunizationRecord retrieved successfully',
+            result
         )
     }
 

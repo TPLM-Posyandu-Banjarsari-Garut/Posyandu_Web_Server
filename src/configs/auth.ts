@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { bearer, emailOTP } from 'better-auth/plugins'
+import { redisSecondaryStorage } from '@/configs/redis'
 import * as schema from '@/db'
 import db from '@/configs/db'
 import env from '@/configs/env'
@@ -19,6 +20,7 @@ export const auth = betterAuth({
             verification: schema.verifications
         }
     }),
+    secondaryStorage: redisSecondaryStorage,
     plugins: [
         bearer(),
         emailOTP({
@@ -34,6 +36,8 @@ export const auth = betterAuth({
         enabled: true,
         autoSignIn: false,
         requireEmailVerification: true,
+        minPasswordLength: 8,
+        maxPasswordLength: 100,
         sendResetPassword: async ({ user, url, token }, request) => {
             await EmailService.sendResetPasswordLink(user.email, url)
         }
@@ -70,6 +74,12 @@ export const auth = betterAuth({
         }
     },
     session: {
+        expiresIn: 60 * 60 * 8, // 8 hours
+        updateAge: 60 * 60, // 1 hour active update
+        cookieCache: {
+            enabled: true,
+            maxAge: 5 * 60 // 5 minutes cache
+        },
         fields: {
             expiresAt: 'expires_at',
             ipAddress: 'ip_address',
