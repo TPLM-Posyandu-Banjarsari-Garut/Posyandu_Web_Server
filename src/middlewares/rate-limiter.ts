@@ -1,7 +1,7 @@
 import { rateLimit } from 'express-rate-limit'
-import { ApiError } from '../utils/api-error'
-import { STATUS_CODES } from '../constants/status-codes'
-import env from '../configs/env'
+import { ApiError } from '@/utils/api-error'
+import { STATUS_CODES } from '@/constants/status-codes'
+import env from '@/configs/env'
 import { rateLimitStore } from '@/configs/redis'
 
 export const rateLimiter = rateLimit({
