@@ -64,6 +64,18 @@ export class ExaminationRecordsService {
                     'Cannot book an examination for a cancelled schedule'
                 )
             }
+            const existing = await this.records_repository.getRecords({
+                schedule_id: payload.schedule_id,
+                children_id: payload.children_id || undefined,
+                parent_id: payload.parent_id || undefined,
+                limit: 1
+            })
+            if (existing.data.length > 0) {
+                throw ApiError.badRequest(
+                    'You or your child has already registered for this examination schedule'
+                )
+            }
+
             if (
                 schedule.max_participants &&
                 schedule.current_participants >= schedule.max_participants
@@ -72,7 +84,6 @@ export class ExaminationRecordsService {
                     'The selected examination schedule is already full'
                 )
             }
-            // Increment schedule participants count
             await this.schedules_repository.incrementParticipants(
                 payload.schedule_id
             )

@@ -14,6 +14,17 @@ export class ExaminationSchedulesService {
     async createSchedule(
         payload: NewExaminationSchedule
     ): Promise<ExaminationSchedule> {
+        const existing = await this.schedules_repository.getSchedules({
+            posyandu_id: payload.posyandu_id,
+            examination_id: payload.examination_id,
+            scheduled_date: payload.scheduled_date,
+            limit: 1
+        })
+        if (existing.data.length > 0) {
+            throw ApiError.conflict(
+                'An examination schedule for this template on the same date already exists'
+            )
+        }
         return this.schedules_repository.create(payload)
     }
 
