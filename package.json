@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "NODE_ENV=development bun --watch src/server.ts",
         "start": "NODE_ENV=production bun dist/server.js",
-        "build": "rm -rf dist && tsc && tsc-alias",
+        "build": "rm -rf dist && tsc && tsc-alias && bunx npm install --platform=linux --arch=x64 sharp",
         "vercel-build": "bun run build",
         "typecheck": "tsc --noEmit",
         "lint:check": "eslint .",
