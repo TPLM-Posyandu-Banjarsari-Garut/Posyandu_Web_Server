@@ -50,6 +50,13 @@
             "when": 1781804719781,
             "tag": "0006_flawless_omega_sentinel",
             "breakpoints": true
+        },
+        {
+            "idx": 7,
+            "version": "7",
+            "when": 1781807854879,
+            "tag": "0007_serious_barracuda",
+            "breakpoints": true
         }
     ]
 }

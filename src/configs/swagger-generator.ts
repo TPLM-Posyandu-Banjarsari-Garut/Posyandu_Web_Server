@@ -17,6 +17,7 @@ import { registerNutritionRecordsRoutes } from '@/docs/nutrition-records-docs'
 import { registerInventoriesRoutes } from '@/docs/inventories-docs'
 import { registerEducationCategoriesRoutes } from '@/docs/education-categories-docs'
 import { registerEducationsRoutes } from '@/docs/educations-docs'
+import { registerConsultationsRoutes } from '@/docs/consultations-docs'
 
 import { registerAuthRoutes } from '@/docs/auth-docs'
 import env from '@/configs/env'
@@ -56,6 +57,9 @@ registerInventoriesRoutes(registry)
 // education
 registerEducationCategoriesRoutes(registry)
 registerEducationsRoutes(registry)
+
+// consultations
+registerConsultationsRoutes(registry)
 
 export function generateOpenApiDocs() {
     const generator = new OpenApiGeneratorV3(registry.definitions)

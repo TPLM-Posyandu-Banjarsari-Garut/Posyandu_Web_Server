@@ -12,8 +12,14 @@ import {
 } from '@/db'
 import { ApiError } from '@/utils/api-error'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, ne, gte, lte, sql } from 'drizzle-orm'
 import db from '@/configs/db'
+import {
+    GENERAL_CONSULTATION_SLOTS,
+    EXAMINATION_SLOTS
+} from '@/constants/booking-schedules'
+
+type ConsultationType = 'pregnancy' | 'child_development' | 'general'
 
 export class ConsultationsService {
     constructor(
@@ -121,17 +127,149 @@ export class ConsultationsService {
         return null
     }
 
+    private async enrichWithQueueNumber(
+        consultation: Consultation
+    ): Promise<Consultation & { queue_number: number }> {
+        const targetDate = new Date(consultation.scheduled_at)
+        const startOfDay = new Date(
+            Date.UTC(
+                targetDate.getUTCFullYear(),
+                targetDate.getUTCMonth(),
+                targetDate.getUTCDate(),
+                0,
+                0,
+                0,
+                0
+            )
+        )
+        const endOfDay = new Date(
+            Date.UTC(
+                targetDate.getUTCFullYear(),
+                targetDate.getUTCMonth(),
+                targetDate.getUTCDate(),
+                23,
+                59,
+                59,
+                999
+            )
+        )
+
+        const [result] = await this.dbInstance
+            .select({ count: sql<number>`count(*)` })
+            .from(consultations)
+            .where(
+                and(
+                    eq(consultations.posyandu_id, consultation.posyandu_id),
+                    eq(
+                        consultations.consultation_type,
+                        consultation.consultation_type
+                    ),
+                    gte(consultations.scheduled_at, startOfDay),
+                    lte(consultations.scheduled_at, endOfDay),
+                    sql`${consultations.deleted_at} IS NULL`,
+                    ne(consultations.status, 'cancelled'),
+                    lte(consultations.created_at, consultation.created_at)
+                )
+            )
+
+        return {
+            ...consultation,
+            queue_number: Number(result?.count || 1)
+        }
+    }
+
+    private validateScheduledAt(
+        consultation_type: ConsultationType,
+        scheduled_at: Date
+    ): void {
+        const utcHours = scheduled_at.getUTCHours()
+        const utcMinutes = scheduled_at.getUTCMinutes()
+        const timeStr = `${String(utcHours).padStart(2, '0')}:${String(utcMinutes).padStart(2, '0')}`
+
+        const allowedSlots: readonly string[] =
+            consultation_type === 'general'
+                ? GENERAL_CONSULTATION_SLOTS
+                : EXAMINATION_SLOTS
+
+        if (!allowedSlots.includes(timeStr)) {
+            throw ApiError.badRequest(
+                `Invalid scheduled time. For ${consultation_type}, allowed timeslots are: ${allowedSlots.join(', ')}`
+            )
+        }
+    }
+
+    async getAvailableSlots(
+        posyandu_id: string,
+        consultation_type: ConsultationType,
+        dateString: string
+    ): Promise<{ time: string; available: boolean }[]> {
+        const dateParts = dateString.split('-')
+        if (dateParts.length !== 3) {
+            throw ApiError.badRequest(
+                'Invalid date format. Expected YYYY-MM-DD'
+            )
+        }
+        const year = Number.parseInt(dateParts[0], 10)
+        const month = Number.parseInt(dateParts[1], 10) - 1
+        const day = Number.parseInt(dateParts[2], 10)
+
+        const startOfDay = new Date(Date.UTC(year, month, day, 0, 0, 0, 0))
+        const endOfDay = new Date(Date.UTC(year, month, day, 23, 59, 59, 999))
+
+        const activeBookings = await this.dbInstance
+            .select({ scheduled_at: consultations.scheduled_at })
+            .from(consultations)
+            .where(
+                and(
+                    eq(consultations.posyandu_id, posyandu_id),
+                    eq(consultations.consultation_type, consultation_type),
+                    gte(consultations.scheduled_at, startOfDay),
+                    lte(consultations.scheduled_at, endOfDay),
+                    sql`${consultations.deleted_at} IS NULL`,
+                    ne(consultations.status, 'cancelled')
+                )
+            )
+
+        const timeslots =
+            consultation_type === 'general'
+                ? GENERAL_CONSULTATION_SLOTS
+                : EXAMINATION_SLOTS
+
+        const now = new Date()
+
+        return timeslots.map(timeStr => {
+            const [hours, minutes] = timeStr.split(':').map(Number)
+            const slotDate = new Date(
+                Date.UTC(year, month, day, hours, minutes, 0, 0)
+            )
+
+            const isPast = slotDate.getTime() <= now.getTime()
+            const isBooked = activeBookings.some(
+                booking => booking.scheduled_at.getTime() === slotDate.getTime()
+            )
+
+            return {
+                time: timeStr,
+                available: !isPast && !isBooked
+            }
+        })
+    }
+
     async createBooking(
         parent_id: string,
         payload: {
-            consultation_type: 'pregnancy' | 'child_development' | 'general'
+            consultation_type: ConsultationType
             scheduled_at: Date
             pregnancy_record_id?: string | null
             children_id?: string | null
             notes?: string | null
             posyandu_id?: string | null
         }
-    ): Promise<Consultation> {
+    ): Promise<Consultation & { queue_number: number }> {
+        this.validateScheduledAt(
+            payload.consultation_type,
+            payload.scheduled_at
+        )
         let derivedPosyanduId: string | null = null
 
         if (payload.consultation_type === 'pregnancy') {
@@ -157,6 +295,29 @@ export class ConsultationsService {
             )
         }
 
+        const existingBooking = await this.dbInstance
+            .select()
+            .from(consultations)
+            .where(
+                and(
+                    eq(consultations.posyandu_id, derivedPosyanduId),
+                    eq(
+                        consultations.consultation_type,
+                        payload.consultation_type
+                    ),
+                    eq(consultations.scheduled_at, payload.scheduled_at),
+                    sql`${consultations.deleted_at} IS NULL`,
+                    ne(consultations.status, 'cancelled')
+                )
+            )
+            .limit(1)
+
+        if (existingBooking.length > 0) {
+            throw ApiError.badRequest(
+                'The selected timeslot is already booked and unavailable'
+            )
+        }
+
         const newBooking: NewConsultation = {
             parent_id,
             posyandu_id: derivedPosyanduId,
@@ -168,26 +329,37 @@ export class ConsultationsService {
             status: 'pending'
         }
 
-        return this.consultations_repository.create(newBooking)
+        const created = await this.consultations_repository.create(newBooking)
+        return this.enrichWithQueueNumber(created)
     }
 
     async getConsultations(filters: ConsultationsQueryFilters) {
-        return this.consultations_repository.getConsultations(filters)
+        const result =
+            await this.consultations_repository.getConsultations(filters)
+        const enrichedData = await Promise.all(
+            result.data.map(item => this.enrichWithQueueNumber(item))
+        )
+        return {
+            data: enrichedData,
+            totalItems: result.totalItems
+        }
     }
 
-    async getConsultationById(public_id: string): Promise<Consultation> {
+    async getConsultationById(
+        public_id: string
+    ): Promise<Consultation & { queue_number: number }> {
         const consultation =
             await this.consultations_repository.findById(public_id)
         if (!consultation) {
             throw ApiError.notFound('Consultation booking not found')
         }
-        return consultation
+        return this.enrichWithQueueNumber(consultation)
     }
 
     async verifyParentAccess(
         public_id: string,
         parent_id: string
-    ): Promise<Consultation> {
+    ): Promise<Consultation & { queue_number: number }> {
         const consultation = await this.getConsultationById(public_id)
         if (consultation.parent_id !== parent_id) {
             throw ApiError.forbidden(
@@ -205,7 +377,7 @@ export class ConsultationsService {
             pregnancy_record_id?: string | null
             children_id?: string | null
         }
-    ): Promise<Consultation> {
+    ): Promise<Consultation & { queue_number: number }> {
         const consultation = await this.getConsultationById(public_id)
 
         if (
@@ -219,6 +391,33 @@ export class ConsultationsService {
 
         const updatedData: Partial<NewConsultation> = {}
         if (payload.scheduled_at) {
+            this.validateScheduledAt(
+                consultation.consultation_type,
+                payload.scheduled_at
+            )
+            const existingBooking = await this.dbInstance
+                .select()
+                .from(consultations)
+                .where(
+                    and(
+                        eq(consultations.posyandu_id, consultation.posyandu_id),
+                        eq(
+                            consultations.consultation_type,
+                            consultation.consultation_type
+                        ),
+                        eq(consultations.scheduled_at, payload.scheduled_at),
+                        sql`${consultations.deleted_at} IS NULL`,
+                        ne(consultations.status, 'cancelled')
+                    )
+                )
+                .limit(1)
+
+            if (existingBooking.length > 0) {
+                throw ApiError.badRequest(
+                    'The selected timeslot is already booked and unavailable'
+                )
+            }
+
             updatedData.scheduled_at = payload.scheduled_at
             if (consultation.status === 'confirmed') {
                 updatedData.status = 'rescheduled'
@@ -237,7 +436,7 @@ export class ConsultationsService {
         if (!result) {
             throw ApiError.internal('Failed to update consultation booking')
         }
-        return result
+        return this.enrichWithQueueNumber(result)
     }
 
     private validateStatusTransitionActor(
@@ -358,7 +557,7 @@ export class ConsultationsService {
             follow_up_required?: boolean
             follow_up_date?: Date | null
         }
-    ): Promise<Consultation> {
+    ): Promise<Consultation & { queue_number: number }> {
         const consultation = await this.getConsultationById(public_id)
 
         this.validateStatusTransitionActor(consultation, actor, payload.status)
@@ -372,13 +571,13 @@ export class ConsultationsService {
         if (!result) {
             throw ApiError.internal('Failed to update consultation status')
         }
-        return result
+        return this.enrichWithQueueNumber(result)
     }
 
     async deleteBooking(
         public_id: string,
         is_permanent = false
-    ): Promise<Consultation> {
+    ): Promise<Consultation & { queue_number: number }> {
         await this.getConsultationById(public_id)
         let result: Consultation | undefined
         if (is_permanent) {
@@ -389,10 +588,12 @@ export class ConsultationsService {
         if (!result) {
             throw ApiError.internal('Failed to delete consultation booking')
         }
-        return result
+        return this.enrichWithQueueNumber(result)
     }
 
-    async restoreBooking(public_id: string): Promise<Consultation> {
+    async restoreBooking(
+        public_id: string
+    ): Promise<Consultation & { queue_number: number }> {
         const [consultation] = await this.dbInstance
             .select()
             .from(consultations)
@@ -407,6 +608,6 @@ export class ConsultationsService {
         if (!result) {
             throw ApiError.internal('Failed to restore consultation booking')
         }
-        return result
+        return this.enrichWithQueueNumber(result)
     }
 }

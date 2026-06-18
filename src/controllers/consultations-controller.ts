@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { ConsultationsService } from '@/services/consultations-service'
 import { ConsultationsQueryFilters } from '@/repositories/consultations-repository'
+import { GetAvailableSlotsQueryInput } from '@/validations/consultations-validation'
 import { ApiResponse } from '@/utils/api-response'
 import { ApiError } from '@/utils/api-error'
 import { logger } from '@/utils/logger'
@@ -12,6 +13,27 @@ import {
 
 export class ConsultationsController {
     constructor(private readonly consultations_service: ConsultationsService) {}
+
+    getAvailableSlots = async (req: Request, res: Response) => {
+        const { posyandu_id, consultation_type, date } =
+            req.query as unknown as GetAvailableSlotsQueryInput
+        logger.info(
+            { posyandu_id, consultation_type, date },
+            'Incoming request: Get Available Slots'
+        )
+
+        const slots = await this.consultations_service.getAvailableSlots(
+            posyandu_id,
+            consultation_type,
+            date
+        )
+
+        return ApiResponse.ok(
+            res,
+            'Available slots retrieved successfully',
+            slots
+        )
+    }
 
     createBooking = async (req: Request, res: Response) => {
         const user = res.locals.user

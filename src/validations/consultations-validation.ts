@@ -218,8 +218,31 @@ export const consultationParamsSchema = z
 
 export const deleteConsultationQuerySchema = deleteQuerySchema
 
+export const getAvailableSlotsQuerySchema = z
+    .object({
+        posyandu_id: z
+            .string({ message: 'Posyandu ID is required' })
+            .min(1, 'Posyandu ID is required')
+            .openapi({ example: 'posyandu-uuid' }),
+        consultation_type: z
+            .enum(consultationTypeEnum.enumValues, {
+                message: 'Invalid consultation type'
+            })
+            .openapi({ example: 'pregnancy' }),
+        date: z
+            .string({ message: 'Date is required' })
+            .regex(/^\d{4}-\d{2}-\d{2}$/, {
+                message: 'Date must be in YYYY-MM-DD format'
+            })
+            .openapi({ example: '2026-06-20' })
+    })
+    .openapi('GetAvailableSlotsQuery')
+
 export type CreateConsultationInput = z.infer<typeof createConsultationSchema>
 export type UpdateConsultationInput = z.infer<typeof updateConsultationSchema>
+export type GetAvailableSlotsQueryInput = z.infer<
+    typeof getAvailableSlotsQuerySchema
+>
 export type UpdateConsultationStatusInput = z.infer<
     typeof updateConsultationStatusSchema
 >

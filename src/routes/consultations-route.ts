@@ -12,7 +12,8 @@ import {
     updateConsultationStatusSchema,
     getConsultationsQuerySchema,
     consultationParamsSchema,
-    deleteConsultationQuerySchema
+    deleteConsultationQuerySchema,
+    getAvailableSlotsQuerySchema
 } from '@/validations/consultations-validation'
 import db from '@/configs/db'
 
@@ -38,6 +39,14 @@ router.get(
     authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
     validateRequest({ query: getConsultationsQuerySchema }),
     AsyncHandler(consultations_controller.getConsultations)
+)
+
+router.get(
+    '/slots/available',
+    verifyAuth,
+    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    validateRequest({ query: getAvailableSlotsQuerySchema }),
+    AsyncHandler(consultations_controller.getAvailableSlots)
 )
 
 router.get(
