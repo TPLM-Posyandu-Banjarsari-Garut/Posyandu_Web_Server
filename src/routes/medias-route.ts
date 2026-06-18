@@ -4,6 +4,7 @@ import { MediaController } from '@/controllers/media-controller'
 import { MediaService } from '@/services/media-service'
 import { MediaRepository } from '@/repositories/media-repository'
 import { verifyAuth } from '@/middlewares/verify-auth'
+import { mediaUploadRateLimiter } from '@/middlewares/rate-limiter'
 import { AsyncHandler } from '@/utils/async-handler'
 import { validateRequest } from '@/middlewares/validate-request'
 import {
@@ -26,6 +27,7 @@ const upload = multer({
 router.post(
     '/upload',
     verifyAuth,
+    mediaUploadRateLimiter,
     upload.array('files', 5),
     AsyncHandler(mediaController.uploadMedia)
 )

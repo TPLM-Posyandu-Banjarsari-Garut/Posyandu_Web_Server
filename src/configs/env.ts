@@ -59,6 +59,8 @@ export const envSchema = z.object({
     RATE_LIMIT_DELETE_ACC_MAX: z.coerce.number(),
     RATE_LIMIT_CHANGE_PWD_WINDOW_MINUTES: z.coerce.number(),
     RATE_LIMIT_CHANGE_PWD_MAX: z.coerce.number(),
+    RATE_LIMIT_MEDIA_UPLOAD_WINDOW_MINUTES: z.coerce.number(),
+    RATE_LIMIT_MEDIA_UPLOAD_MAX: z.coerce.number(),
 
     R2_ACCOUNT_ID: z.string().min(1, 'R2_ACCOUNT_ID is required'),
     R2_ACCESS_KEY_ID: z.string().min(1, 'R2_ACCESS_KEY_ID is required'),

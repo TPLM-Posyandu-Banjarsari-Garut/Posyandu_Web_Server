@@ -130,6 +130,19 @@ export const changePasswordLimiter = rateLimit({
     legacyHeaders: false
 })
 
+export const mediaUploadRateLimiter = rateLimit({
+    windowMs: env.RATE_LIMIT_MEDIA_UPLOAD_WINDOW_MINUTES * 60 * 1000,
+    max: env.RATE_LIMIT_MEDIA_UPLOAD_MAX,
+    store: rateLimitStore,
+    message: {
+        success: false,
+        message: 'Too many upload requests. Please try again later.',
+        statusCode: 429
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+})
+
 /**
  * Make sure global error handler is set up to handle ApiError
  */
