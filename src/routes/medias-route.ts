@@ -13,6 +13,7 @@ import {
 } from '@/validations/medias-validation'
 import { deleteQuerySchema } from '@/validations/shared-validation'
 import db from '@/configs/db'
+import env from '@/configs/env'
 
 const router = Router()
 
@@ -21,7 +22,10 @@ const mediaService = new MediaService(mediaRepository)
 const mediaController = new MediaController(mediaService)
 
 const upload = multer({
-    storage: multer.memoryStorage()
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: env.MEDIA_UPLOAD_MAX_RAW_SIZE_MB * 1024 * 1024
+    }
 })
 
 router.post(

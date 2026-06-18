@@ -72,6 +72,7 @@ export const envSchema = z.object({
         .optional(),
 
     MEDIA_UPLOAD_MAX_SIZE_MB: z.coerce.number().default(3),
+    MEDIA_UPLOAD_MAX_RAW_SIZE_MB: z.coerce.number().default(15),
     MEDIA_UPLOAD_ALLOWED_EXTENSIONS: z
         .string()
         .default(
