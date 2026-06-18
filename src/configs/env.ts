@@ -32,24 +32,31 @@ export const envSchema = z.object({
 
     SENDER_EMAIL: z.string().email('Invalid sender email format'),
 
-    RATE_LIMIT_GLOBAL_WINDOW_MINUTES: z.coerce.number().default(15),
-    RATE_LIMIT_GLOBAL_MAX: z.coerce.number().default(100),
-    RATE_LIMIT_AUTH_WINDOW_MINUTES: z.coerce.number().default(60),
-    RATE_LIMIT_AUTH_MAX: z.coerce.number().default(5),
-    RATE_LIMIT_SIGNIN_WINDOW_MINUTES: z.coerce.number().default(15),
-    RATE_LIMIT_SIGNIN_MAX: z.coerce.number().default(5),
-    RATE_LIMIT_SIGNUP_WINDOW_MINUTES: z.coerce.number().default(15),
-    RATE_LIMIT_SIGNUP_MAX: z.coerce.number().default(5),
-    RATE_LIMIT_OTP_REQ_WINDOW_MINUTES: z.coerce.number().default(10),
-    RATE_LIMIT_OTP_REQ_MAX: z.coerce.number().default(6),
-    RATE_LIMIT_OTP_VERIFY_WINDOW_MINUTES: z.coerce.number().default(10),
-    RATE_LIMIT_OTP_VERIFY_MAX: z.coerce.number().default(6),
-    RATE_LIMIT_RESET_PWD_WINDOW_MINUTES: z.coerce.number().default(15),
-    RATE_LIMIT_RESET_PWD_MAX: z.coerce.number().default(6),
-    RATE_LIMIT_DELETE_ACC_WINDOW_MINUTES: z.coerce.number().default(15),
-    RATE_LIMIT_DELETE_ACC_MAX: z.coerce.number().default(5),
-    RATE_LIMIT_CHANGE_PWD_WINDOW_MINUTES: z.coerce.number().default(15),
-    RATE_LIMIT_CHANGE_PWD_MAX: z.coerce.number().default(5)
+    CONTACT_NAME: z.string().min(1, 'CONTACT_NAME is required'),
+    CONTACT_WHATSAPP: z.string().url('Invalid WhatsApp URL format'),
+    CONTACT_EMAIL: z
+        .string()
+        .email('Invalid contact email format')
+        .min(1, 'CONTACT_EMAIL is required'),
+
+    RATE_LIMIT_GLOBAL_WINDOW_MINUTES: z.coerce.number(),
+    RATE_LIMIT_GLOBAL_MAX: z.coerce.number(),
+    RATE_LIMIT_AUTH_WINDOW_MINUTES: z.coerce.number(),
+    RATE_LIMIT_AUTH_MAX: z.coerce.number(),
+    RATE_LIMIT_SIGNIN_WINDOW_MINUTES: z.coerce.number(),
+    RATE_LIMIT_SIGNIN_MAX: z.coerce.number(),
+    RATE_LIMIT_SIGNUP_WINDOW_MINUTES: z.coerce.number(),
+    RATE_LIMIT_SIGNUP_MAX: z.coerce.number(),
+    RATE_LIMIT_OTP_REQ_WINDOW_MINUTES: z.coerce.number(),
+    RATE_LIMIT_OTP_REQ_MAX: z.coerce.number(),
+    RATE_LIMIT_OTP_VERIFY_WINDOW_MINUTES: z.coerce.number(),
+    RATE_LIMIT_OTP_VERIFY_MAX: z.coerce.number(),
+    RATE_LIMIT_RESET_PWD_WINDOW_MINUTES: z.coerce.number(),
+    RATE_LIMIT_RESET_PWD_MAX: z.coerce.number(),
+    RATE_LIMIT_DELETE_ACC_WINDOW_MINUTES: z.coerce.number(),
+    RATE_LIMIT_DELETE_ACC_MAX: z.coerce.number(),
+    RATE_LIMIT_CHANGE_PWD_WINDOW_MINUTES: z.coerce.number(),
+    RATE_LIMIT_CHANGE_PWD_MAX: z.coerce.number()
 })
 
 export type Env = z.infer<typeof envSchema>
