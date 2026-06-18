@@ -330,6 +330,39 @@ export class ConsultationsService {
         consultation_type: ConsultationType,
         scheduled_at: Date
     ): void {
+        const now = new Date()
+        const startOfToday = new Date(
+            Date.UTC(
+                now.getUTCFullYear(),
+                now.getUTCMonth(),
+                now.getUTCDate(),
+                0,
+                0,
+                0,
+                0
+            )
+        )
+        const endOfLusa = new Date(
+            Date.UTC(
+                now.getUTCFullYear(),
+                now.getUTCMonth(),
+                now.getUTCDate() + 2,
+                23,
+                59,
+                59,
+                999
+            )
+        )
+
+        if (
+            scheduled_at.getTime() < startOfToday.getTime() ||
+            scheduled_at.getTime() > endOfLusa.getTime()
+        ) {
+            throw ApiError.badRequest(
+                'Booking is only allowed for today, tomorrow, and the day after tomorrow'
+            )
+        }
+
         const utcHours = scheduled_at.getUTCHours()
         const utcMinutes = scheduled_at.getUTCMinutes()
         const timeStr = `${String(utcHours).padStart(2, '0')}:${String(utcMinutes).padStart(2, '0')}`
@@ -429,17 +462,23 @@ export class ConsultationsService {
         parent_id: string,
         payload: {
             consultation_type: ConsultationType
-            scheduled_at: Date
+            scheduled_at: Date | Date[]
             pregnancy_record_id?: string | null
             children_id?: string | null
             notes?: string | null
             posyandu_id?: string | null
         }
-    ): Promise<Consultation & { queue_number: number }> {
-        this.validateScheduledAt(
-            payload.consultation_type,
-            payload.scheduled_at
-        )
+    ): Promise<
+        | (Consultation & { queue_number: number })
+        | (Consultation & { queue_number: number })[]
+    > {
+        const dates = Array.isArray(payload.scheduled_at)
+            ? payload.scheduled_at
+            : [payload.scheduled_at]
+        for (const date of dates) {
+            this.validateScheduledAt(payload.consultation_type, date)
+        }
+
         let derivedPosyanduId: string | null = null
 
         if (payload.consultation_type === 'pregnancy') {
@@ -465,89 +504,104 @@ export class ConsultationsService {
             )
         }
 
-        const existingBooking = await this.dbInstance
-            .select()
-            .from(consultations)
-            .where(
-                and(
-                    eq(consultations.posyandu_id, derivedPosyanduId),
-                    eq(
-                        consultations.consultation_type,
-                        payload.consultation_type
-                    ),
-                    eq(consultations.scheduled_at, payload.scheduled_at),
-                    sql`${consultations.deleted_at} IS NULL`,
-                    ne(consultations.status, 'cancelled')
-                )
-            )
-            .limit(1)
+        const finalPosyanduId = derivedPosyanduId
 
-        if (existingBooking.length > 0) {
-            throw ApiError.badRequest(
-                'The selected timeslot is already booked and unavailable'
-            )
-        }
+        const results = await this.dbInstance.transaction(async tx => {
+            const createdBookings = []
+            for (const schedDate of dates) {
+                const existingBooking = await tx
+                    .select()
+                    .from(consultations)
+                    .where(
+                        and(
+                            eq(consultations.posyandu_id, finalPosyanduId),
+                            eq(
+                                consultations.consultation_type,
+                                payload.consultation_type
+                            ),
+                            eq(consultations.scheduled_at, schedDate),
+                            sql`${consultations.deleted_at} IS NULL`,
+                            ne(consultations.status, 'cancelled')
+                        )
+                    )
+                    .limit(1)
 
-        const newBooking: NewConsultation = {
-            parent_id,
-            posyandu_id: derivedPosyanduId,
-            consultation_type: payload.consultation_type,
-            scheduled_at: payload.scheduled_at,
-            pregnancy_record_id: payload.pregnancy_record_id || null,
-            children_id: payload.children_id || null,
-            notes: payload.notes || null,
-            status: 'pending'
-        }
+                if (existingBooking.length > 0) {
+                    throw ApiError.badRequest(
+                        `The timeslot ${schedDate.toISOString()} is already booked and unavailable`
+                    )
+                }
 
-        let created: Consultation
-        try {
-            created = await this.consultations_repository.create(newBooking)
-        } catch (error: unknown) {
-            this.handleDatabaseUpdateError(error)
-        }
+                const newBooking: NewConsultation = {
+                    parent_id,
+                    posyandu_id: finalPosyanduId,
+                    consultation_type: payload.consultation_type,
+                    scheduled_at: schedDate,
+                    pregnancy_record_id: payload.pregnancy_record_id || null,
+                    children_id: payload.children_id || null,
+                    notes: payload.notes || null,
+                    status: 'pending'
+                }
 
-        const enriched = await this.enrichWithQueueNumber(created)
-
-        await this.invalidateSlotsCache(
-            derivedPosyanduId,
-            payload.consultation_type,
-            payload.scheduled_at
-        )
-
-        try {
-            const dateString = payload.scheduled_at.toISOString().split('T')[0]
-            WsManager.broadcastSlotUpdate(
-                derivedPosyanduId,
-                payload.consultation_type,
-                dateString
-            )
-        } catch (err) {
-            logger.error(err, 'WebSocket broadcast slot update failed')
-        }
-
-        try {
-            const detail = await this.getBookingDetails(enriched.id)
-            if (detail) {
-                await this.notifications_service.createNotification({
-                    user_id: detail.parent_user_id,
-                    type: 'consultation',
-                    status: 'unread',
-                    title: '📅 Booking Baru Dibuat',
-                    body: `Booking Anda untuk ${labelConsultationType(payload.consultation_type)} di ${detail.posyandu_name} telah berhasil dibuat. Menunggu konfirmasi petugas.`,
-                    data: {
-                        consultation_id: enriched.id,
-                        scheduled_at: payload.scheduled_at.toISOString(),
-                        queue_number: enriched.queue_number,
-                        consultation_type: payload.consultation_type,
-                        posyandu_name: detail.posyandu_name
-                    }
-                })
+                const [created] = await tx
+                    .insert(consultations)
+                    .values(newBooking)
+                    .returning()
+                createdBookings.push(created)
             }
-        } catch (err) {
-            logger.error(err, 'Failed to send createBooking notification')
+            return createdBookings
+        })
+
+        const enrichedBookings = []
+        for (const created of results) {
+            const enriched = await this.enrichWithQueueNumber(created)
+            enrichedBookings.push(enriched)
+
+            await this.invalidateSlotsCache(
+                finalPosyanduId,
+                payload.consultation_type,
+                created.scheduled_at
+            )
+
+            try {
+                const dateString = created.scheduled_at
+                    .toISOString()
+                    .split('T')[0]
+                WsManager.broadcastSlotUpdate(
+                    finalPosyanduId,
+                    payload.consultation_type,
+                    dateString
+                )
+            } catch (err) {
+                logger.error(err, 'WebSocket broadcast slot update failed')
+            }
+
+            try {
+                const detail = await this.getBookingDetails(enriched.id)
+                if (detail) {
+                    await this.notifications_service.createNotification({
+                        user_id: detail.parent_user_id,
+                        type: 'consultation',
+                        status: 'unread',
+                        title: '📅 Booking Baru Dibuat',
+                        body: `Booking Anda untuk ${labelConsultationType(payload.consultation_type)} di ${detail.posyandu_name} telah berhasil dibuat. Menunggu konfirmasi petugas.`,
+                        data: {
+                            consultation_id: enriched.id,
+                            scheduled_at: created.scheduled_at.toISOString(),
+                            queue_number: enriched.queue_number,
+                            consultation_type: payload.consultation_type,
+                            posyandu_name: detail.posyandu_name
+                        }
+                    })
+                }
+            } catch (err) {
+                logger.error(err, 'Failed to send createBooking notification')
+            }
         }
 
-        return enriched
+        return Array.isArray(payload.scheduled_at)
+            ? enrichedBookings
+            : enrichedBookings[0]
     }
 
     async getConsultations(filters: ConsultationsQueryFilters) {

@@ -30,10 +30,16 @@ export const createEducationSchema = createInsertSchema(educations, {
         .openapi({ example: 'Panduan lengkap tentang pencegahan stunting.' }),
 
     image_url: z
-        .url('Must be a valid URL')
+        .string()
+        .url({ message: 'Must be a valid URL' })
         .optional()
         .nullable()
-        .openapi({ example: 'https://example.com/images/stunting.jpg' }),
+        .openapi({
+            description:
+                'Education cover image URL (uploaded via /api/medias/upload first)',
+            example:
+                'https://media.posyandubanjarsari.my.id/medias/uuid-stunting.webp'
+        }),
 
     category_id: z
         .string()

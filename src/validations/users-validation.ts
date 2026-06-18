@@ -31,6 +31,18 @@ export const createUserSchema = createInsertSchema(users, {
 
     role: z.enum(accountRoleEnum.enumValues).openapi({ example: 'cadre' }),
 
+    avatar_url: z
+        .string()
+        .url({ message: 'Must be a valid URL' })
+        .optional()
+        .nullable()
+        .openapi({
+            description:
+                'User avatar URL (uploaded via /api/medias/upload first)',
+            example:
+                'https://media.posyandubanjarsari.my.id/medias/uuid-avatar.webp'
+        }),
+
     status: z.enum(accountStatusEnum.enumValues).default('active')
 })
     .extend({

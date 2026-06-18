@@ -61,10 +61,11 @@ export class ConsultationsController {
             req.body
         )
 
-        logger.info(
-            { bookingId: booking.id },
-            'Consultation booking created successfully'
-        )
+        const bookingId = Array.isArray(booking)
+            ? booking.map(b => b.id).join(', ')
+            : booking.id
+
+        logger.info({ bookingId }, 'Consultation booking created successfully')
         return ApiResponse.created(
             res,
             'Consultation booking created successfully',
