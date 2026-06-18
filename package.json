@@ -31,6 +31,9 @@
         ],
         "*.ts": "bash -c 'tsc --noEmit'"
     },
+    "trustedDependencies": [
+        "sharp"
+    ],
     "devDependencies": {
         "@commitlint/cli": "^21.0.1",
         "@commitlint/config-conventional": "^21.0.1",
