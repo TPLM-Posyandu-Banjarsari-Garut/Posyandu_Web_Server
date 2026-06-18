@@ -16,7 +16,8 @@ import {
     check,
     boolean,
     date,
-    index
+    index,
+    uniqueIndex
 } from 'drizzle-orm/pg-core'
 
 export const consultations = pgTable(
@@ -64,8 +65,14 @@ export const consultations = pgTable(
     table => [
         check(
             'consultations_context_check',
-            sql`(${table.consultation_type} = 'pregnancy' AND ${table.pregnancy_record_id} IS NOT NULL) OR (${table.consultation_type} = 'child_development' AND ${table.children_id} IS NOT NULL) OR ${table.consultation_type} = 'general'`
+            sql`(${table.consultation_type} = 'pregnancy' AND ${table.pregnancy_record_id} IS NOT NULL AND ${table.children_id} IS NULL) OR (${table.consultation_type} = 'child_development' AND ${table.children_id} IS NOT NULL AND ${table.pregnancy_record_id} IS NULL) OR (${table.consultation_type} = 'general' AND ${table.pregnancy_record_id} IS NULL AND ${table.children_id} IS NULL)`
         ),
+        uniqueIndex('consultations_slot_unique_idx')
+            .on(table.posyandu_id, table.consultation_type, table.scheduled_at)
+            .where(sql`status != 'cancelled' AND deleted_at IS NULL`),
+        uniqueIndex('consultations_parent_schedule_unique_idx')
+            .on(table.parent_id, table.scheduled_at)
+            .where(sql`status != 'cancelled' AND deleted_at IS NULL`),
         index('consultations_parent_id_idx').on(table.parent_id),
         index('consultations_pregnancy_record_id_idx').on(
             table.pregnancy_record_id

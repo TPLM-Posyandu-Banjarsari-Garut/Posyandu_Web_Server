@@ -66,6 +66,7 @@
         "@better-auth/drizzle-adapter": "^1.6.14",
         "@better-auth/redis-storage": "^1.6.19",
         "@neondatabase/serverless": "^1.1.0",
+        "@types/ws": "^8.18.1",
         "@upstash/redis": "^1.38.0",
         "better-auth": "^1.6.14",
         "cookie-parser": "^1.4.7",
@@ -88,6 +89,7 @@
         "source-map-support": "^0.5.21",
         "swagger-jsdoc": "^6.3.0",
         "swagger-ui-express": "^5.0.1",
+        "ws": "^8.21.0",
         "zod": "^4.4.3"
     }
 }

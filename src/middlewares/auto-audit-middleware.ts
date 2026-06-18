@@ -14,6 +14,39 @@ const SENSITIVE_KEYS = [
     'cookie'
 ]
 
+const ENTITY_TYPE_MAP: Record<string, string> = {
+    consultations: 'consultation',
+    users: 'user',
+    parents: 'parent',
+    midwifes: 'midwife',
+    cadres: 'cadre',
+    posyandus: 'posyandu',
+    childrens: 'children',
+    notifications: 'notification',
+    'immunization-records': 'immunization_record',
+    'vitamin-records': 'vitamin_record',
+    'nutrition-records': 'nutrition_record',
+    'kipi-details': 'kipi_detail',
+    inventories: 'inventory',
+    vaccines: 'vaccine',
+    vitamins: 'vitamin',
+    educations: 'education'
+}
+
+function extractEntityType(url: string): string | null {
+    const match = new RegExp(/\/api\/([^/?]+)/).exec(url)
+    if (!match) return null
+    return ENTITY_TYPE_MAP[match[1]] ?? match[1].replaceAll('-', '_')
+}
+
+function extractEntityId(req: Request): string | null {
+    return (
+        (req.params.public_id as string | undefined) ||
+        (req.params.id as string | undefined) ||
+        null
+    )
+}
+
 const censorPayload = (data: unknown): unknown => {
     if (!data || typeof data !== 'object') return data
 
@@ -50,6 +83,19 @@ export const autoAuditMiddleware = (
     const ipAddress = (req.headers['x-forwarded-for'] as string) || req.ip || ''
     const userAgent = req.headers['user-agent'] || ''
     const action = `${req.method} ${req.originalUrl || req.url}`
+    const entityType = extractEntityType(req.originalUrl || req.url)
+    const entityId = extractEntityId(req)
+
+    let capturedNewValue: unknown = null
+    const originalJson = res.json.bind(res)
+    res.json = (body: unknown) => {
+        const parsed =
+            body && typeof body === 'object'
+                ? (body as Record<string, unknown>)
+                : null
+        capturedNewValue = parsed?.data ?? null
+        return originalJson(body)
+    }
 
     res.on('finish', () => {
         const isSuccess = res.statusCode >= 200 && res.statusCode < 300
@@ -61,6 +107,9 @@ export const autoAuditMiddleware = (
                 .values({
                     userId,
                     action,
+                    entityType,
+                    entityId,
+                    newValue: capturedNewValue,
                     ipAddress,
                     userAgent,
                     payload,
@@ -68,7 +117,7 @@ export const autoAuditMiddleware = (
                 })
                 .then(() => {
                     logger.debug(
-                        { action, userId },
+                        { action, userId, entityType, entityId },
                         'Audit log saved successfully'
                     )
                 })
