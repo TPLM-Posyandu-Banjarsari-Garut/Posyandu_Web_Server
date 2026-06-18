@@ -1,21 +1,28 @@
 import { z } from 'zod'
 
+const numeric = z.string().transform((val, ctx) => {
+    const parsed = Number(val)
+    if (Number.isNaN(parsed)) {
+        ctx.addIssue({
+            code: 'custom',
+            message: 'Must be a valid number'
+        })
+        return z.NEVER
+    }
+    return parsed
+})
+
 export const envSchema = z.object({
-    NODE_ENV: z
-        .enum(['development', 'test', 'production'])
-        .default('development'),
+    NODE_ENV: z.enum(['development', 'test', 'production']),
 
-    PORT: z.coerce.number().default(3000),
+    PORT: numeric,
 
-    LOG_LEVEL: z
-        .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
-        .default('info'),
+    LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']),
 
     CORS_ORIGIN: z.url('Invalid CORS origin URL format'),
 
     TRUSTED_ORIGINS: z
         .string()
-        .default('')
         .transform(val => (val ? val.split(',').map(url => url.trim()) : [])),
 
     DATABASE_URL: z.url('Invalid Database URL format'),
@@ -41,26 +48,26 @@ export const envSchema = z.object({
         .email('Invalid contact email format')
         .min(1, 'CONTACT_EMAIL is required'),
 
-    RATE_LIMIT_GLOBAL_WINDOW_MINUTES: z.coerce.number(),
-    RATE_LIMIT_GLOBAL_MAX: z.coerce.number(),
-    RATE_LIMIT_AUTH_WINDOW_MINUTES: z.coerce.number(),
-    RATE_LIMIT_AUTH_MAX: z.coerce.number(),
-    RATE_LIMIT_SIGNIN_WINDOW_MINUTES: z.coerce.number(),
-    RATE_LIMIT_SIGNIN_MAX: z.coerce.number(),
-    RATE_LIMIT_SIGNUP_WINDOW_MINUTES: z.coerce.number(),
-    RATE_LIMIT_SIGNUP_MAX: z.coerce.number(),
-    RATE_LIMIT_OTP_REQ_WINDOW_MINUTES: z.coerce.number(),
-    RATE_LIMIT_OTP_REQ_MAX: z.coerce.number(),
-    RATE_LIMIT_OTP_VERIFY_WINDOW_MINUTES: z.coerce.number(),
-    RATE_LIMIT_OTP_VERIFY_MAX: z.coerce.number(),
-    RATE_LIMIT_RESET_PWD_WINDOW_MINUTES: z.coerce.number(),
-    RATE_LIMIT_RESET_PWD_MAX: z.coerce.number(),
-    RATE_LIMIT_DELETE_ACC_WINDOW_MINUTES: z.coerce.number(),
-    RATE_LIMIT_DELETE_ACC_MAX: z.coerce.number(),
-    RATE_LIMIT_CHANGE_PWD_WINDOW_MINUTES: z.coerce.number(),
-    RATE_LIMIT_CHANGE_PWD_MAX: z.coerce.number(),
-    RATE_LIMIT_MEDIA_UPLOAD_WINDOW_MINUTES: z.coerce.number(),
-    RATE_LIMIT_MEDIA_UPLOAD_MAX: z.coerce.number(),
+    RATE_LIMIT_GLOBAL_WINDOW_MINUTES: numeric,
+    RATE_LIMIT_GLOBAL_MAX: numeric,
+    RATE_LIMIT_AUTH_WINDOW_MINUTES: numeric,
+    RATE_LIMIT_AUTH_MAX: numeric,
+    RATE_LIMIT_SIGNIN_WINDOW_MINUTES: numeric,
+    RATE_LIMIT_SIGNIN_MAX: numeric,
+    RATE_LIMIT_SIGNUP_WINDOW_MINUTES: numeric,
+    RATE_LIMIT_SIGNUP_MAX: numeric,
+    RATE_LIMIT_OTP_REQ_WINDOW_MINUTES: numeric,
+    RATE_LIMIT_OTP_REQ_MAX: numeric,
+    RATE_LIMIT_OTP_VERIFY_WINDOW_MINUTES: numeric,
+    RATE_LIMIT_OTP_VERIFY_MAX: numeric,
+    RATE_LIMIT_RESET_PWD_WINDOW_MINUTES: numeric,
+    RATE_LIMIT_RESET_PWD_MAX: numeric,
+    RATE_LIMIT_DELETE_ACC_WINDOW_MINUTES: numeric,
+    RATE_LIMIT_DELETE_ACC_MAX: numeric,
+    RATE_LIMIT_CHANGE_PWD_WINDOW_MINUTES: numeric,
+    RATE_LIMIT_CHANGE_PWD_MAX: numeric,
+    RATE_LIMIT_MEDIA_UPLOAD_WINDOW_MINUTES: numeric,
+    RATE_LIMIT_MEDIA_UPLOAD_MAX: numeric,
 
     R2_ACCOUNT_ID: z.string().min(1, 'R2_ACCOUNT_ID is required'),
     R2_ACCESS_KEY_ID: z.string().min(1, 'R2_ACCESS_KEY_ID is required'),
@@ -71,13 +78,10 @@ export const envSchema = z.object({
         .url({ message: 'Invalid R2_PUBLIC_URL format' })
         .optional(),
 
-    MEDIA_UPLOAD_MAX_SIZE_MB: z.coerce.number().default(3),
-    MEDIA_UPLOAD_MAX_RAW_SIZE_MB: z.coerce.number().default(15),
+    MEDIA_UPLOAD_MAX_SIZE_MB: numeric,
+    MEDIA_UPLOAD_MAX_RAW_SIZE_MB: numeric,
     MEDIA_UPLOAD_ALLOWED_EXTENSIONS: z
         .string()
-        .default(
-            'png,jpg,jpeg,gif,webp,svg,mp4,webm,ogg,mov,mkv,avi,xls,xlsx,csv,doc,docx,pdf,txt,rtf'
-        )
         .transform(val => val.split(',').map(ext => ext.trim().toLowerCase())),
 
     UPSTASH_REDIS_REST_URL: z
