@@ -9,10 +9,10 @@ export const media = pgTable(
         ...createBaseColumns('media'),
         file_name: varchar('file_name', { length: 255 }).notNull(),
         original_name: varchar('original_name', { length: 255 }).notNull(),
-        file_size: integer('file_size').notNull(), // in bytes
+        file_size: integer('file_size').notNull(),
         mime_type: varchar('mime_type', { length: 100 }).notNull(),
         file_extension: varchar('file_extension', { length: 10 }).notNull(),
-        file_category: varchar('file_category', { length: 20 }).notNull(), // 'image' | 'video' | 'excel' | 'docs'
+        file_category: varchar('file_category', { length: 20 }).notNull(),
         url: text('url').notNull(),
         r2_key: text('r2_key').notNull(),
         uploaded_by: text('uploaded_by')

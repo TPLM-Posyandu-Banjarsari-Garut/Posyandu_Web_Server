@@ -23,7 +23,6 @@ const upload = multer({
     storage: multer.memoryStorage()
 })
 
-// Upload endpoint supporting up to 5 files under key 'files'
 router.post(
     '/upload',
     verifyAuth,
@@ -31,7 +30,6 @@ router.post(
     AsyncHandler(mediaController.uploadMedia)
 )
 
-// List media endpoint
 router.get(
     '/',
     verifyAuth,
@@ -39,7 +37,6 @@ router.get(
     AsyncHandler(mediaController.getMedias)
 )
 
-// Get single media details endpoint
 router.get(
     '/:id',
     verifyAuth,
@@ -47,7 +44,6 @@ router.get(
     AsyncHandler(mediaController.getMediaById)
 )
 
-// Delete media endpoint
 router.delete(
     '/:id',
     verifyAuth,

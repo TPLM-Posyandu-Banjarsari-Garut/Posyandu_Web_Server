@@ -8,6 +8,7 @@ import {
 import { Media, NewMedia } from '@/db'
 import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
+import sharp from 'sharp'
 
 export class MediaService {
     constructor(private readonly media_repository: MediaRepository) {}
@@ -31,6 +32,110 @@ export class MediaService {
         )
     }
 
+    private async compressImage(
+        buffer: Buffer,
+        originalName: string,
+        maxSizeBytes: number
+    ): Promise<Buffer> {
+        try {
+            const compressed = await sharp(buffer)
+                .webp({ quality: 80 })
+                .toBuffer()
+
+            if (compressed.length > maxSizeBytes) {
+                throw ApiError.badRequest(
+                    `Image ${originalName} still exceeds the ${env.MEDIA_UPLOAD_MAX_SIZE_MB}MB limit even after compression.`
+                )
+            }
+            return compressed
+        } catch (error: unknown) {
+            if (error instanceof ApiError) throw error
+            const message =
+                error instanceof Error ? error.message : String(error)
+            throw ApiError.badRequest(
+                `Failed to compress image ${originalName}: ${message}`
+            )
+        }
+    }
+
+    private async processAndUploadFile(
+        file: Express.Multer.File,
+        maxSizeBytes: number,
+        allowedExtensions: string[],
+        userId: string
+    ): Promise<Media> {
+        let ext = file.originalname.split('.').pop()?.toLowerCase() || ''
+
+        if (!allowedExtensions.includes(ext)) {
+            throw ApiError.badRequest(
+                `File extension .${ext} is not allowed. Allowed extensions: ${allowedExtensions.join(', ')}`
+            )
+        }
+
+        const category = this.getFileCategory(ext)
+        let buffer = file.buffer
+        let size = file.size
+        let mimeType = file.mimetype
+        let originalName = file.originalname
+
+        if (size > maxSizeBytes) {
+            if (category !== 'image') {
+                throw ApiError.badRequest(
+                    `File ${originalName} exceeds the limit of ${env.MEDIA_UPLOAD_MAX_SIZE_MB}MB.`
+                )
+            }
+
+            buffer = await this.compressImage(
+                buffer,
+                originalName,
+                maxSizeBytes
+            )
+            size = buffer.length
+            mimeType = 'image/webp'
+            ext = 'webp'
+
+            const baseName =
+                originalName.substring(0, originalName.lastIndexOf('.')) ||
+                originalName
+            originalName = `${baseName}.webp`
+        }
+
+        const uniqueId = crypto.randomUUID()
+        const sanitizedOriginalName = originalName.replace(
+            /[^a-zA-Z0-9.-]/g,
+            '_'
+        )
+        const r2Key = `medias/${uniqueId}-${sanitizedOriginalName}`
+
+        await r2.send(
+            new PutObjectCommand({
+                Bucket: R2_BUCKET_NAME,
+                Key: r2Key,
+                Body: buffer,
+                ContentType: mimeType
+            })
+        )
+
+        const publicBaseUrl = env.R2_PUBLIC_URL?.replace(/\/$/, '')
+        const fileUrl = publicBaseUrl
+            ? `${publicBaseUrl}/${r2Key}`
+            : `https://${R2_BUCKET_NAME}.${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${r2Key}`
+
+        const newMedia: NewMedia = {
+            file_name: r2Key,
+            original_name: originalName,
+            file_size: size,
+            mime_type: mimeType,
+            file_extension: ext,
+            file_category: category,
+            url: fileUrl,
+            r2_key: r2Key,
+            uploaded_by: userId
+        }
+
+        return this.media_repository.create(newMedia)
+    }
+
     async uploadMultiple(
         files: Express.Multer.File[],
         userId: string
@@ -51,60 +156,12 @@ export class MediaService {
         const uploadedMedias: Media[] = []
 
         for (const file of files) {
-            const ext = file.originalname.split('.').pop()?.toLowerCase() || ''
-
-            // Validate extension
-            if (!allowedExtensions.includes(ext)) {
-                throw ApiError.badRequest(
-                    `File extension .${ext} is not allowed. Allowed extensions: ${allowedExtensions.join(', ')}`
-                )
-            }
-
-            // Validate size
-            if (file.size > maxSizeBytes) {
-                throw ApiError.badRequest(
-                    `File ${file.originalname} exceeds the limit of ${env.MEDIA_UPLOAD_MAX_SIZE_MB}MB.`
-                )
-            }
-
-            const category = this.getFileCategory(ext)
-            const uniqueId = crypto.randomUUID()
-            const sanitizedOriginalName = file.originalname.replace(
-                /[^a-zA-Z0-9.-]/g,
-                '_'
+            const savedMedia = await this.processAndUploadFile(
+                file,
+                maxSizeBytes,
+                allowedExtensions,
+                userId
             )
-            const r2Key = `medias/${uniqueId}-${sanitizedOriginalName}`
-
-            // Upload to Cloudflare R2
-            await r2.send(
-                new PutObjectCommand({
-                    Bucket: R2_BUCKET_NAME,
-                    Key: r2Key,
-                    Body: file.buffer,
-                    ContentType: file.mimetype
-                })
-            )
-
-            // Construct public URL
-            const publicBaseUrl = env.R2_PUBLIC_URL?.replace(/\/$/, '')
-            const fileUrl = publicBaseUrl
-                ? `${publicBaseUrl}/${r2Key}`
-                : `https://${R2_BUCKET_NAME}.${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${r2Key}`
-
-            // Save metadata in database
-            const newMedia: NewMedia = {
-                file_name: r2Key,
-                original_name: file.originalname,
-                file_size: file.size,
-                mime_type: file.mimetype,
-                file_extension: ext,
-                file_category: category,
-                url: fileUrl,
-                r2_key: r2Key,
-                uploaded_by: userId
-            }
-
-            const savedMedia = await this.media_repository.create(newMedia)
             uploadedMedias.push(savedMedia)
         }
 
@@ -131,7 +188,6 @@ export class MediaService {
     async deleteMedia(id: string, isPermanent = false): Promise<Media> {
         const item = await this.getMediaById(id)
 
-        // Delete from R2 if permanent delete or just standard behaviour
         if (isPermanent) {
             await r2.send(
                 new DeleteObjectCommand({
