@@ -33,7 +33,9 @@ export const envSchema = z.object({
     SENDER_EMAIL: z.string().email('Invalid sender email format'),
 
     CONTACT_NAME: z.string().min(1, 'CONTACT_NAME is required'),
-    CONTACT_WHATSAPP: z.string().url('Invalid WhatsApp URL format'),
+    CONTACT_WHATSAPP: z
+        .string()
+        .url({ message: 'Invalid WhatsApp URL format' }),
     CONTACT_EMAIL: z
         .string()
         .email('Invalid contact email format')
@@ -57,15 +59,30 @@ export const envSchema = z.object({
     RATE_LIMIT_DELETE_ACC_MAX: z.coerce.number(),
     RATE_LIMIT_CHANGE_PWD_WINDOW_MINUTES: z.coerce.number(),
     RATE_LIMIT_CHANGE_PWD_MAX: z.coerce.number(),
+    RATE_LIMIT_MEDIA_UPLOAD_WINDOW_MINUTES: z.coerce.number(),
+    RATE_LIMIT_MEDIA_UPLOAD_MAX: z.coerce.number(),
 
     R2_ACCOUNT_ID: z.string().min(1, 'R2_ACCOUNT_ID is required'),
     R2_ACCESS_KEY_ID: z.string().min(1, 'R2_ACCESS_KEY_ID is required'),
     R2_SECRET_ACCESS_KEY: z.string().min(1, 'R2_SECRET_ACCESS_KEY is required'),
     R2_BUCKET_NAME: z.string().min(1, 'R2_BUCKET_NAME is required'),
+    R2_PUBLIC_URL: z
+        .string()
+        .url({ message: 'Invalid R2_PUBLIC_URL format' })
+        .optional(),
+
+    MEDIA_UPLOAD_MAX_SIZE_MB: z.coerce.number().default(3),
+    MEDIA_UPLOAD_MAX_RAW_SIZE_MB: z.coerce.number().default(15),
+    MEDIA_UPLOAD_ALLOWED_EXTENSIONS: z
+        .string()
+        .default(
+            'png,jpg,jpeg,gif,webp,svg,mp4,webm,ogg,mov,mkv,avi,xls,xlsx,csv,doc,docx,pdf,txt,rtf'
+        )
+        .transform(val => val.split(',').map(ext => ext.trim().toLowerCase())),
 
     UPSTASH_REDIS_REST_URL: z
         .string()
-        .url('Invalid Upstash Redis URL')
+        .url({ message: 'Invalid Upstash Redis URL' })
         .optional(),
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     UPSTASH_REDIS_URL: z.string().optional()

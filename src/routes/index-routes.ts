@@ -18,6 +18,7 @@ import educationCategoryRoutes from '@/routes/education-categories-route'
 import educationRoutes from '@/routes/educations-route'
 import consultationRoutes from '@/routes/consultations-route'
 import notificationRoutes from '@/routes/notifications-route'
+import mediasRoute from '@/routes/medias-route'
 import { rateLimiter } from '@/middlewares/rate-limiter'
 
 const router = Router()
@@ -41,5 +42,6 @@ router.use('/api/education-categories', educationCategoryRoutes)
 router.use('/api/educations', educationRoutes)
 router.use('/api/consultations', consultationRoutes)
 router.use('/api/notifications', notificationRoutes)
+router.use('/api/medias', mediasRoute)
 
 export default router

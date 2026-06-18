@@ -23,6 +23,7 @@ import { vitaminRecords } from '@/db/schemas/vitamin-records-schema'
 import { vitamins } from '@/db/schemas/vitamins-schema'
 import { sessions } from '@/db/schemas/sessions-schema'
 import { accounts } from '@/db/schemas/accounts-schema'
+import { media } from '@/db/schemas/media-schema'
 
 export const usersRelations = relations(users, ({ one, many }) => ({
     parent: one(parents, {
@@ -33,7 +34,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     accounts: many(accounts),
     cadreAssignments: many(cadres),
     midwifeAssignments: many(midwifes),
-    educations: many(educations)
+    educations: many(educations),
+    media: many(media)
 }))
 
 export const sessions_relations = relations(sessions, ({ one }) => ({
@@ -382,5 +384,12 @@ export const kipiDetailsRelations = relations(kipiDetails, ({ one }) => ({
     immunizationRecord: one(immunizationRecords, {
         fields: [kipiDetails.immunization_record_id],
         references: [immunizationRecords.id]
+    })
+}))
+
+export const mediaRelations = relations(media, ({ one }) => ({
+    uploader: one(users, {
+        fields: [media.uploaded_by],
+        references: [users.id]
     })
 }))
