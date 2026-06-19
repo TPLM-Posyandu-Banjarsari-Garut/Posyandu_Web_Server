@@ -89,8 +89,41 @@ export class ChildrenRepository {
                 .where(whereClause)
         ])
 
+        if (data.length === 0) {
+            return {
+                data: [],
+                totalItems: Number(countResult[0]?.count || 0)
+            }
+        }
+
+        // Enrich with posyandu_detail and mother_name
+        const childIds = data.map(c => c.id)
+        
+        const posyanduIds = [...new Set(data.map(c => c.posyandu_id).filter(Boolean) as string[])]
+        const posyanduRecords = posyanduIds.length > 0
+            ? await this.db.select().from(posyandus).where(inArray(posyandus.id, posyanduIds))
+            : []
+        const posyanduMap = new Map(posyanduRecords.map(p => [p.id, p]))
+
+        const parentRecords = await this.db
+            .select({
+                child_id: relationChildrens.children_id,
+                mother_name: users.name
+            })
+            .from(relationChildrens)
+            .innerJoin(parents, eq(parents.id, relationChildrens.parent_id))
+            .innerJoin(users, eq(users.id, parents.user_id))
+            .where(inArray(relationChildrens.children_id, childIds))
+        const parentMap = new Map(parentRecords.map(p => [p.child_id, p.mother_name]))
+
+        const enrichedData = data.map(child => ({
+            ...child,
+            posyandu_detail: child.posyandu_id ? posyanduMap.get(child.posyandu_id) : undefined,
+            mother_name: parentMap.get(child.id) || null
+        }))
+
         return {
-            data,
+            data: enrichedData,
             totalItems: Number(countResult[0]?.count || 0)
         }
     }
