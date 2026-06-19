@@ -18,6 +18,20 @@ export class MidwifeService {
             }
         }
 
+        if (!midwife_payload.identity_number) {
+            let uniqueNik = ''
+            let isUsed = true
+            while (isUsed) {
+                uniqueNik = Math.floor(
+                    1000000000000000 + Math.random() * 9000000000000000
+                ).toString()
+                isUsed = await this.midwife_repository.existsByIdentityNumber(
+                    uniqueNik
+                )
+            }
+            midwife_payload.identity_number = uniqueNik
+        }
+
         const isIdentityNumberUsed =
             await this.midwife_repository.existsByIdentityNumber(
                 midwife_payload.identity_number

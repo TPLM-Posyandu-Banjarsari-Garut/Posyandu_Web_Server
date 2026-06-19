@@ -6,7 +6,7 @@ import { rateLimitStore } from '@/configs/redis'
 
 export const rateLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_GLOBAL_WINDOW_MINUTES * 60 * 1000,
-    max: env.RATE_LIMIT_GLOBAL_MAX,
+    max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_GLOBAL_MAX,
     standardHeaders: true,
     legacyHeaders: false,
     store: rateLimitStore,
@@ -28,7 +28,7 @@ export const rateLimiter = rateLimit({
 
 export const authRateLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_AUTH_WINDOW_MINUTES * 60 * 1000,
-    max: env.RATE_LIMIT_AUTH_MAX,
+    max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_AUTH_MAX,
     store: rateLimitStore,
     handler: (req, res, next, options) => {
         next(
@@ -41,7 +41,7 @@ export const authRateLimiter = rateLimit({
 
 export const signinRateLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_SIGNIN_WINDOW_MINUTES * 60 * 1000,
-    max: env.RATE_LIMIT_SIGNIN_MAX,
+    max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_SIGNIN_MAX,
     store: rateLimitStore,
     message: {
         success: false,
@@ -54,7 +54,7 @@ export const signinRateLimiter = rateLimit({
 
 export const signupRateLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_SIGNUP_WINDOW_MINUTES * 60 * 1000,
-    max: env.RATE_LIMIT_SIGNUP_MAX,
+    max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_SIGNUP_MAX,
     store: rateLimitStore,
     message: {
         success: false,
@@ -67,7 +67,7 @@ export const signupRateLimiter = rateLimit({
 
 export const otpRequestLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_OTP_REQ_WINDOW_MINUTES * 60 * 1000,
-    max: env.RATE_LIMIT_OTP_REQ_MAX,
+    max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_OTP_REQ_MAX,
     store: rateLimitStore,
     message: {
         success: false,
@@ -80,7 +80,7 @@ export const otpRequestLimiter = rateLimit({
 
 export const otpVerificationLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_OTP_VERIFY_WINDOW_MINUTES * 60 * 1000,
-    max: env.RATE_LIMIT_OTP_VERIFY_MAX,
+    max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_OTP_VERIFY_MAX,
     store: rateLimitStore,
     message: {
         success: false,
@@ -93,7 +93,7 @@ export const otpVerificationLimiter = rateLimit({
 
 export const resetPasswordLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_RESET_PWD_WINDOW_MINUTES * 60 * 1000,
-    max: env.RATE_LIMIT_RESET_PWD_MAX,
+    max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_RESET_PWD_MAX,
     store: rateLimitStore,
     message: {
         success: false,
@@ -106,7 +106,7 @@ export const resetPasswordLimiter = rateLimit({
 
 export const deleteAccountLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_DELETE_ACC_WINDOW_MINUTES * 60 * 1000,
-    max: env.RATE_LIMIT_DELETE_ACC_MAX,
+    max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_DELETE_ACC_MAX,
     store: rateLimitStore,
     message: {
         success: false,
@@ -119,7 +119,7 @@ export const deleteAccountLimiter = rateLimit({
 
 export const changePasswordLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_CHANGE_PWD_WINDOW_MINUTES * 60 * 1000,
-    max: env.RATE_LIMIT_CHANGE_PWD_MAX,
+    max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_CHANGE_PWD_MAX,
     store: rateLimitStore,
     message: {
         success: false,
@@ -132,7 +132,7 @@ export const changePasswordLimiter = rateLimit({
 
 export const mediaUploadRateLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_MEDIA_UPLOAD_WINDOW_MINUTES * 60 * 1000,
-    max: env.RATE_LIMIT_MEDIA_UPLOAD_MAX,
+    max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_MEDIA_UPLOAD_MAX,
     store: rateLimitStore,
     message: {
         success: false,
