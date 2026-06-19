@@ -40,6 +40,9 @@ export class EducationRepository {
 
         if (!includeDeleted) {
             conditions.push(sql`${educations.deleted_at} IS NULL`)
+            if (!status) {
+                conditions.push(eq(educations.status, 'active'))
+            }
         }
 
         if (search) {
@@ -151,7 +154,12 @@ export class EducationRepository {
     }
 
     async softDelete(public_id: string): Promise<Education | undefined> {
-        return this.updateStatus(public_id, 'inactive')
+        const [row] = await this.db
+            .update(educations)
+            .set({ status: 'inactive', deleted_at: sql`now()` })
+            .where(eq(educations.id, public_id))
+            .returning()
+        return row
     }
 
     async hardDelete(public_id: string): Promise<Education | undefined> {
@@ -163,6 +171,11 @@ export class EducationRepository {
     }
 
     async restore(public_id: string): Promise<Education | undefined> {
-        return this.updateStatus(public_id, 'active')
+        const [row] = await this.db
+            .update(educations)
+            .set({ status: 'active', deleted_at: null })
+            .where(eq(educations.id, public_id))
+            .returning()
+        return row
     }
 }

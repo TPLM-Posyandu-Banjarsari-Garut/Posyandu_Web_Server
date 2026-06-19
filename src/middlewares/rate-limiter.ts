@@ -2,14 +2,14 @@ import { rateLimit } from 'express-rate-limit'
 import { ApiError } from '@/utils/api-error'
 import { STATUS_CODES } from '@/constants/status-codes'
 import env from '@/configs/env'
-import { rateLimitStore } from '@/configs/redis'
+import { createRateLimitStore } from '@/configs/redis'
 
 export const rateLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_GLOBAL_WINDOW_MINUTES * 60 * 1000,
     max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_GLOBAL_MAX,
     standardHeaders: true,
     legacyHeaders: false,
-    store: rateLimitStore,
+    store: createRateLimitStore('rl:global:'),
     message: {
         success: false,
         message:
@@ -29,7 +29,7 @@ export const rateLimiter = rateLimit({
 export const authRateLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_AUTH_WINDOW_MINUTES * 60 * 1000,
     max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_AUTH_MAX,
-    store: rateLimitStore,
+    store: createRateLimitStore('rl:auth:'),
     handler: (req, res, next, options) => {
         next(
             ApiError.tooManyRequests(
@@ -42,7 +42,7 @@ export const authRateLimiter = rateLimit({
 export const signinRateLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_SIGNIN_WINDOW_MINUTES * 60 * 1000,
     max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_SIGNIN_MAX,
-    store: rateLimitStore,
+    store: createRateLimitStore('rl:signin:'),
     message: {
         success: false,
         message: 'Too many login attempts, please try again later.',
@@ -55,7 +55,7 @@ export const signinRateLimiter = rateLimit({
 export const signupRateLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_SIGNUP_WINDOW_MINUTES * 60 * 1000,
     max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_SIGNUP_MAX,
-    store: rateLimitStore,
+    store: createRateLimitStore('rl:signup:'),
     message: {
         success: false,
         message: 'Too many registration attempts, please try again later.',
@@ -68,7 +68,7 @@ export const signupRateLimiter = rateLimit({
 export const otpRequestLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_OTP_REQ_WINDOW_MINUTES * 60 * 1000,
     max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_OTP_REQ_MAX,
-    store: rateLimitStore,
+    store: createRateLimitStore('rl:otpreq:'),
     message: {
         success: false,
         message: 'Too many OTP requests. Please try again later.',
@@ -81,7 +81,7 @@ export const otpRequestLimiter = rateLimit({
 export const otpVerificationLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_OTP_VERIFY_WINDOW_MINUTES * 60 * 1000,
     max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_OTP_VERIFY_MAX,
-    store: rateLimitStore,
+    store: createRateLimitStore('rl:otpverify:'),
     message: {
         success: false,
         message: 'Too many OTP verification attempts. Please try again later.',
@@ -94,7 +94,7 @@ export const otpVerificationLimiter = rateLimit({
 export const resetPasswordLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_RESET_PWD_WINDOW_MINUTES * 60 * 1000,
     max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_RESET_PWD_MAX,
-    store: rateLimitStore,
+    store: createRateLimitStore('rl:resetpwd:'),
     message: {
         success: false,
         message: 'Too many password reset attempts, please try again later.',
@@ -107,7 +107,7 @@ export const resetPasswordLimiter = rateLimit({
 export const deleteAccountLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_DELETE_ACC_WINDOW_MINUTES * 60 * 1000,
     max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_DELETE_ACC_MAX,
-    store: rateLimitStore,
+    store: createRateLimitStore('rl:delacc:'),
     message: {
         success: false,
         message: 'Too many account deletion attempts, please try again later.',
@@ -120,7 +120,7 @@ export const deleteAccountLimiter = rateLimit({
 export const changePasswordLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_CHANGE_PWD_WINDOW_MINUTES * 60 * 1000,
     max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_CHANGE_PWD_MAX,
-    store: rateLimitStore,
+    store: createRateLimitStore('rl:changepwd:'),
     message: {
         success: false,
         message: 'Too many password change attempts, please try again later.',
@@ -132,8 +132,11 @@ export const changePasswordLimiter = rateLimit({
 
 export const mediaUploadRateLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_MEDIA_UPLOAD_WINDOW_MINUTES * 60 * 1000,
-    max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_MEDIA_UPLOAD_MAX,
-    store: rateLimitStore,
+    max:
+        env.NODE_ENV === 'development'
+            ? 99999
+            : env.RATE_LIMIT_MEDIA_UPLOAD_MAX,
+    store: createRateLimitStore('rl:media:'),
     message: {
         success: false,
         message: 'Too many upload requests. Please try again later.',

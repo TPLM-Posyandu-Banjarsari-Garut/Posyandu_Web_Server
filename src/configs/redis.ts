@@ -35,10 +35,12 @@ export const redisSecondaryStorage = redis
 
 export class UpstashRedisStore implements Store {
     private readonly client: Redis
+    public readonly prefix: string
     private windowMs: number = 15 * 60 * 1000
 
-    constructor(client: Redis) {
+    constructor(client: Redis, prefix: string = 'rl:') {
         this.client = client
+        this.prefix = prefix
     }
 
     init(options: Options): void {
@@ -49,14 +51,16 @@ export class UpstashRedisStore implements Store {
         const now = Date.now()
         const windowStart = now - this.windowMs
 
+        const fullKey = this.prefix + key
+
         const pipeline = this.client.pipeline()
-        pipeline.zremrangebyscore(key, 0, windowStart)
-        pipeline.zadd(key, {
+        pipeline.zremrangebyscore(fullKey, 0, windowStart)
+        pipeline.zadd(fullKey, {
             score: now,
             member: `${now}-${crypto.randomUUID()}`
         })
-        pipeline.zcard(key)
-        pipeline.pexpire(key, this.windowMs)
+        pipeline.zcard(fullKey)
+        pipeline.pexpire(fullKey, this.windowMs)
 
         const results = await pipeline.exec()
         const totalHits = (results[2] as number) || 0
@@ -69,12 +73,13 @@ export class UpstashRedisStore implements Store {
     }
 
     async decrement(key: string): Promise<void> {
-        await this.client.zremrangebyrank(key, -1, -1)
+        await this.client.zremrangebyrank(this.prefix + key, -1, -1)
     }
 
     async resetKey(key: string): Promise<void> {
-        await this.client.del(key)
+        await this.client.del(this.prefix + key)
     }
 }
 
-export const rateLimitStore = redis ? new UpstashRedisStore(redis) : undefined
+export const createRateLimitStore = (prefix: string) =>
+    redis ? new UpstashRedisStore(redis, prefix) : undefined

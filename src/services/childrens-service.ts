@@ -29,16 +29,20 @@ export class ChildrenService {
         }
 
         // Pisahkan parent_user_id dari data bayi
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { parent_user_id, ...childData } = children_payload as any
         const child = await this.children_repository.create(childData)
 
         // Simpan relasi ke relation_childrens jika parent_user_id ada
         if (parent_user_id && this.parent_repository) {
-            let parent = await this.parent_repository.findByUserId(parent_user_id)
+            let parent =
+                await this.parent_repository.findByUserId(parent_user_id)
             if (!parent) {
-                parent = await this.parent_repository.create({ 
+                parent = await this.parent_repository.create({
                     user_id: parent_user_id,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     rt: null as any,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     rw: null as any
                 })
             }
@@ -61,6 +65,7 @@ export class ChildrenService {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async getChildrenById(public_id: string): Promise<Children & any> {
         const child = await this.children_repository.findById(public_id)
         if (!child) throw new Error('Children not found')
@@ -78,7 +83,9 @@ export class ChildrenService {
      */
     async updateChildren(
         public_id: string,
-        children_payload: Partial<NewChildren> & { parent_user_id?: string | null }
+        children_payload: Partial<NewChildren> & {
+            parent_user_id?: string | null
+        }
     ): Promise<Children> {
         const existingChild = await this.getChildrenById(public_id)
 
@@ -98,6 +105,7 @@ export class ChildrenService {
         }
 
         // Pisahkan parent_user_id dari data update
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { parent_user_id, ...childData } = children_payload as any
         const updated = await this.children_repository.update(
             public_id,
@@ -111,16 +119,22 @@ export class ChildrenService {
                 // Hapus relasi jika dikirimkan null/empty
                 await this.children_repository.unlinkParent(public_id)
             } else {
-                let parent = await this.parent_repository.findByUserId(parent_user_id)
+                let parent =
+                    await this.parent_repository.findByUserId(parent_user_id)
                 if (!parent) {
-                    parent = await this.parent_repository.create({ 
+                    parent = await this.parent_repository.create({
                         user_id: parent_user_id,
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         rt: null as any,
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         rw: null as any
                     })
                 }
                 if (parent) {
-                    await this.children_repository.linkParent(updated.id, parent.id)
+                    await this.children_repository.linkParent(
+                        updated.id,
+                        parent.id
+                    )
                 }
             }
         }
