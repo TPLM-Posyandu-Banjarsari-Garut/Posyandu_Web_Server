@@ -61,7 +61,7 @@ export class ChildrenService {
         }
     }
 
-    async getChildrenById(public_id: string): Promise<Children> {
+    async getChildrenById(public_id: string): Promise<Children & any> {
         const child = await this.children_repository.findById(public_id)
         if (!child) throw new Error('Children not found')
         return child

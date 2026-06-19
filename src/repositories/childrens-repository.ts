@@ -1,4 +1,4 @@
-import { NewChildren, Children, childrens, relationChildrens, parents, users } from '@/db'
+import { NewChildren, Children, childrens, relationChildrens, parents, users, posyandus, nutritionRecords, vitaminRecords } from '@/db'
 import { and, eq, ilike, sql, inArray, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
@@ -97,7 +97,13 @@ export class ChildrenRepository {
 
     async findById(
         public_id: string
-    ): Promise<(Children & { mother_name?: string | null; parent_user_id?: string | null }) | undefined> {
+    ): Promise<(Children & { 
+        mother_name?: string | null; 
+        parent_user_id?: string | null;
+        posyandu_detail?: any;
+        latest_nutrition?: any;
+        latest_vitamin?: any;
+    }) | undefined> {
         const [row] = await this.db
             .select({
                 child: childrens,
@@ -122,13 +128,28 @@ export class ChildrenRepository {
             )
             .limit(1)
 
-        return row
-            ? {
-                  ...row.child,
-                  mother_name: row.mother_name,
-                  parent_user_id: row.parent_user_id
-              }
-            : undefined
+        if (!row) return undefined
+
+        const [posyandu] = await this.db.select().from(posyandus).where(eq(posyandus.id, row.child.posyandu_id)).limit(1)
+        
+        const [latestNutrition] = await this.db.select().from(nutritionRecords)
+            .where(eq(nutritionRecords.children_id, row.child.id))
+            .orderBy(desc(nutritionRecords.measurement_date))
+            .limit(1)
+            
+        const [latestVitamin] = await this.db.select().from(vitaminRecords)
+            .where(eq(vitaminRecords.children_id, row.child.id))
+            .orderBy(desc(vitaminRecords.created_at))
+            .limit(1)
+
+        return {
+            ...row.child,
+            mother_name: row.mother_name,
+            parent_user_id: row.parent_user_id,
+            posyandu_detail: posyandu,
+            latest_nutrition: latestNutrition,
+            latest_vitamin: latestVitamin
+        }
     }
 
     async findByIdentityNumber(
