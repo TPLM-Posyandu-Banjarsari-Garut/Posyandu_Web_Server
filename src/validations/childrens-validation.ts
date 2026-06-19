@@ -100,6 +100,9 @@ export const createChildSchema = createInsertSchema(childrens, {
         updated_at: true,
         deleted_at: true
     })
+    .extend({
+        parent_user_id: z.string().optional().nullable()
+    })
     .openapi('CreateChildInput')
 
 export const getChildrenQuerySchema = z

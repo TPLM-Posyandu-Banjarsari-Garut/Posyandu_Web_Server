@@ -1,4 +1,4 @@
-import { NewChildren, Children, childrens, relationChildrens } from '@/db'
+import { NewChildren, Children, childrens, relationChildrens, parents, users } from '@/db'
 import { and, eq, ilike, sql, inArray, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
@@ -61,11 +61,11 @@ export class ChildrenRepository {
         }
 
         if (parent_id) {
+            // Filter children by parent_id via relation_childrens junction table
             const parentChildSubquery = this.db
                 .select({ children_id: relationChildrens.children_id })
                 .from(relationChildrens)
                 .where(eq(relationChildrens.parent_id, parent_id))
-
             conditions.push(inArray(childrens.id, parentChildSubquery))
         }
 
@@ -95,10 +95,25 @@ export class ChildrenRepository {
         }
     }
 
-    async findById(public_id: string): Promise<Children | undefined> {
-        const [child] = await this.db
-            .select()
+    async findById(
+        public_id: string
+    ): Promise<(Children & { mother_name?: string | null; parent_user_id?: string | null }) | undefined> {
+        const [row] = await this.db
+            .select({
+                child: childrens,
+                mother_name: users.name,
+                parent_user_id: parents.user_id
+            })
             .from(childrens)
+            .leftJoin(
+                relationChildrens,
+                and(
+                    eq(relationChildrens.children_id, childrens.id),
+                    eq(relationChildrens.relation, 'mother')
+                )
+            )
+            .leftJoin(parents, eq(parents.id, relationChildrens.parent_id))
+            .leftJoin(users, eq(users.id, parents.user_id))
             .where(
                 and(
                     eq(childrens.id, public_id),
@@ -106,7 +121,14 @@ export class ChildrenRepository {
                 )
             )
             .limit(1)
-        return child
+
+        return row
+            ? {
+                  ...row.child,
+                  mother_name: row.mother_name,
+                  parent_user_id: row.parent_user_id
+              }
+            : undefined
     }
 
     async findByIdentityNumber(
@@ -126,7 +148,7 @@ export class ChildrenRepository {
     }
 
     async findByParentId(parent_id: string): Promise<Children[]> {
-        const records = await this.db
+        return this.db
             .select({
                 id: childrens.id,
                 posyandu_id: childrens.posyandu_id,
@@ -156,8 +178,6 @@ export class ChildrenRepository {
                     sql`${childrens.deleted_at} IS NULL`
                 )
             )
-
-        return records
     }
 
     async update(
@@ -175,9 +195,7 @@ export class ChildrenRepository {
     async softDelete(public_id: string): Promise<Children | undefined> {
         const [child] = await this.db
             .update(childrens)
-            .set({
-                deleted_at: new Date()
-            })
+            .set({ deleted_at: new Date() })
             .where(eq(childrens.id, public_id))
             .returning()
         return child
@@ -194,9 +212,7 @@ export class ChildrenRepository {
     async restore(public_id: string): Promise<Children | undefined> {
         const [child] = await this.db
             .update(childrens)
-            .set({
-                deleted_at: null
-            })
+            .set({ deleted_at: null })
             .where(eq(childrens.id, public_id))
             .returning()
         return child
@@ -209,5 +225,31 @@ export class ChildrenRepository {
             .where(eq(childrens.identity_number, identity_number))
             .limit(1)
         return !!child
+    }
+
+    /**
+     * Menyimpan relasi ibu kandung ke tabel relation_childrens.
+     * parent_user_id adalah user.id dari ibu (tabel users).
+     * Method ini akan mencari parent profile lalu menyimpan ke relation_childrens.
+     */
+    async linkParent(children_id: string, parent_id: string): Promise<void> {
+        // parent_id di sini sudah berupa parents.id (profile ID), bukan user.id
+        // Hapus relasi existing untuk child ini dulu
+        await this.db
+            .delete(relationChildrens)
+            .where(eq(relationChildrens.children_id, children_id))
+
+        // Simpan relasi baru
+        await this.db.insert(relationChildrens).values({
+            parent_id: parent_id,
+            children_id: children_id,
+            relation: 'mother'
+        })
+    }
+
+    async unlinkParent(children_id: string): Promise<void> {
+        await this.db
+            .delete(relationChildrens)
+            .where(eq(relationChildrens.children_id, children_id))
     }
 }
