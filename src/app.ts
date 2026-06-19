@@ -22,8 +22,6 @@ const app: Express = express()
 
 app.set('trust proxy', 1)
 
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
 app.use(
     cors({
         origin: [env.CORS_ORIGIN, ...env.TRUSTED_ORIGINS],
@@ -32,9 +30,10 @@ app.use(
         credentials: true
     })
 )
+
 app.use(
     express.json({
-        limit: '2mb',
+        limit: '50mb',
         verify: (
             req: import('node:http').IncomingMessage & { rawBody?: Buffer },
             _res,
@@ -44,7 +43,7 @@ app.use(
         }
     })
 )
-app.use(express.urlencoded({ extended: true, limit: '2mb' }))
+app.use(express.urlencoded({ extended: true, limit: '50mb' }))
 app.use(
     helmet({
         contentSecurityPolicy: {

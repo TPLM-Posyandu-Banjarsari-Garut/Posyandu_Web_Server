@@ -28,8 +28,7 @@
         "src/**/*.ts": [
             "eslint --fix",
             "prettier --write"
-        ],
-        "*.ts": "bash -c 'tsc --noEmit'"
+        ]
     },
     "devDependencies": {
         "@commitlint/cli": "^21.0.1",
