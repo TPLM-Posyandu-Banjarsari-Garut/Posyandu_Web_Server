@@ -20,7 +20,9 @@ router.post('/trigger', async (req, res) => {
         throw ApiError.unauthorized('Unauthorized')
     }
 
-    await CronService.triggerCronJobs()
+    const task = req.body?.task as string | undefined
+
+    await CronService.triggerCronJobs(task)
     return ApiResponse.ok(res, 'Cron jobs triggered successfully')
 })
 
