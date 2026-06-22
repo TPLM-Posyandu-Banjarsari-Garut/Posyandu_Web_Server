@@ -1,4 +1,14 @@
-import { NewChildren, Children, childrens, relationChildrens, parents, users, posyandus, nutritionRecords, vitaminRecords } from '@/db'
+import {
+    NewChildren,
+    Children,
+    childrens,
+    relationChildrens,
+    parents,
+    users,
+    posyandus,
+    nutritionRecords,
+    vitaminRecords
+} from '@/db'
 import { and, eq, ilike, sql, inArray, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
@@ -15,7 +25,7 @@ export interface ChildrenQueryFilters {
 }
 
 export class ChildrenRepository {
-    constructor(private readonly db: NodePgDatabase) {}
+    constructor(private readonly db: NodePgDatabase<Record<string, never>>) {}
 
     async create(new_children: NewChildren): Promise<Children> {
         const [child] = await this.db
@@ -98,11 +108,17 @@ export class ChildrenRepository {
 
         // Enrich with posyandu_detail and mother_name
         const childIds = data.map(c => c.id)
-        
-        const posyanduIds = [...new Set(data.map(c => c.posyandu_id).filter(Boolean) as string[])]
-        const posyanduRecords = posyanduIds.length > 0
-            ? await this.db.select().from(posyandus).where(inArray(posyandus.id, posyanduIds))
-            : []
+
+        const posyanduIds = [
+            ...new Set(data.map(c => c.posyandu_id).filter(Boolean) as string[])
+        ]
+        const posyanduRecords =
+            posyanduIds.length > 0
+                ? await this.db
+                      .select()
+                      .from(posyandus)
+                      .where(inArray(posyandus.id, posyanduIds))
+                : []
         const posyanduMap = new Map(posyanduRecords.map(p => [p.id, p]))
 
         const parentRecords = await this.db
@@ -114,11 +130,15 @@ export class ChildrenRepository {
             .innerJoin(parents, eq(parents.id, relationChildrens.parent_id))
             .innerJoin(users, eq(users.id, parents.user_id))
             .where(inArray(relationChildrens.children_id, childIds))
-        const parentMap = new Map(parentRecords.map(p => [p.child_id, p.mother_name]))
+        const parentMap = new Map(
+            parentRecords.map(p => [p.child_id, p.mother_name])
+        )
 
         const enrichedData = data.map(child => ({
             ...child,
-            posyandu_detail: child.posyandu_id ? posyanduMap.get(child.posyandu_id) : undefined,
+            posyandu_detail: child.posyandu_id
+                ? posyanduMap.get(child.posyandu_id)
+                : undefined,
             mother_name: parentMap.get(child.id) || null
         }))
 
@@ -129,14 +149,25 @@ export class ChildrenRepository {
     }
 
     async findById(
-        public_id: string
-    ): Promise<(Children & { 
-        mother_name?: string | null; 
-        parent_user_id?: string | null;
-        posyandu_detail?: any;
-        latest_nutrition?: any;
-        latest_vitamin?: any;
-    }) | undefined> {
+        public_id: string,
+        includeDeleted = false
+    ): Promise<
+        | (Children & {
+              mother_name?: string | null
+              parent_user_id?: string | null
+              posyandu_detail?: typeof posyandus.$inferSelect
+              latest_nutrition?: typeof nutritionRecords.$inferSelect
+              latest_vitamin?: typeof vitaminRecords.$inferSelect
+          })
+        | undefined
+    > {
+        const condition = includeDeleted
+            ? eq(childrens.id, public_id)
+            : and(
+                  eq(childrens.id, public_id),
+                  sql`${childrens.deleted_at} IS NULL`
+              )
+
         const [row] = await this.db
             .select({
                 child: childrens,
@@ -153,24 +184,27 @@ export class ChildrenRepository {
             )
             .leftJoin(parents, eq(parents.id, relationChildrens.parent_id))
             .leftJoin(users, eq(users.id, parents.user_id))
-            .where(
-                and(
-                    eq(childrens.id, public_id),
-                    sql`${childrens.deleted_at} IS NULL`
-                )
-            )
+            .where(condition)
             .limit(1)
 
         if (!row) return undefined
 
-        const [posyandu] = await this.db.select().from(posyandus).where(eq(posyandus.id, row.child.posyandu_id)).limit(1)
-        
-        const [latestNutrition] = await this.db.select().from(nutritionRecords)
+        const [posyandu] = await this.db
+            .select()
+            .from(posyandus)
+            .where(eq(posyandus.id, row.child.posyandu_id))
+            .limit(1)
+
+        const [latestNutrition] = await this.db
+            .select()
+            .from(nutritionRecords)
             .where(eq(nutritionRecords.children_id, row.child.id))
             .orderBy(desc(nutritionRecords.measurement_date))
             .limit(1)
-            
-        const [latestVitamin] = await this.db.select().from(vitaminRecords)
+
+        const [latestVitamin] = await this.db
+            .select()
+            .from(vitaminRecords)
             .where(eq(vitaminRecords.children_id, row.child.id))
             .orderBy(desc(vitaminRecords.created_at))
             .limit(1)

@@ -5,11 +5,17 @@ import { eq, isNull, and, sql } from 'drizzle-orm'
 async function fixGhostEducations() {
     console.log('Fixing ghost educations...')
     try {
-        const result = await db.update(educations)
+        const result = await db
+            .update(educations)
             .set({ deleted_at: sql`now()` })
-            .where(and(eq(educations.status, 'inactive'), isNull(educations.deleted_at)))
+            .where(
+                and(
+                    eq(educations.status, 'inactive'),
+                    isNull(educations.deleted_at)
+                )
+            )
             .returning()
-        
+
         console.log(`Fixed ${result.length} ghost educations!`)
         process.exit(0)
     } catch (err) {

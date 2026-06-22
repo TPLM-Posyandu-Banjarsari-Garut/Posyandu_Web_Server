@@ -1,4 +1,4 @@
-import { NewUser, User, users, parents, midwifes, cadres } from '@/db'
+import { NewUser, User, users, parents, midwifes, cadres, sessions } from '@/db'
 import { and, eq, ilike, or, sql, SQL, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
@@ -174,6 +174,9 @@ export class UserRepository {
                 .where(eq(users.id, public_id))
                 .returning()
             if (!user) return undefined
+
+            // Delete sessions to immediately log out the soft-deleted user
+            await tx.delete(sessions).where(eq(sessions.user_id, public_id))
 
             if (user.role === 'parent') {
                 await tx

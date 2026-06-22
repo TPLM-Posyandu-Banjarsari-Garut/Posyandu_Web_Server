@@ -102,9 +102,9 @@ export class AuthService {
 
         const current_user: AuthenticatedUser | undefined =
             await this.user_repository.findByPublicId(active_session.user.id)
-        if (!current_user) {
+        if (current_user?.status !== 'active') {
             throw new Error(
-                'The database user profile linked to this session could not be found'
+                'Unauthorized access: account is inactive or has been deleted'
             )
         }
 

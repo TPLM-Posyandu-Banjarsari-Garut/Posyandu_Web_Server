@@ -83,10 +83,14 @@ export class MidwifeRepository {
         }
     }
 
-    async findById(public_id: string): Promise<Midwife | undefined> {
-        return this.findByCondition(
-            and(eq(midwifes.id, public_id), eq(midwifes.status, 'active'))
-        )
+    async findById(
+        public_id: string,
+        includeDeleted = false
+    ): Promise<Midwife | undefined> {
+        const condition = includeDeleted
+            ? eq(midwifes.id, public_id)
+            : and(eq(midwifes.id, public_id), eq(midwifes.status, 'active'))
+        return this.findByCondition(condition)
     }
 
     async findByUserId(user_id: string): Promise<Midwife | undefined> {

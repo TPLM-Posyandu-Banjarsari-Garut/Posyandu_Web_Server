@@ -146,7 +146,15 @@ export class ChildrenService {
         public_id: string,
         is_permanent: boolean = false
     ): Promise<Children> {
-        await this.getChildrenById(public_id)
+        const existing = await this.children_repository.findById(
+            public_id,
+            true
+        )
+        if (!existing) throw new Error('Children not found')
+
+        if (!is_permanent && existing.deleted_at !== null) {
+            return existing
+        }
 
         const deleted = is_permanent
             ? await this.children_repository.hardDelete(public_id)

@@ -74,7 +74,15 @@ export class EducationService {
         public_id: string,
         isPermanent: boolean = false
     ): Promise<Education> {
-        await this.getEducationById(public_id)
+        const existing = await this.educationRepository.findById(
+            public_id,
+            true
+        )
+        if (!existing) throw new Error('Education article not found')
+
+        if (!isPermanent && existing.status === 'inactive') {
+            return existing
+        }
 
         const deleted = isPermanent
             ? await this.educationRepository.hardDelete(public_id)

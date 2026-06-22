@@ -92,7 +92,12 @@ export class ParentService {
         public_id: string,
         is_permanent: boolean = false
     ): Promise<Parent> {
-        await this.getParentById(public_id)
+        const existing = await this.parent_repository.findById(public_id, true)
+        if (!existing) throw new Error('Parent profile not found')
+
+        if (!is_permanent && existing.status === 'inactive') {
+            return existing
+        }
 
         const deleted = is_permanent
             ? await this.parent_repository.hardDelete(public_id)

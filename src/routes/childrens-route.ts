@@ -20,7 +20,10 @@ const router = Router()
 
 const children_repository = new ChildrenRepository(db)
 const parent_repository = new ParentRepository(db)
-const children_service = new ChildrenService(children_repository, parent_repository)
+const children_service = new ChildrenService(
+    children_repository,
+    parent_repository
+)
 const children_controller = new ChildrenController(children_service)
 
 router.post(

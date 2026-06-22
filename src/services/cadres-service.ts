@@ -80,7 +80,12 @@ export class CadreService {
         public_id: string,
         is_permanent: boolean = false
     ): Promise<Cadre> {
-        await this.getCadreById(public_id)
+        const existing = await this.cadre_repository.findById(public_id, true)
+        if (!existing) throw new Error('Cadre not found')
+
+        if (!is_permanent && existing.status === 'inactive') {
+            return existing
+        }
 
         const deleted = is_permanent
             ? await this.cadre_repository.hardDelete(public_id)

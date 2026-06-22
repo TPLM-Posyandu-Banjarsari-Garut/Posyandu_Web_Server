@@ -25,9 +25,10 @@ export class MidwifeService {
                 uniqueNik = Math.floor(
                     1000000000000000 + Math.random() * 9000000000000000
                 ).toString()
-                isUsed = await this.midwife_repository.existsByIdentityNumber(
-                    uniqueNik
-                )
+                isUsed =
+                    await this.midwife_repository.existsByIdentityNumber(
+                        uniqueNik
+                    )
             }
             midwife_payload.identity_number = uniqueNik
         }
@@ -132,7 +133,12 @@ export class MidwifeService {
         public_id: string,
         is_permanent: boolean = false
     ): Promise<Midwife> {
-        await this.getMidwifeById(public_id)
+        const existing = await this.midwife_repository.findById(public_id, true)
+        if (!existing) throw new Error('Midwife not found')
+
+        if (!is_permanent && existing.status === 'inactive') {
+            return existing
+        }
 
         const deleted = is_permanent
             ? await this.midwife_repository.hardDelete(public_id)

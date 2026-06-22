@@ -93,10 +93,14 @@ export class EducationRepository {
         }
     }
 
-    async findById(public_id: string): Promise<Education | undefined> {
-        return this.findByCondition(
-            and(eq(educations.id, public_id), eq(educations.status, 'active'))
-        )
+    async findById(
+        public_id: string,
+        includeDeleted = false
+    ): Promise<Education | undefined> {
+        const condition = includeDeleted
+            ? eq(educations.id, public_id)
+            : and(eq(educations.id, public_id), eq(educations.status, 'active'))
+        return this.findByCondition(condition)
     }
 
     async incrementViews(public_id: string): Promise<Education | undefined> {
