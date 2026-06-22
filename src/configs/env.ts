@@ -89,7 +89,9 @@ export const envSchema = z.object({
         .url({ message: 'Invalid Upstash Redis URL' })
         .optional(),
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
-    UPSTASH_REDIS_URL: z.string().optional()
+    UPSTASH_REDIS_URL: z.string().optional(),
+
+    CRON_SECRET: z.string().min(1, 'CRON_SECRET is required')
 })
 
 export type Env = z.infer<typeof envSchema>
