@@ -10,15 +10,7 @@ export class MidwifeService {
     constructor(private readonly midwife_repository: MidwifeRepository) {}
 
     async createMidwife(midwife_payload: NewMidwife): Promise<Midwife> {
-        if (midwife_payload.user_id) {
-            const existingMidwife = await this.midwife_repository.findByUserId(
-                midwife_payload.user_id
-            )
-            if (existingMidwife) {
-                throw new Error('User is already registered as a midwife')
-            }
-        }
-
+        let isIdentityNumberChecked = false
         if (!midwife_payload.identity_number) {
             let uniqueNik = ''
             let isUsed = true
@@ -33,23 +25,26 @@ export class MidwifeService {
                     )
             }
             midwife_payload.identity_number = uniqueNik
+            isIdentityNumberChecked = true
         }
 
-        const isIdentityNumberUsed =
-            await this.midwife_repository.existsByIdentityNumber(
-                midwife_payload.identity_number
-            )
-        if (isIdentityNumberUsed) {
+        const checks = await this.midwife_repository.checkUniqueConstraints({
+            user_id: midwife_payload.user_id || undefined,
+            identity_number:
+                midwife_payload.identity_number && !isIdentityNumberChecked
+                    ? midwife_payload.identity_number
+                    : undefined,
+            license_number: midwife_payload.license_number || undefined
+        })
+
+        if (checks.userExists) {
+            throw new Error('User is already registered as a midwife')
+        }
+        if (checks.identityExists) {
             throw new Error('Identity number (NIK) is already registered')
         }
-
-        if (midwife_payload.license_number) {
-            const isStrUsed = await this.midwife_repository.existsByStrNumber(
-                midwife_payload.license_number
-            )
-            if (isStrUsed) {
-                throw new Error('STR number is already registered')
-            }
+        if (checks.licenseExists) {
+            throw new Error('STR number is already registered')
         }
 
         return this.midwife_repository.create(midwife_payload)
@@ -78,49 +73,38 @@ export class MidwifeService {
     ): Promise<Midwife> {
         const existingMidwife = await this.getMidwifeById(public_id)
 
-        if (
-            midwife_payload.user_id &&
-            midwife_payload.user_id !== existingMidwife.user_id
-        ) {
-            const existingMidwifeForUser =
-                await this.midwife_repository.findByUserId(
-                    midwife_payload.user_id
-                )
-            if (
-                existingMidwifeForUser &&
-                existingMidwifeForUser.id !== public_id
-            ) {
-                throw new Error('User is already registered as a midwife')
-            }
-        }
+        const checks = await this.midwife_repository.checkUniqueConstraints({
+            user_id:
+                midwife_payload.user_id &&
+                midwife_payload.user_id !== existingMidwife.user_id
+                    ? midwife_payload.user_id
+                    : undefined,
+            identity_number:
+                midwife_payload.identity_number &&
+                midwife_payload.identity_number !==
+                    existingMidwife.identity_number
+                    ? midwife_payload.identity_number
+                    : undefined,
+            license_number:
+                midwife_payload.license_number &&
+                midwife_payload.license_number !==
+                    existingMidwife.license_number
+                    ? midwife_payload.license_number
+                    : undefined
+        })
 
-        if (
-            midwife_payload.identity_number &&
-            midwife_payload.identity_number !== existingMidwife.identity_number
-        ) {
-            const isIdentityNumberUsed =
-                await this.midwife_repository.existsByIdentityNumber(
-                    midwife_payload.identity_number
-                )
-            if (isIdentityNumberUsed) {
-                throw new Error(
-                    'Identity number (NIK) is already registered by another midwife'
-                )
-            }
+        if (checks.userExists) {
+            throw new Error('User is already registered as a midwife')
         }
-
-        if (
-            midwife_payload.license_number &&
-            midwife_payload.license_number !== existingMidwife.license_number
-        ) {
-            const isStrUsed = await this.midwife_repository.existsByStrNumber(
-                midwife_payload.license_number
+        if (checks.identityExists) {
+            throw new Error(
+                'Identity number (NIK) is already registered by another midwife'
             )
-            if (isStrUsed) {
-                throw new Error(
-                    'STR number is already registered by another midwife'
-                )
-            }
+        }
+        if (checks.licenseExists) {
+            throw new Error(
+                'STR number is already registered by another midwife'
+            )
         }
 
         const updated = await this.midwife_repository.update(

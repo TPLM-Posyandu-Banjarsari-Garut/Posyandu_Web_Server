@@ -1,5 +1,15 @@
 import { NewCadre, Cadre, cadres } from '@/db'
-import { and, eq, ilike, or, sql, SQL, asc, desc } from 'drizzle-orm'
+import {
+    and,
+    eq,
+    ilike,
+    or,
+    sql,
+    SQL,
+    asc,
+    desc,
+    getTableColumns
+} from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface CadreQueryFilters {
@@ -42,6 +52,13 @@ export class CadreRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         let statusCondition = undefined
         if (status) {
             statusCondition = eq(cadres.status, status)
@@ -50,10 +67,10 @@ export class CadreRepository {
         }
 
         const whereClause = and(
-            search
+            escapedSearch
                 ? or(
-                      ilike(cadres.identity_number, `%${search}%`),
-                      ilike(cadres.duty_area_notes, `%${search}%`)
+                      ilike(cadres.identity_number, `%${escapedSearch}%`),
+                      ilike(cadres.duty_area_notes, `%${escapedSearch}%`)
                   )
                 : undefined,
             user_id ? eq(cadres.user_id, user_id) : undefined,
@@ -62,27 +79,37 @@ export class CadreRepository {
             statusCondition
         )
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(cadres)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(cadres.created_at)
-                        : desc(cadres.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(cadres),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(cadres)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc'
+                    ? asc(cadres.created_at)
+                    : desc(cadres.created_at)
+            )
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(cadres)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(({ total_count, ...cadre }) => cadre)
 
         return {
             data,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 
@@ -174,5 +201,24 @@ export class CadreRepository {
 
     async restore(public_id: string): Promise<Cadre | undefined> {
         return this.updateStatus(public_id, 'active')
+    }
+
+    async checkUniqueConstraints(data: {
+        user_id?: string | null
+        posyandu_id?: string | null
+    }) {
+        if (!data.user_id || !data.posyandu_id) {
+            return { isAlreadyCadre: false }
+        }
+        const isAlreadyCadre = await this.checkExists(
+            and(
+                eq(cadres.user_id, data.user_id),
+                eq(cadres.posyandu_id, data.posyandu_id),
+                eq(cadres.status, 'active')
+            )
+        )
+        return {
+            isAlreadyCadre
+        }
     }
 }

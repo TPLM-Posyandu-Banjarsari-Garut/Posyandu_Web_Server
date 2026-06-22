@@ -3,7 +3,16 @@ import {
     EducationCategory,
     educationCategories
 } from '@/db'
-import { and, eq, ilike, sql, or, asc, desc } from 'drizzle-orm'
+import {
+    and,
+    eq,
+    ilike,
+    sql,
+    or,
+    asc,
+    desc,
+    getTableColumns
+} from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface EducationCategoryQueryFilters {
@@ -38,17 +47,24 @@ export class EducationCategoryRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         const conditions = []
 
         if (!includeDeleted) {
             conditions.push(sql`${educationCategories.deleted_at} IS NULL`)
         }
 
-        if (search) {
+        if (escapedSearch) {
             conditions.push(
                 or(
-                    ilike(educationCategories.name, `%${search}%`),
-                    ilike(educationCategories.slug, `%${search}%`)
+                    ilike(educationCategories.name, `%${escapedSearch}%`),
+                    ilike(educationCategories.slug, `%${escapedSearch}%`)
                 )
             )
         }
@@ -59,27 +75,39 @@ export class EducationCategoryRepository {
 
         const whereClause = and(...conditions)
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(educationCategories)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(educationCategories.created_at)
-                        : desc(educationCategories.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(educationCategories),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(educationCategories)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc'
+                    ? asc(educationCategories.created_at)
+                    : desc(educationCategories.created_at)
+            )
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(educationCategories)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(
+            ({ total_count, ...category }) => category
+        )
 
         return {
             data,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 

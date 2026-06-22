@@ -95,6 +95,7 @@ export const createChildSchema = createInsertSchema(childrens, {
         .openapi({ type: 'string', example: '34.2' })
 })
     .omit({
+        is_deleted: true,
         id: true,
         created_at: true,
         updated_at: true,

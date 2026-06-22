@@ -9,7 +9,8 @@ import {
     uniqueIndex,
     varchar,
     boolean,
-    jsonb
+    jsonb,
+    index
 } from 'drizzle-orm/pg-core'
 
 export const examinations = pgTable(
@@ -35,7 +36,8 @@ export const examinations = pgTable(
         uniqueIndex('examinations_posyandu_id_name_unique').on(
             table.posyandu_id,
             table.name
-        )
+        ),
+        index('examinations_is_deleted_idx').on(table.is_deleted)
     ]
 )
 

@@ -3,7 +3,7 @@ import {
     ExaminationSchedule,
     examinationSchedules
 } from '@/db'
-import { and, eq, sql, asc, desc } from 'drizzle-orm'
+import { and, eq, sql, asc, desc, getTableColumns } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ExaminationSchedulesQueryFilters {
@@ -46,6 +46,9 @@ export class ExaminationSchedulesRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
         const conditions = []
 
         if (!includeDeleted) {
@@ -84,27 +87,37 @@ export class ExaminationSchedulesRepository {
 
         const whereClause = and(...conditions)
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(examinationSchedules)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(examinationSchedules.created_at)
-                        : desc(examinationSchedules.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(examinationSchedules),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(examinationSchedules)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc'
+                    ? asc(examinationSchedules.created_at)
+                    : desc(examinationSchedules.created_at)
+            )
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(examinationSchedules)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(({ total_count, ...record }) => record)
 
         return {
             data,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 

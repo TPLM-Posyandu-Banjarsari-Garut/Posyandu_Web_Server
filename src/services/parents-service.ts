@@ -9,21 +9,16 @@ export class ParentService {
     constructor(private readonly parent_repository: ParentRepository) {}
 
     async createParent(parent_payload: NewParent): Promise<Parent> {
-        const existingProfile = await this.parent_repository.findByUserId(
-            parent_payload.user_id
-        )
-        if (existingProfile) {
+        const checks = await this.parent_repository.checkUniqueConstraints({
+            user_id: parent_payload.user_id || undefined,
+            identity_number: parent_payload.identity_number || undefined
+        })
+
+        if (checks.userExists) {
             throw new Error('User already has a parent profile')
         }
-
-        if (parent_payload.identity_number) {
-            const isNikUsed =
-                await this.parent_repository.existsByIdentityNumber(
-                    parent_payload.identity_number
-                )
-            if (isNikUsed) {
-                throw new Error('Identity number (NIK) is already registered')
-            }
+        if (checks.identityExists) {
+            throw new Error('Identity number (NIK) is already registered')
         }
 
         return this.parent_repository.create(parent_payload)
@@ -52,32 +47,27 @@ export class ParentService {
     ): Promise<Parent> {
         const existingParent = await this.getParentById(public_id)
 
-        if (
-            parent_payload.identity_number &&
-            parent_payload.identity_number !== existingParent.identity_number
-        ) {
-            const isNikUsed =
-                await this.parent_repository.existsByIdentityNumber(
-                    parent_payload.identity_number
-                )
-            if (isNikUsed) {
-                throw new Error(
-                    'Identity number (NIK) is already registered by another parent'
-                )
-            }
-        }
+        const checks = await this.parent_repository.checkUniqueConstraints({
+            user_id:
+                parent_payload.user_id &&
+                parent_payload.user_id !== existingParent.user_id
+                    ? parent_payload.user_id
+                    : undefined,
+            identity_number:
+                parent_payload.identity_number &&
+                parent_payload.identity_number !==
+                    existingParent.identity_number
+                    ? parent_payload.identity_number
+                    : undefined
+        })
 
-        if (
-            parent_payload.user_id &&
-            parent_payload.user_id !== existingParent.user_id
-        ) {
-            const existingProfileForNewUser =
-                await this.parent_repository.findByUserId(
-                    parent_payload.user_id
-                )
-            if (existingProfileForNewUser) {
-                throw new Error('The target user already has a parent profile')
-            }
+        if (checks.identityExists) {
+            throw new Error(
+                'Identity number (NIK) is already registered by another parent'
+            )
+        }
+        if (checks.userExists) {
+            throw new Error('The target user already has a parent profile')
         }
 
         const updated = await this.parent_repository.update(

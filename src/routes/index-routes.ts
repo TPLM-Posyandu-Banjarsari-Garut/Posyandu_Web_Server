@@ -24,6 +24,7 @@ import examinationsRoute from '@/routes/examinations-route'
 import examinationSchedulesRoute from '@/routes/examination-schedules-route'
 import examinationRecordsRoute from '@/routes/examination-records-route'
 import trashRoutes from '@/routes/trash-routes'
+import cronRoutes from '@/routes/cron-routes'
 
 import { rateLimiter } from '@/middlewares/rate-limiter'
 
@@ -54,5 +55,6 @@ router.use('/api/examinations', examinationsRoute)
 router.use('/api/examination-schedules', examinationSchedulesRoute)
 router.use('/api/examination-records', examinationRecordsRoute)
 router.use('/api/trash', trashRoutes)
+router.use('/api/cron', cronRoutes)
 
 export default router

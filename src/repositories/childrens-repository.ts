@@ -9,7 +9,16 @@ import {
     nutritionRecords,
     vitaminRecords
 } from '@/db'
-import { and, eq, ilike, sql, inArray, asc, desc } from 'drizzle-orm'
+import {
+    and,
+    eq,
+    ilike,
+    sql,
+    inArray,
+    asc,
+    desc,
+    getTableColumns
+} from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ChildrenQueryFilters {
@@ -48,14 +57,21 @@ export class ChildrenRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         const conditions = []
 
         if (!includeDeleted) {
             conditions.push(sql`${childrens.deleted_at} IS NULL`)
         }
 
-        if (search) {
-            conditions.push(ilike(childrens.name, `%${search}%`))
+        if (escapedSearch) {
+            conditions.push(ilike(childrens.name, `%${escapedSearch}%`))
         }
 
         if (posyandu_id) {
@@ -71,7 +87,6 @@ export class ChildrenRepository {
         }
 
         if (parent_id) {
-            // Filter children by parent_id via relation_childrens junction table
             const parentChildSubquery = this.db
                 .select({ children_id: relationChildrens.children_id })
                 .from(relationChildrens)
@@ -81,32 +96,41 @@ export class ChildrenRepository {
 
         const whereClause = and(...conditions)
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(childrens)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(childrens.created_at)
-                        : desc(childrens.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(childrens),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(childrens)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc'
+                    ? asc(childrens.created_at)
+                    : desc(childrens.created_at)
+            )
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(childrens)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(({ total_count, ...child }) => child)
 
         if (data.length === 0) {
             return {
                 data: [],
-                totalItems: Number(countResult[0]?.count || 0)
+                totalItems
             }
         }
 
-        // Enrich with posyandu_detail and mother_name
         const childIds = data.map(c => c.id)
 
         const posyanduIds = [
@@ -144,7 +168,7 @@ export class ChildrenRepository {
 
         return {
             data: enrichedData,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 
@@ -253,7 +277,8 @@ export class ChildrenRepository {
                 birth_head_circumference: childrens.birth_head_circumference,
                 created_at: childrens.created_at,
                 updated_at: childrens.updated_at,
-                deleted_at: childrens.deleted_at
+                deleted_at: childrens.deleted_at,
+                is_deleted: childrens.is_deleted
             })
             .from(childrens)
             .innerJoin(
@@ -313,6 +338,15 @@ export class ChildrenRepository {
             .where(eq(childrens.identity_number, identity_number))
             .limit(1)
         return !!child
+    }
+
+    async checkUniqueConstraints(data: { identity_number?: string | null }) {
+        const identityExists = data.identity_number
+            ? await this.existsByIdentityNumber(data.identity_number)
+            : false
+        return {
+            identityExists
+        }
     }
 
     /**

@@ -23,7 +23,8 @@ export const media = pgTable(
     table => [
         index('media_uploaded_by_idx').on(table.uploaded_by),
         index('media_file_category_idx').on(table.file_category),
-        index('media_created_at_idx').on(table.created_at)
+        index('media_created_at_idx').on(table.created_at),
+        index('media_is_deleted_idx').on(table.is_deleted)
     ]
 )
 

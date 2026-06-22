@@ -34,7 +34,8 @@ export const notifications = pgTable(
     table => [
         index('notifications_user_id_idx').on(table.user_id),
         index('notifications_user_status_idx').on(table.user_id, table.status),
-        index('notifications_created_at_idx').on(table.created_at)
+        index('notifications_created_at_idx').on(table.created_at),
+        index('notifications_is_deleted_idx').on(table.is_deleted)
     ]
 )
 

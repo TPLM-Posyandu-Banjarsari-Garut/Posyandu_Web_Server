@@ -1,5 +1,5 @@
 import { NewVaccine, Vaccine, vaccines } from '@/db'
-import { and, eq, ilike, sql, asc, desc } from 'drizzle-orm'
+import { and, eq, ilike, sql, asc, desc, getTableColumns } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface VaccineQueryFilters {
@@ -39,14 +39,21 @@ export class VaccineRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         const conditions = []
 
         if (!includeDeleted) {
             conditions.push(sql`${vaccines.deleted_at} IS NULL`)
         }
 
-        if (search) {
-            conditions.push(ilike(vaccines.name, `%${search}%`))
+        if (escapedSearch) {
+            conditions.push(ilike(vaccines.name, `%${escapedSearch}%`))
         }
 
         if (route) {
@@ -55,27 +62,37 @@ export class VaccineRepository {
 
         const whereClause = and(...conditions)
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(vaccines)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(vaccines.created_at)
-                        : desc(vaccines.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(vaccines),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(vaccines)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc'
+                    ? asc(vaccines.created_at)
+                    : desc(vaccines.created_at)
+            )
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(vaccines)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(({ total_count, ...vaccine }) => vaccine)
 
         return {
             data,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 
@@ -151,5 +168,19 @@ export class VaccineRepository {
             .where(eq(vaccines.code, code))
             .limit(1)
         return !!vaccine
+    }
+
+    async checkUniqueConstraints(data: {
+        name?: string | null
+        code?: string | null
+    }) {
+        const [nameExists, codeExists] = await Promise.all([
+            data.name ? this.existsByName(data.name) : Promise.resolve(false),
+            data.code ? this.existsByCode(data.code) : Promise.resolve(false)
+        ])
+        return {
+            nameExists,
+            codeExists
+        }
     }
 }

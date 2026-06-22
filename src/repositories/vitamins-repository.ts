@@ -1,5 +1,5 @@
 import { NewVitamin, Vitamin, vitamins } from '@/db'
-import { and, eq, ilike, sql, asc, desc } from 'drizzle-orm'
+import { and, eq, ilike, sql, asc, desc, getTableColumns } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface VitaminQueryFilters {
@@ -39,14 +39,21 @@ export class VitaminRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         const conditions = []
 
         if (!includeDeleted) {
             conditions.push(sql`${vitamins.deleted_at} IS NULL`)
         }
 
-        if (search) {
-            conditions.push(ilike(vitamins.name, `%${search}%`))
+        if (escapedSearch) {
+            conditions.push(ilike(vitamins.name, `%${escapedSearch}%`))
         }
 
         if (capsule_color) {
@@ -55,27 +62,37 @@ export class VitaminRepository {
 
         const whereClause = and(...conditions)
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(vitamins)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(vitamins.created_at)
-                        : desc(vitamins.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(vitamins),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(vitamins)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc'
+                    ? asc(vitamins.created_at)
+                    : desc(vitamins.created_at)
+            )
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(vitamins)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(({ total_count, ...vitamin }) => vitamin)
 
         return {
             data,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 
@@ -142,5 +159,14 @@ export class VitaminRepository {
             .where(eq(vitamins.name, name))
             .limit(1)
         return !!vitamin
+    }
+
+    async checkUniqueConstraints(data: { name?: string | null }) {
+        const nameExists = data.name
+            ? await this.existsByName(data.name)
+            : false
+        return {
+            nameExists
+        }
     }
 }

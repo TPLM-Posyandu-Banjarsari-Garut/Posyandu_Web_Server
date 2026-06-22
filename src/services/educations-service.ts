@@ -39,10 +39,12 @@ export class EducationService {
         public_id: string,
         incrementView: boolean = false
     ): Promise<Education> {
+        let education: Education | undefined
         if (incrementView) {
-            await this.educationRepository.incrementViews(public_id)
+            education = await this.educationRepository.incrementViews(public_id)
+        } else {
+            education = await this.educationRepository.findById(public_id)
         }
-        const education = await this.educationRepository.findById(public_id)
         if (!education) throw new Error('Education article not found')
         return education
     }

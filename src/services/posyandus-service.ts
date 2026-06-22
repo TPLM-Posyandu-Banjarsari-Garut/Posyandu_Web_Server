@@ -9,10 +9,10 @@ export class PosyanduService {
     constructor(private readonly posyandu_repository: PosyanduRepository) {}
 
     async createPosyandu(posyandu_payload: NewPosyandu): Promise<Posyandu> {
-        const isNameUsed = await this.posyandu_repository.existsByName(
-            posyandu_payload.name
-        )
-        if (isNameUsed) {
+        const checks = await this.posyandu_repository.checkUniqueConstraints({
+            name: posyandu_payload.name || undefined
+        })
+        if (checks.nameExists) {
             throw new Error('Posyandu name is already registered')
         }
 
@@ -42,18 +42,18 @@ export class PosyanduService {
     ): Promise<Posyandu> {
         const existingPosyandu = await this.getPosyanduById(public_id)
 
-        if (
-            posyandu_payload.name &&
-            posyandu_payload.name !== existingPosyandu.name
-        ) {
-            const isNameUsed = await this.posyandu_repository.existsByName(
-                posyandu_payload.name
+        const checks = await this.posyandu_repository.checkUniqueConstraints({
+            name:
+                posyandu_payload.name &&
+                posyandu_payload.name !== existingPosyandu.name
+                    ? posyandu_payload.name
+                    : undefined
+        })
+
+        if (checks.nameExists) {
+            throw new Error(
+                'Posyandu name is already registered by another posyandu'
             )
-            if (isNameUsed) {
-                throw new Error(
-                    'Posyandu name is already registered by another posyandu'
-                )
-            }
         }
 
         const updated = await this.posyandu_repository.update(

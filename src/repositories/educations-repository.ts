@@ -1,5 +1,15 @@
 import { NewEducation, Education, educations } from '@/db'
-import { and, eq, ilike, sql, or, SQL, asc, desc } from 'drizzle-orm'
+import {
+    and,
+    eq,
+    ilike,
+    sql,
+    or,
+    SQL,
+    asc,
+    desc,
+    getTableColumns
+} from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface EducationQueryFilters {
@@ -36,6 +46,13 @@ export class EducationRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         const conditions = []
 
         if (!includeDeleted) {
@@ -45,12 +62,12 @@ export class EducationRepository {
             }
         }
 
-        if (search) {
+        if (escapedSearch) {
             conditions.push(
                 or(
-                    ilike(educations.title, `%${search}%`),
-                    ilike(educations.content, `%${search}%`),
-                    ilike(educations.summary, `%${search}%`)
+                    ilike(educations.title, `%${escapedSearch}%`),
+                    ilike(educations.content, `%${escapedSearch}%`),
+                    ilike(educations.summary, `%${escapedSearch}%`)
                 )
             )
         }
@@ -69,27 +86,39 @@ export class EducationRepository {
 
         const whereClause = and(...conditions)
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(educations)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(educations.created_at)
-                        : desc(educations.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(educations),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(educations)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc'
+                    ? asc(educations.created_at)
+                    : desc(educations.created_at)
+            )
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(educations)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(
+            ({ total_count, ...education }) => education
+        )
 
         return {
             data,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 

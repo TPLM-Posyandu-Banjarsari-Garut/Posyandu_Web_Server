@@ -21,6 +21,7 @@ import { registerConsultationsRoutes } from '@/docs/consultations-docs'
 import { registerMediasRoutes } from '@/docs/medias-docs'
 import { registerNotificationsRoutes } from '@/docs/notifications-docs'
 import { registerHealthRoutes } from '@/docs/health-docs'
+import { registerCronRoutes } from '@/docs/cron-docs'
 import { registerPregnancyRecordsRoutes } from '@/docs/pregnancy-records-docs'
 import { registerExaminationsRoutes } from '@/docs/examinations-docs'
 import { registerExaminationSchedulesRoutes } from '@/docs/examination-schedules-docs'
@@ -81,6 +82,9 @@ registerNotificationsRoutes(registry)
 
 // health-check
 registerHealthRoutes(registry)
+
+// cron-jobs
+registerCronRoutes(registry)
 
 // pregnancy-records
 registerPregnancyRecordsRoutes(registry)
