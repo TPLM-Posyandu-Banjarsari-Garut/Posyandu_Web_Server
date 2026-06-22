@@ -1,4 +1,3 @@
-import cron, { ScheduledTask } from 'node-cron'
 import db from '@/configs/db'
 import {
     verifications,
@@ -82,49 +81,6 @@ async function getQueueNumber(
 }
 
 export class CronService {
-    private static tasks: ScheduledTask[] = []
-
-    static start(): void {
-        logger.info('⏰ Initializing Cron Service...')
-
-        const keepAliveTask = cron.schedule('*/5 * * * *', async () => {
-            await this.runKeepAlive()
-        })
-        this.tasks.push(keepAliveTask)
-
-        const dailyCleanupTask = cron.schedule('0 0 * * *', async () => {
-            await this.runDailyCleanup()
-        })
-        this.tasks.push(dailyCleanupTask)
-
-        const bookingReminderH1Task = cron.schedule('0 * * * *', async () => {
-            await this.runBookingReminderH1()
-        })
-        this.tasks.push(bookingReminderH1Task)
-
-        const bookingReminder2hTask = cron.schedule(
-            '*/30 * * * *',
-            async () => {
-                await this.runBookingReminder2h()
-            }
-        )
-        this.tasks.push(bookingReminder2hTask)
-
-        const bookingAutoExpireTask = cron.schedule('30 * * * *', async () => {
-            await this.runBookingAutoExpire()
-        })
-        this.tasks.push(bookingAutoExpireTask)
-
-        const bookingFollowUpTask = cron.schedule('0 1 * * *', async () => {
-            await this.runBookingFollowUp()
-        })
-        this.tasks.push(bookingFollowUpTask)
-
-        logger.info(
-            `🚀 Cron Service started. Active jobs: ${this.tasks.length}`
-        )
-    }
-
     static async runKeepAlive(): Promise<void> {
         try {
             await db.execute(sql`SELECT 1`)
@@ -362,17 +318,43 @@ export class CronService {
         }
     }
 
-    static async triggerCronJobs(): Promise<void> {
+    static async triggerCronJobs(taskName?: string): Promise<void> {
+        logger.info(
+            `⏰ Triggering cron jobs via HTTP endpoint. Task: ${taskName || 'auto (time-based)'}`
+        )
+
+        if (taskName) {
+            switch (taskName) {
+                case 'keep-alive':
+                    await this.runKeepAlive()
+                    break
+                case 'reminder-2h':
+                    await this.runBookingReminder2h()
+                    break
+                case 'reminder-h1':
+                    await this.runBookingReminderH1()
+                    break
+                case 'auto-expire':
+                    await this.runBookingAutoExpire()
+                    break
+                case 'daily-cleanup':
+                    await this.runDailyCleanup()
+                    break
+                case 'follow-up':
+                    await this.runBookingFollowUp()
+                    break
+                default:
+                    logger.warn(`Unknown cron task requested: ${taskName}`)
+                    break
+            }
+            return
+        }
+
         const now = new Date()
         const minute = now.getUTCMinutes()
         const hour = now.getUTCHours()
 
-        logger.info(
-            `⏰ Triggering scheduled cron jobs via HTTP endpoint. UTC Time: ${now.toISOString()}`
-        )
-
         await this.runKeepAlive()
-
         await this.runBookingReminder2h()
 
         if (minute >= 0 && minute < 30) {
@@ -387,14 +369,5 @@ export class CronService {
         if (hour === 1 && minute >= 0 && minute < 30) {
             await this.runBookingFollowUp()
         }
-    }
-
-    static stop(): void {
-        logger.warn('🛑 Stopping Cron Service...')
-        for (const task of this.tasks) {
-            task.stop()
-        }
-        this.tasks = []
-        logger.info('👋 Cron Service stopped.')
     }
 }
