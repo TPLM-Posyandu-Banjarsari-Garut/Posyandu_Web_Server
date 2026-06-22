@@ -46,6 +46,13 @@ export class EducationRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         const conditions = []
 
         if (!includeDeleted) {
@@ -55,12 +62,12 @@ export class EducationRepository {
             }
         }
 
-        if (search) {
+        if (escapedSearch) {
             conditions.push(
                 or(
-                    ilike(educations.title, `%${search}%`),
-                    ilike(educations.content, `%${search}%`),
-                    ilike(educations.summary, `%${search}%`)
+                    ilike(educations.title, `%${escapedSearch}%`),
+                    ilike(educations.content, `%${escapedSearch}%`),
+                    ilike(educations.summary, `%${escapedSearch}%`)
                 )
             )
         }
@@ -91,8 +98,8 @@ export class EducationRepository {
                     ? asc(educations.created_at)
                     : desc(educations.created_at)
             )
-            .limit(limit)
-            .offset((page - 1) * limit)
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
 
         let totalItems = 0
         if (dataWithCount.length > 0) {

@@ -39,14 +39,21 @@ export class VitaminRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         const conditions = []
 
         if (!includeDeleted) {
             conditions.push(sql`${vitamins.deleted_at} IS NULL`)
         }
 
-        if (search) {
-            conditions.push(ilike(vitamins.name, `%${search}%`))
+        if (escapedSearch) {
+            conditions.push(ilike(vitamins.name, `%${escapedSearch}%`))
         }
 
         if (capsule_color) {
@@ -67,8 +74,8 @@ export class VitaminRepository {
                     ? asc(vitamins.created_at)
                     : desc(vitamins.created_at)
             )
-            .limit(limit)
-            .offset((page - 1) * limit)
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
 
         let totalItems = 0
         if (dataWithCount.length > 0) {
@@ -152,5 +159,14 @@ export class VitaminRepository {
             .where(eq(vitamins.name, name))
             .limit(1)
         return !!vitamin
+    }
+
+    async checkUniqueConstraints(data: { name?: string | null }) {
+        const nameExists = data.name
+            ? await this.existsByName(data.name)
+            : false
+        return {
+            nameExists
+        }
     }
 }

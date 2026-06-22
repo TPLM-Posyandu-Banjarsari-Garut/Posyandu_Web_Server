@@ -36,6 +36,13 @@ export class InventoryRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         const conditions = []
 
         if (!includeDeleted) {
@@ -46,8 +53,8 @@ export class InventoryRepository {
             conditions.push(eq(inventories.posyandu_id, posyandu_id))
         }
 
-        if (search) {
-            conditions.push(ilike(inventories.item_name, `%${search}%`))
+        if (escapedSearch) {
+            conditions.push(ilike(inventories.item_name, `%${escapedSearch}%`))
         }
 
         if (item_type) {
@@ -72,8 +79,8 @@ export class InventoryRepository {
                     ? asc(inventories.created_at)
                     : desc(inventories.created_at)
             )
-            .limit(limit)
-            .offset((page - 1) * limit)
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
 
         let totalItems = 0
         if (dataWithCount.length > 0) {

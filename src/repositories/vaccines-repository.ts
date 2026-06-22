@@ -39,14 +39,21 @@ export class VaccineRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         const conditions = []
 
         if (!includeDeleted) {
             conditions.push(sql`${vaccines.deleted_at} IS NULL`)
         }
 
-        if (search) {
-            conditions.push(ilike(vaccines.name, `%${search}%`))
+        if (escapedSearch) {
+            conditions.push(ilike(vaccines.name, `%${escapedSearch}%`))
         }
 
         if (route) {
@@ -67,8 +74,8 @@ export class VaccineRepository {
                     ? asc(vaccines.created_at)
                     : desc(vaccines.created_at)
             )
-            .limit(limit)
-            .offset((page - 1) * limit)
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
 
         let totalItems = 0
         if (dataWithCount.length > 0) {
@@ -161,5 +168,19 @@ export class VaccineRepository {
             .where(eq(vaccines.code, code))
             .limit(1)
         return !!vaccine
+    }
+
+    async checkUniqueConstraints(data: {
+        name?: string | null
+        code?: string | null
+    }) {
+        const [nameExists, codeExists] = await Promise.all([
+            data.name ? this.existsByName(data.name) : Promise.resolve(false),
+            data.code ? this.existsByCode(data.code) : Promise.resolve(false)
+        ])
+        return {
+            nameExists,
+            codeExists
+        }
     }
 }

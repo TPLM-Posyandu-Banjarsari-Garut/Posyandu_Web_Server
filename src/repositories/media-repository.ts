@@ -34,6 +34,13 @@ export class MediaRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         const conditions = []
 
         if (!includeDeleted) {
@@ -44,8 +51,8 @@ export class MediaRepository {
             conditions.push(eq(media.uploaded_by, uploaded_by))
         }
 
-        if (search) {
-            conditions.push(ilike(media.original_name, `%${search}%`))
+        if (escapedSearch) {
+            conditions.push(ilike(media.original_name, `%${escapedSearch}%`))
         }
 
         if (file_category) {
@@ -64,8 +71,8 @@ export class MediaRepository {
             .orderBy(
                 order === 'asc' ? asc(media.created_at) : desc(media.created_at)
             )
-            .limit(limit)
-            .offset((page - 1) * limit)
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
 
         let totalItems = 0
         if (dataWithCount.length > 0) {

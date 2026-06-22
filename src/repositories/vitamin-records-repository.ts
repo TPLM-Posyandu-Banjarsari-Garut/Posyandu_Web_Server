@@ -44,6 +44,9 @@ export class VitaminRecordRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
         const conditions = []
 
         if (!includeDeleted) {
@@ -100,8 +103,8 @@ export class VitaminRecordRepository {
                     ? asc(vitaminRecords.created_at)
                     : desc(vitaminRecords.created_at)
             )
-            .limit(limit)
-            .offset((page - 1) * limit)
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
 
         let totalItems = 0
         if (dataWithCount.length > 0) {

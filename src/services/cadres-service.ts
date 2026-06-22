@@ -9,14 +9,12 @@ export class CadreService {
     constructor(private readonly cadre_repository: CadreRepository) {}
 
     async createCadre(cadre_payload: NewCadre): Promise<Cadre> {
-        const existingCadres = await this.cadre_repository.findByUserId(
-            cadre_payload.user_id
-        )
-        const isAlreadyCadre = existingCadres.some(
-            c => c.posyandu_id === cadre_payload.posyandu_id
-        )
+        const checks = await this.cadre_repository.checkUniqueConstraints({
+            user_id: cadre_payload.user_id,
+            posyandu_id: cadre_payload.posyandu_id
+        })
 
-        if (isAlreadyCadre) {
+        if (checks.isAlreadyCadre) {
             throw new Error('User is already a cadre in this posyandu')
         }
 
@@ -46,25 +44,21 @@ export class CadreService {
     ): Promise<Cadre> {
         const existingCadre = await this.getCadreById(public_id)
 
-        if (cadre_payload.user_id || cadre_payload.posyandu_id) {
-            const targetUserId = cadre_payload.user_id || existingCadre.user_id
-            const targetPosyanduId =
-                cadre_payload.posyandu_id || existingCadre.posyandu_id
+        const targetUserId = cadre_payload.user_id || existingCadre.user_id
+        const targetPosyanduId =
+            cadre_payload.posyandu_id || existingCadre.posyandu_id
 
-            if (
-                targetUserId !== existingCadre.user_id ||
-                targetPosyanduId !== existingCadre.posyandu_id
-            ) {
-                const existingCadresForUser =
-                    await this.cadre_repository.findByUserId(targetUserId)
-                const isAlreadyCadre = existingCadresForUser.some(
-                    c =>
-                        c.posyandu_id === targetPosyanduId && c.id !== public_id
-                )
+        if (
+            targetUserId !== existingCadre.user_id ||
+            targetPosyanduId !== existingCadre.posyandu_id
+        ) {
+            const checks = await this.cadre_repository.checkUniqueConstraints({
+                user_id: targetUserId,
+                posyandu_id: targetPosyanduId
+            })
 
-                if (isAlreadyCadre) {
-                    throw new Error('User is already a cadre in this posyandu')
-                }
+            if (checks.isAlreadyCadre) {
+                throw new Error('User is already a cadre in this posyandu')
             }
         }
 

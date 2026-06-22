@@ -51,6 +51,13 @@ export class MidwifeRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         let statusCondition = undefined
         if (status) {
             statusCondition = eq(midwifes.status, status)
@@ -59,10 +66,10 @@ export class MidwifeRepository {
         }
 
         const whereClause = and(
-            search
+            escapedSearch
                 ? or(
-                      ilike(midwifes.identity_number, `%${search}%`),
-                      ilike(midwifes.license_number, `%${search}%`)
+                      ilike(midwifes.identity_number, `%${escapedSearch}%`),
+                      ilike(midwifes.license_number, `%${escapedSearch}%`)
                   )
                 : undefined,
             str_number ? eq(midwifes.license_number, str_number) : undefined,
@@ -81,8 +88,8 @@ export class MidwifeRepository {
                     ? asc(midwifes.created_at)
                     : desc(midwifes.created_at)
             )
-            .limit(limit)
-            .offset((page - 1) * limit)
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
 
         let totalItems = 0
         if (dataWithCount.length > 0) {
@@ -218,5 +225,33 @@ export class MidwifeRepository {
             .where(eq(midwifes.identity_number, identity_number))
             .limit(1)
         return !!midwife
+    }
+
+    async checkUniqueConstraints(data: {
+        user_id?: string | null
+        identity_number?: string | null
+        license_number?: string | null
+    }) {
+        const [userExists, identityExists, licenseExists] = await Promise.all([
+            data.user_id
+                ? this.checkExists(
+                      and(
+                          eq(midwifes.user_id, data.user_id),
+                          eq(midwifes.status, 'active')
+                      )
+                  )
+                : Promise.resolve(false),
+            data.identity_number
+                ? this.existsByIdentityNumber(data.identity_number)
+                : Promise.resolve(false),
+            data.license_number
+                ? this.existsByStrNumber(data.license_number)
+                : Promise.resolve(false)
+        ])
+        return {
+            userExists,
+            identityExists,
+            licenseExists
+        }
     }
 }

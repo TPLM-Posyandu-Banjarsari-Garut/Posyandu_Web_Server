@@ -48,6 +48,13 @@ export class PosyanduRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         let statusCondition = undefined
         if (status) {
             statusCondition = eq(posyandus.status, status)
@@ -56,7 +63,9 @@ export class PosyanduRepository {
         }
 
         const whereClause = and(
-            search ? ilike(posyandus.name, `%${search}%`) : undefined,
+            escapedSearch
+                ? ilike(posyandus.name, `%${escapedSearch}%`)
+                : undefined,
             statusCondition
         )
 
@@ -72,8 +81,8 @@ export class PosyanduRepository {
                     ? asc(posyandus.created_at)
                     : desc(posyandus.created_at)
             )
-            .limit(limit)
-            .offset((page - 1) * limit)
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
 
         let totalItems = 0
         if (dataWithCount.length > 0) {
@@ -172,5 +181,14 @@ export class PosyanduRepository {
             .where(eq(posyandus.name, name))
             .limit(1)
         return !!posyandu
+    }
+
+    async checkUniqueConstraints(data: { name?: string | null }) {
+        const nameExists = data.name
+            ? await this.existsByName(data.name)
+            : false
+        return {
+            nameExists
+        }
     }
 }

@@ -57,14 +57,21 @@ export class ChildrenRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         const conditions = []
 
         if (!includeDeleted) {
             conditions.push(sql`${childrens.deleted_at} IS NULL`)
         }
 
-        if (search) {
-            conditions.push(ilike(childrens.name, `%${search}%`))
+        if (escapedSearch) {
+            conditions.push(ilike(childrens.name, `%${escapedSearch}%`))
         }
 
         if (posyandu_id) {
@@ -102,8 +109,8 @@ export class ChildrenRepository {
                     ? asc(childrens.created_at)
                     : desc(childrens.created_at)
             )
-            .limit(limit)
-            .offset((page - 1) * limit)
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
 
         let totalItems = 0
         if (dataWithCount.length > 0) {
@@ -332,6 +339,15 @@ export class ChildrenRepository {
             .where(eq(childrens.identity_number, identity_number))
             .limit(1)
         return !!child
+    }
+
+    async checkUniqueConstraints(data: { identity_number?: string | null }) {
+        const identityExists = data.identity_number
+            ? await this.existsByIdentityNumber(data.identity_number)
+            : false
+        return {
+            identityExists
+        }
     }
 
     /**

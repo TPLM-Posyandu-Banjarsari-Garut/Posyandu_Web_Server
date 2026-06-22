@@ -50,6 +50,9 @@ export class ImmunizationRecordRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
         const conditions = []
 
         if (!includeDeleted) {
@@ -106,8 +109,8 @@ export class ImmunizationRecordRepository {
                     ? asc(immunizationRecords.created_at)
                     : desc(immunizationRecords.created_at)
             )
-            .limit(limit)
-            .offset((page - 1) * limit)
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
 
         let totalItems = 0
         if (dataWithCount.length > 0) {

@@ -374,8 +374,15 @@ export class TrashRepository {
         filters?: TrashQueryFilters
     ): Promise<{ data: TrashItem[]; totalItems: number }> {
         const { type, search, page = 1, limit = 10 } = filters || {}
-        const offset = (page - 1) * limit
-        const fetchLimit = offset + limit
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
+        const offset = (safePage - 1) * safeLimit
+        const fetchLimit = offset + safeLimit
 
         const targets = type
             ? trashConfigs.filter(c => c.type === type)
@@ -387,13 +394,13 @@ export class TrashRepository {
                     this.db
                         .select()
                         .from(config.table)
-                        .where(config.filter(search))
+                        .where(config.filter(escapedSearch))
                         .orderBy(desc(config.orderByColumn))
                         .limit(fetchLimit),
                     this.db
                         .select({ count: sql<number>`count(*)` })
                         .from(config.table)
-                        .where(config.filter(search))
+                        .where(config.filter(escapedSearch))
                 ])
 
                 const count = Number(countResult[0]?.count || 0)

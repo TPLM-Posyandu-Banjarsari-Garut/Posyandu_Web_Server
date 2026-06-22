@@ -1,4 +1,4 @@
-import { NewParent, Parent, parents, relationChildrens } from '@/db'
+import { NewParent, Parent, parents, relationChildrens, users } from '@/db'
 import {
     and,
     eq,
@@ -50,6 +50,13 @@ export class ParentRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         let statusCondition = undefined
         if (status) {
             statusCondition = eq(parents.status, status)
@@ -58,10 +65,12 @@ export class ParentRepository {
         }
 
         const whereClause = and(
-            search
+            escapedSearch
                 ? or(
-                      ilike(parents.identity_number, `%${search}%`),
-                      ilike(parents.address_line, `%${search}%`)
+                      ilike(parents.identity_number, `%${escapedSearch}%`),
+                      ilike(users.name, `%${escapedSearch}%`),
+                      ilike(parents.address_line, `%${escapedSearch}%`),
+                      ilike(users.phone_number, `%${escapedSearch}%`)
                   )
                 : undefined,
             user_id ? eq(parents.user_id, user_id) : undefined,
@@ -75,32 +84,20 @@ export class ParentRepository {
                 total_count: sql<number>`count(*) over()`.mapWith(Number)
             })
             .from(parents)
+            .innerJoin(users, eq(users.id, parents.user_id))
             .where(whereClause)
             .orderBy(
                 order === 'asc'
                     ? asc(parents.created_at)
                     : desc(parents.created_at)
             )
-            .limit(limit)
-            .offset((page - 1) * limit)
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
 
-        let totalItems = 0
-        if (dataWithCount.length > 0) {
-            totalItems = dataWithCount[0].total_count
-        } else {
-            const countResult = await this.db
-                .select({ count: sql<number>`count(*)` })
-                .from(parents)
-                .where(whereClause)
-            totalItems = Number(countResult[0]?.count || 0)
-        }
-
+        const totalItems = dataWithCount[0]?.total_count ?? 0
         const data = dataWithCount.map(({ total_count, ...parent }) => parent)
 
-        return {
-            data,
-            totalItems
-        }
+        return { data, totalItems }
     }
 
     async findById(
@@ -199,6 +196,24 @@ export class ParentRepository {
             .where(eq(parents.identity_number, identity_number))
             .limit(1)
         return !!parent
+    }
+
+    async checkUniqueConstraints(data: {
+        user_id?: string | null
+        identity_number?: string | null
+    }) {
+        const [userExists, identityExists] = await Promise.all([
+            data.user_id
+                ? this.checkExists(eq(parents.user_id, data.user_id))
+                : Promise.resolve(false),
+            data.identity_number
+                ? this.existsByIdentityNumber(data.identity_number)
+                : Promise.resolve(false)
+        ])
+        return {
+            userExists,
+            identityExists
+        }
     }
 
     async isChildAssociatedWithParent(
