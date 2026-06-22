@@ -22,9 +22,14 @@ const app: Express = express()
 
 app.set('trust proxy', 1)
 
+const corsOrigins = [env.CORS_ORIGIN, ...env.TRUSTED_ORIGINS]
+if (env.NODE_ENV === 'development') {
+    corsOrigins.push('http://localhost:3001')
+}
+
 app.use(
     cors({
-        origin: [env.CORS_ORIGIN, ...env.TRUSTED_ORIGINS],
+        origin: corsOrigins,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
         credentials: true
