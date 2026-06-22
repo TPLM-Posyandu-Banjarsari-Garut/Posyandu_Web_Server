@@ -80,6 +80,7 @@ export const createInventorySchema = createInsertSchema(inventories, {
         .openapi({ example: 'Baterai perlu diganti bulan depan' })
 })
     .omit({
+        is_deleted: true,
         id: true,
         created_at: true,
         updated_at: true,

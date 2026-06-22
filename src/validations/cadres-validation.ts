@@ -35,6 +35,7 @@ export const createCadreSchema = createInsertSchema(cadres, {
     status: z.enum(accountStatusEnum.enumValues).default('active')
 })
     .omit({
+        is_deleted: true,
         id: true,
         created_at: true,
         updated_at: true,

@@ -95,6 +95,7 @@ export const createVitaminRecordSchema = createInsertSchema(vitaminRecords, {
         .openapi({ example: 'Vitamin A merah dosis penuh' })
 })
     .omit({
+        is_deleted: true,
         id: true,
         created_at: true,
         updated_at: true,

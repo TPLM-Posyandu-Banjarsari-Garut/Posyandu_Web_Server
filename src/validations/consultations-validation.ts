@@ -74,6 +74,7 @@ export const createConsultationSchema = createInsertSchema(consultations, {
     status: z.enum(consultationStatusEnum.enumValues).default('pending')
 })
     .omit({
+        is_deleted: true,
         id: true,
         actual_start_at: true,
         duration_minutes: true,
@@ -125,6 +126,7 @@ export const updateConsultationSchema = createInsertSchema(consultations, {
     children_id: z.string().optional().nullable()
 })
     .omit({
+        is_deleted: true,
         id: true,
         parent_id: true,
         posyandu_id: true,

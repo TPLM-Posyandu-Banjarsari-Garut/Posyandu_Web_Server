@@ -106,6 +106,7 @@ export const createImmunizationRecordSchema = createInsertSchema(
     }
 )
     .omit({
+        is_deleted: true,
         id: true,
         created_at: true,
         updated_at: true,

@@ -87,7 +87,6 @@ export class ChildrenRepository {
         }
 
         if (parent_id) {
-            // Filter children by parent_id via relation_childrens junction table
             const parentChildSubquery = this.db
                 .select({ children_id: relationChildrens.children_id })
                 .from(relationChildrens)
@@ -132,7 +131,6 @@ export class ChildrenRepository {
             }
         }
 
-        // Enrich with posyandu_detail and mother_name
         const childIds = data.map(c => c.id)
 
         const posyanduIds = [
@@ -279,7 +277,8 @@ export class ChildrenRepository {
                 birth_head_circumference: childrens.birth_head_circumference,
                 created_at: childrens.created_at,
                 updated_at: childrens.updated_at,
-                deleted_at: childrens.deleted_at
+                deleted_at: childrens.deleted_at,
+                is_deleted: childrens.is_deleted
             })
             .from(childrens)
             .innerJoin(

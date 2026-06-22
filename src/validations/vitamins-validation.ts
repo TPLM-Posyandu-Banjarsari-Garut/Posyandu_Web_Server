@@ -67,6 +67,7 @@ export const createVitaminSchema = createInsertSchema(vitamins, {
         .openapi({ example: 6 })
 })
     .omit({
+        is_deleted: true,
         id: true,
         created_at: true,
         updated_at: true,

@@ -47,7 +47,8 @@ export const pregnancyRecords = pgTable(
     table => [
         index('pregnancy_records_parent_id_idx').on(table.parent_id),
         index('pregnancy_records_posyandu_id_idx').on(table.posyandu_id),
-        index('pregnancy_records_midwife_id_idx').on(table.midwife_id)
+        index('pregnancy_records_midwife_id_idx').on(table.midwife_id),
+        index('pregnancy_records_is_deleted_idx').on(table.is_deleted)
     ]
 )
 

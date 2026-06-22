@@ -41,7 +41,8 @@ export const nutritionRecords = pgTable(
     table => [
         index('nutrition_records_children_id_idx').on(table.children_id),
         index('nutrition_records_cadre_id_idx').on(table.cadre_id),
-        index('nutrition_records_midwife_id_idx').on(table.midwife_id)
+        index('nutrition_records_midwife_id_idx').on(table.midwife_id),
+        index('nutrition_records_is_deleted_idx').on(table.is_deleted)
     ]
 )
 

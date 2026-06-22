@@ -1,4 +1,4 @@
-import { timestamp } from 'drizzle-orm/pg-core'
+import { boolean, timestamp } from 'drizzle-orm/pg-core'
 
 export const timestamps = {
     created_at: timestamp('created_at', {
@@ -19,5 +19,7 @@ export const timestamps = {
     deleted_at: timestamp('deleted_at', {
         withTimezone: true,
         mode: 'date'
-    })
+    }),
+
+    is_deleted: boolean('is_deleted').default(false).notNull()
 }

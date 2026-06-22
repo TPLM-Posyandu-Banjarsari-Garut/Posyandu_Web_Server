@@ -18,7 +18,8 @@ import {
     pgTable,
     text,
     unique,
-    varchar
+    varchar,
+    index
 } from 'drizzle-orm/pg-core'
 
 export const vitaminRecords = pgTable(
@@ -58,7 +59,13 @@ export const vitaminRecords = pgTable(
             table.children_id,
             table.distribution_period,
             table.distribution_year
-        )
+        ),
+        index('vitamin_records_children_id_idx').on(table.children_id),
+        index('vitamin_records_vitamin_id_idx').on(table.vitamin_id),
+        index('vitamin_records_cadre_id_idx').on(table.cadre_id),
+        index('vitamin_records_midwife_id_idx').on(table.midwife_id),
+        index('vitamin_records_posyandu_id_idx').on(table.posyandu_id),
+        index('vitamin_records_is_deleted_idx').on(table.is_deleted)
     ]
 )
 

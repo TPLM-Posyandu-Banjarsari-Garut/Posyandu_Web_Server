@@ -8,7 +8,8 @@ import {
     pgTable,
     text,
     uniqueIndex,
-    varchar
+    varchar,
+    index
 } from 'drizzle-orm/pg-core'
 
 export const cadres = pgTable(
@@ -40,7 +41,9 @@ export const cadres = pgTable(
         uniqueIndex('cadres_user_id_posyandu_id_unique').on(
             table.user_id,
             table.posyandu_id
-        )
+        ),
+        index('cadres_is_deleted_idx').on(table.is_deleted),
+        index('cadres_posyandu_id_idx').on(table.posyandu_id)
     ]
 )
 

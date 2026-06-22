@@ -8,7 +8,8 @@ import {
     pgTable,
     text,
     uniqueIndex,
-    varchar
+    varchar,
+    index
 } from 'drizzle-orm/pg-core'
 
 export const midwifes = pgTable(
@@ -52,7 +53,9 @@ export const midwifes = pgTable(
             table.user_id,
             table.posyandu_id
         ),
-        uniqueIndex('midwives_str_number_unique').on(table.license_number)
+        uniqueIndex('midwives_str_number_unique').on(table.license_number),
+        index('midwifes_posyandu_id_idx').on(table.posyandu_id),
+        index('midwifes_is_deleted_idx').on(table.is_deleted)
     ]
 )
 

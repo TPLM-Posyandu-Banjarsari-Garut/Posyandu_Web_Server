@@ -56,6 +56,7 @@ export const createVaccineSchema = createInsertSchema(vaccines, {
     route: z.enum(vaccineRouteEnum.enumValues).optional().nullable()
 })
     .omit({
+        is_deleted: true,
         id: true,
         created_at: true,
         updated_at: true,
