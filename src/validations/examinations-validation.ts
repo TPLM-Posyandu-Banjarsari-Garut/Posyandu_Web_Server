@@ -38,6 +38,7 @@ export const createExaminationSchema = createInsertSchema(examinations, {
     is_active: z.boolean().default(true)
 })
     .omit({
+        is_deleted: true,
         id: true,
         created_at: true,
         updated_at: true,

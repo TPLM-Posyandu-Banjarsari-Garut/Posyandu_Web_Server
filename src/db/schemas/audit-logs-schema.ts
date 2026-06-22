@@ -33,7 +33,8 @@ export const auditLogs = pgTable(
     table => [
         index('audit_logs_user_id_idx').on(table.userId),
         index('audit_logs_entity_idx').on(table.entityType, table.entityId),
-        index('audit_logs_created_at_idx').on(table.created_at)
+        index('audit_logs_created_at_idx').on(table.created_at),
+        index('audit_logs_is_deleted_idx').on(table.is_deleted)
     ]
 )
 

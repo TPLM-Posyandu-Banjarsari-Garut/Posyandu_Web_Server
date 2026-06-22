@@ -9,10 +9,10 @@ export class VitaminService {
     constructor(private readonly vitamin_repository: VitaminRepository) {}
 
     async createVitamin(vitamin_payload: NewVitamin): Promise<Vitamin> {
-        const isNameUsed = await this.vitamin_repository.existsByName(
-            vitamin_payload.name
-        )
-        if (isNameUsed) {
+        const checks = await this.vitamin_repository.checkUniqueConstraints({
+            name: vitamin_payload.name || undefined
+        })
+        if (checks.nameExists) {
             throw new Error('Vitamin name is already registered')
         }
 
@@ -42,18 +42,18 @@ export class VitaminService {
     ): Promise<Vitamin> {
         const existingVitamin = await this.getVitaminById(public_id)
 
-        if (
-            vitamin_payload.name &&
-            vitamin_payload.name !== existingVitamin.name
-        ) {
-            const isNameUsed = await this.vitamin_repository.existsByName(
-                vitamin_payload.name
+        const checks = await this.vitamin_repository.checkUniqueConstraints({
+            name:
+                vitamin_payload.name &&
+                vitamin_payload.name !== existingVitamin.name
+                    ? vitamin_payload.name
+                    : undefined
+        })
+
+        if (checks.nameExists) {
+            throw new Error(
+                'Vitamin name is already registered by another vitamin'
             )
-            if (isNameUsed) {
-                throw new Error(
-                    'Vitamin name is already registered by another vitamin'
-                )
-            }
         }
 
         const updated = await this.vitamin_repository.update(

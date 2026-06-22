@@ -48,7 +48,8 @@ export const examinationSchedules = pgTable(
         ),
         index('examination_schedules_posyandu_id_idx').on(table.posyandu_id),
         index('examination_schedules_midwife_id_idx').on(table.midwife_id),
-        index('examination_schedules_cadre_id_idx').on(table.cadre_id)
+        index('examination_schedules_cadre_id_idx').on(table.cadre_id),
+        index('examination_schedules_is_deleted_idx').on(table.is_deleted)
     ]
 )
 

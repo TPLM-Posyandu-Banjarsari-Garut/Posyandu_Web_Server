@@ -9,7 +9,14 @@ import { midwifes } from '@/db/schemas/midwifes-schema'
 import { parents } from '@/db/schemas/parents-schema'
 import { posyandus } from '@/db/schemas/posyandus-schema'
 import { sql } from 'drizzle-orm'
-import { check, date, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import {
+    check,
+    date,
+    pgTable,
+    text,
+    timestamp,
+    index
+} from 'drizzle-orm/pg-core'
 
 export const examinationRecords = pgTable(
     'examination_records',
@@ -55,7 +62,20 @@ export const examinationRecords = pgTable(
         check(
             'examination_records_subject_check',
             sql`${table.children_id} IS NOT NULL OR ${table.parent_id} IS NOT NULL`
-        )
+        ),
+        index('examination_records_examination_id_idx').on(
+            table.examination_id
+        ),
+        index('examination_records_schedule_id_idx').on(table.schedule_id),
+        index('examination_records_posyandu_id_idx').on(table.posyandu_id),
+        index('examination_records_children_id_idx').on(table.children_id),
+        index('examination_records_parent_id_idx').on(table.parent_id),
+        index('examination_records_cadre_id_idx').on(table.cadre_id),
+        index('examination_records_midwife_id_idx').on(table.midwife_id),
+        index('examination_records_medically_validated_by_midwife_id_idx').on(
+            table.medically_validated_by_midwife_id
+        ),
+        index('examination_records_is_deleted_idx').on(table.is_deleted)
     ]
 )
 

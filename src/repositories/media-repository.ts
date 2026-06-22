@@ -1,5 +1,5 @@
 import { NewMedia, Media, media } from '@/db'
-import { and, eq, ilike, sql, asc, desc } from 'drizzle-orm'
+import { and, eq, ilike, sql, asc, desc, getTableColumns } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface MediaQueryFilters {
@@ -34,6 +34,13 @@ export class MediaRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         const conditions = []
 
         if (!includeDeleted) {
@@ -44,8 +51,8 @@ export class MediaRepository {
             conditions.push(eq(media.uploaded_by, uploaded_by))
         }
 
-        if (search) {
-            conditions.push(ilike(media.original_name, `%${search}%`))
+        if (escapedSearch) {
+            conditions.push(ilike(media.original_name, `%${escapedSearch}%`))
         }
 
         if (file_category) {
@@ -54,27 +61,35 @@ export class MediaRepository {
 
         const whereClause = and(...conditions)
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(media)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(media.created_at)
-                        : desc(media.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(media),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(media)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc' ? asc(media.created_at) : desc(media.created_at)
+            )
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(media)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(({ total_count, ...m }) => m)
 
         return {
             data,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 

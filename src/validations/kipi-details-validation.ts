@@ -32,6 +32,7 @@ export const createKipiDetailSchema = createInsertSchema(kipiDetails, {
     referred: z.boolean().default(false)
 })
     .omit({
+        is_deleted: true,
         id: true,
         created_at: true,
         updated_at: true,

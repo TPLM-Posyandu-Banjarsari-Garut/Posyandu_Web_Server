@@ -64,6 +64,7 @@ export const createEducationSchema = createInsertSchema(educations, {
     status: z.enum(statusEnum.enumValues).default('active')
 })
     .omit({
+        is_deleted: true,
         id: true,
         created_at: true,
         updated_at: true,

@@ -1,5 +1,15 @@
 import { NewUser, User, users, parents, midwifes, cadres, sessions } from '@/db'
-import { and, eq, ilike, or, sql, SQL, asc, desc } from 'drizzle-orm'
+import {
+    and,
+    eq,
+    ilike,
+    or,
+    sql,
+    SQL,
+    asc,
+    desc,
+    getTableColumns
+} from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface UserQueryFilters {
@@ -41,6 +51,13 @@ export class UserRepository {
             order = 'desc'
         } = filters || {}
 
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.min(Math.max(1, limit), 100)
+
+        const escapedSearch = search
+            ? search.replace(/[%_\\]/g, '\\$&')
+            : undefined
+
         let statusCondition = undefined
         if (status) {
             statusCondition = eq(users.status, status)
@@ -49,37 +66,46 @@ export class UserRepository {
         }
 
         const whereClause = and(
-            search
+            escapedSearch
                 ? or(
-                      ilike(users.name, `%${search}%`),
-                      ilike(users.email, `%${search}%`)
+                      ilike(users.name, `%${escapedSearch}%`),
+                      ilike(users.email, `%${escapedSearch}%`)
                   )
                 : undefined,
             role ? eq(users.role, role) : undefined,
             statusCondition
         )
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(users)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(users.created_at)
-                        : desc(users.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(users),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(users)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc' ? asc(users.created_at) : desc(users.created_at)
+            )
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            // Out of bounds page fallback: count the items separately
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(users)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(({ total_count, ...user }) => user)
 
         return {
             data,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 
@@ -293,5 +319,23 @@ export class UserRepository {
             .where(eq(cadres.user_id, user_id))
             .limit(1)
         return cadre
+    }
+
+    async checkUniqueConstraints(data: {
+        email?: string | null
+        phone_number?: string | null
+    }) {
+        const [emailExists, phoneExists] = await Promise.all([
+            data.email
+                ? this.existsByEmail(data.email)
+                : Promise.resolve(false),
+            data.phone_number
+                ? this.existsByPhoneNumber(data.phone_number)
+                : Promise.resolve(false)
+        ])
+        return {
+            emailExists,
+            phoneExists
+        }
     }
 }

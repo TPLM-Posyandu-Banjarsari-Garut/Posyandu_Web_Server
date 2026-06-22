@@ -2,7 +2,6 @@ import app from '@/app'
 import env from '@/configs/env'
 import { logger } from '@/utils/logger'
 import { configureGracefulShutdown } from '@/utils/shutdown'
-import { CronService } from '@/services/cron-service'
 import { WsManager } from '@/utils/ws-manager'
 
 const port = env.PORT || 9000
@@ -18,10 +17,9 @@ const server = app.listen(port, () => {
     logger.info(`🔌 WebSocket    : ws://localhost:${port}/ws`)
     logger.info(divider)
 
-    CronService.start()
     WsManager.attach(server)
 })
 
 configureGracefulShutdown(server, () => {
-    CronService.stop()
+    // Other graceful shutdowns can go here
 })

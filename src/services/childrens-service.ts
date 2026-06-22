@@ -20,11 +20,10 @@ export class ChildrenService {
     async createChildren(
         children_payload: NewChildren & { parent_user_id?: string | null }
     ): Promise<Children> {
-        const isIdentityNumberUsed =
-            await this.children_repository.existsByIdentityNumber(
-                children_payload.identity_number
-            )
-        if (isIdentityNumberUsed) {
+        const checks = await this.children_repository.checkUniqueConstraints({
+            identity_number: children_payload.identity_number || undefined
+        })
+        if (checks.identityExists) {
             throw new Error('Identity number (NIK) is already registered')
         }
 
@@ -87,19 +86,19 @@ export class ChildrenService {
     ): Promise<Children> {
         const existingChild = await this.getChildrenById(public_id)
 
-        if (
-            children_payload.identity_number &&
-            children_payload.identity_number !== existingChild.identity_number
-        ) {
-            const isIdentityNumberUsed =
-                await this.children_repository.existsByIdentityNumber(
-                    children_payload.identity_number
-                )
-            if (isIdentityNumberUsed) {
-                throw new Error(
-                    'Identity number (NIK) is already registered by another child'
-                )
-            }
+        const checks = await this.children_repository.checkUniqueConstraints({
+            identity_number:
+                children_payload.identity_number &&
+                children_payload.identity_number !==
+                    existingChild.identity_number
+                    ? children_payload.identity_number
+                    : undefined
+        })
+
+        if (checks.identityExists) {
+            throw new Error(
+                'Identity number (NIK) is already registered by another child'
+            )
         }
 
         // Pisahkan parent_user_id dari data update

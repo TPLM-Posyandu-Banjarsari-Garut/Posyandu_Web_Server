@@ -9,17 +9,15 @@ export class VaccineService {
     constructor(private readonly vaccine_repository: VaccineRepository) {}
 
     async createVaccine(vaccine_payload: NewVaccine): Promise<Vaccine> {
-        const isNameUsed = await this.vaccine_repository.existsByName(
-            vaccine_payload.name
-        )
-        if (isNameUsed) {
+        const checks = await this.vaccine_repository.checkUniqueConstraints({
+            name: vaccine_payload.name || undefined,
+            code: vaccine_payload.code || undefined
+        })
+
+        if (checks.nameExists) {
             throw new Error('Vaccine name is already registered')
         }
-
-        const isCodeUsed = await this.vaccine_repository.existsByCode(
-            vaccine_payload.code
-        )
-        if (isCodeUsed) {
+        if (checks.codeExists) {
             throw new Error('Vaccine code is already registered')
         }
 
@@ -49,32 +47,28 @@ export class VaccineService {
     ): Promise<Vaccine> {
         const existingVaccine = await this.getVaccineById(public_id)
 
-        if (
-            vaccine_payload.name &&
-            vaccine_payload.name !== existingVaccine.name
-        ) {
-            const isNameUsed = await this.vaccine_repository.existsByName(
-                vaccine_payload.name
-            )
-            if (isNameUsed) {
-                throw new Error(
-                    'Vaccine name is already registered by another vaccine'
-                )
-            }
-        }
+        const checks = await this.vaccine_repository.checkUniqueConstraints({
+            name:
+                vaccine_payload.name &&
+                vaccine_payload.name !== existingVaccine.name
+                    ? vaccine_payload.name
+                    : undefined,
+            code:
+                vaccine_payload.code &&
+                vaccine_payload.code !== existingVaccine.code
+                    ? vaccine_payload.code
+                    : undefined
+        })
 
-        if (
-            vaccine_payload.code &&
-            vaccine_payload.code !== existingVaccine.code
-        ) {
-            const isCodeUsed = await this.vaccine_repository.existsByCode(
-                vaccine_payload.code
+        if (checks.nameExists) {
+            throw new Error(
+                'Vaccine name is already registered by another vaccine'
             )
-            if (isCodeUsed) {
-                throw new Error(
-                    'Vaccine code is already registered by another vaccine'
-                )
-            }
+        }
+        if (checks.codeExists) {
+            throw new Error(
+                'Vaccine code is already registered by another vaccine'
+            )
         }
 
         const updated = await this.vaccine_repository.update(

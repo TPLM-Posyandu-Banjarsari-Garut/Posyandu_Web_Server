@@ -80,7 +80,8 @@ export const consultations = pgTable(
         index('consultations_children_id_idx').on(table.children_id),
         index('consultations_posyandu_id_idx').on(table.posyandu_id),
         index('consultations_midwife_id_idx').on(table.midwife_id),
-        index('consultations_cadre_id_idx').on(table.cadre_id)
+        index('consultations_cadre_id_idx').on(table.cadre_id),
+        index('consultations_is_deleted_idx').on(table.is_deleted)
     ]
 )
 

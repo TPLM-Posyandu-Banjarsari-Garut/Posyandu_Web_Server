@@ -12,17 +12,14 @@ export class UserService {
     constructor(private readonly user_repository: UserRepository) {}
 
     async createUser(user_payload: CreateUserInput): Promise<User> {
-        const [email_exists, phone_exists] = await Promise.all([
-            this.user_repository.existsByEmail(user_payload.email),
-            user_payload.phone_number
-                ? this.user_repository.existsByPhoneNumber(
-                      user_payload.phone_number
-                  )
-                : false
-        ])
+        const checks = await this.user_repository.checkUniqueConstraints({
+            email: user_payload.email,
+            phone_number: user_payload.phone_number
+        })
 
-        if (email_exists) throw new Error('Email already registered')
-        if (phone_exists) throw new Error('Phone number already registered')
+        if (checks.emailExists) throw new Error('Email already registered')
+        if (checks.phoneExists)
+            throw new Error('Phone number already registered')
 
         const auth_service = new AuthService(this.user_repository)
         return await auth_service.registerWithEmail({
@@ -60,30 +57,23 @@ export class UserService {
     ): Promise<User> {
         const existing_user = await this.getUserById(public_id)
 
-        const checks: Promise<boolean>[] = []
-        const email = user_payload.email
-        const phone = user_payload.phone_number
+        const checks = await this.user_repository.checkUniqueConstraints({
+            email:
+                user_payload.email && user_payload.email !== existing_user.email
+                    ? user_payload.email
+                    : undefined,
+            phone_number:
+                user_payload.phone_number &&
+                user_payload.phone_number !== existing_user.phone_number
+                    ? user_payload.phone_number
+                    : undefined
+        })
 
-        const check_email = email && email !== existing_user.email
-        const check_phone = phone && phone !== existing_user.phone_number
-
-        if (check_email && email) {
-            checks.push(this.user_repository.existsByEmail(email))
+        if (checks.emailExists) {
+            throw new Error('Email already taken by another user')
         }
-        if (check_phone && phone) {
-            checks.push(this.user_repository.existsByPhoneNumber(phone))
-        }
-
-        if (checks.length > 0) {
-            const results = await Promise.all(checks)
-            let index = 0
-
-            if (check_email && results[index++]) {
-                throw new Error('Email already taken by another user')
-            }
-            if (check_phone && results[index]) {
-                throw new Error('Phone number already taken by another user')
-            }
+        if (checks.phoneExists) {
+            throw new Error('Phone number already taken by another user')
         }
 
         const updated = await this.user_repository.update(
