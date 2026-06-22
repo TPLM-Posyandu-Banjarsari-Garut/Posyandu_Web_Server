@@ -98,7 +98,13 @@ export class UserService {
         public_id: string,
         is_permanent: boolean = false
     ): Promise<User> {
-        await this.getUserById(public_id)
+        const existing_user =
+            await this.user_repository.findByPublicId(public_id)
+        if (!existing_user) throw new Error('User not found')
+
+        if (!is_permanent && existing_user.status === 'inactive') {
+            return existing_user
+        }
 
         const deleted = is_permanent
             ? await this.user_repository.hardDelete(public_id)

@@ -167,19 +167,88 @@ export class UserRepository {
     }
 
     async softDelete(public_id: string): Promise<User | undefined> {
-        return this.updateStatus(public_id, 'inactive')
+        return this.db.transaction(async tx => {
+            const [user] = await tx
+                .update(users)
+                .set({ status: 'inactive' })
+                .where(eq(users.id, public_id))
+                .returning()
+            if (!user) return undefined
+
+            if (user.role === 'parent') {
+                await tx
+                    .update(parents)
+                    .set({ status: 'inactive' })
+                    .where(eq(parents.user_id, public_id))
+            } else if (user.role === 'midwife') {
+                await tx
+                    .update(midwifes)
+                    .set({ status: 'inactive' })
+                    .where(eq(midwifes.user_id, public_id))
+            } else if (user.role === 'cadre') {
+                await tx
+                    .update(cadres)
+                    .set({ status: 'inactive' })
+                    .where(eq(cadres.user_id, public_id))
+            }
+
+            return user
+        })
     }
 
     async hardDelete(public_id: string): Promise<User | undefined> {
-        const [user] = await this.db
-            .delete(users)
-            .where(eq(users.id, public_id))
-            .returning()
-        return user
+        return this.db.transaction(async tx => {
+            const [user] = await tx
+                .select()
+                .from(users)
+                .where(eq(users.id, public_id))
+                .limit(1)
+            if (!user) return undefined
+
+            if (user.role === 'parent') {
+                await tx.delete(parents).where(eq(parents.user_id, public_id))
+            } else if (user.role === 'midwife') {
+                await tx.delete(midwifes).where(eq(midwifes.user_id, public_id))
+            } else if (user.role === 'cadre') {
+                await tx.delete(cadres).where(eq(cadres.user_id, public_id))
+            }
+
+            const [deleted] = await tx
+                .delete(users)
+                .where(eq(users.id, public_id))
+                .returning()
+            return deleted
+        })
     }
 
     async restore(public_id: string): Promise<User | undefined> {
-        return this.updateStatus(public_id, 'active')
+        return this.db.transaction(async tx => {
+            const [user] = await tx
+                .update(users)
+                .set({ status: 'active' })
+                .where(eq(users.id, public_id))
+                .returning()
+            if (!user) return undefined
+
+            if (user.role === 'parent') {
+                await tx
+                    .update(parents)
+                    .set({ status: 'active' })
+                    .where(eq(parents.user_id, public_id))
+            } else if (user.role === 'midwife') {
+                await tx
+                    .update(midwifes)
+                    .set({ status: 'active' })
+                    .where(eq(midwifes.user_id, public_id))
+            } else if (user.role === 'cadre') {
+                await tx
+                    .update(cadres)
+                    .set({ status: 'active' })
+                    .where(eq(cadres.user_id, public_id))
+            }
+
+            return user
+        })
     }
 
     private async checkExists(condition: SQL | undefined): Promise<boolean> {
