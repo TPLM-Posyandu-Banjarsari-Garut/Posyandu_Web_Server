@@ -1,5 +1,5 @@
 import { NewPregnancyRecord, PregnancyRecord, pregnancyRecords } from '@/db'
-import { and, eq, sql, asc, desc } from 'drizzle-orm'
+import { and, eq, sql, asc, desc, getTableColumns } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface PregnancyRecordQueryFilters {
@@ -63,27 +63,37 @@ export class PregnancyRecordsRepository {
 
         const whereClause = and(...conditions)
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(pregnancyRecords)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(pregnancyRecords.created_at)
-                        : desc(pregnancyRecords.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(pregnancyRecords),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(pregnancyRecords)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc'
+                    ? asc(pregnancyRecords.created_at)
+                    : desc(pregnancyRecords.created_at)
+            )
+            .limit(limit)
+            .offset((page - 1) * limit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(pregnancyRecords)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(({ total_count, ...record }) => record)
 
         return {
             data,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 

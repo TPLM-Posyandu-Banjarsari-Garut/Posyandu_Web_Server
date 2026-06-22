@@ -1,5 +1,15 @@
 import { NewCadre, Cadre, cadres } from '@/db'
-import { and, eq, ilike, or, sql, SQL, asc, desc } from 'drizzle-orm'
+import {
+    and,
+    eq,
+    ilike,
+    or,
+    sql,
+    SQL,
+    asc,
+    desc,
+    getTableColumns
+} from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface CadreQueryFilters {
@@ -62,27 +72,37 @@ export class CadreRepository {
             statusCondition
         )
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(cadres)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(cadres.created_at)
-                        : desc(cadres.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(cadres),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(cadres)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc'
+                    ? asc(cadres.created_at)
+                    : desc(cadres.created_at)
+            )
+            .limit(limit)
+            .offset((page - 1) * limit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(cadres)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(({ total_count, ...cadre }) => cadre)
 
         return {
             data,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 

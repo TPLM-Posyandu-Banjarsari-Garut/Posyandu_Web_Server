@@ -1,5 +1,5 @@
 import { NewNotification, Notification, notifications } from '@/db'
-import { and, eq, lt, sql, SQL, desc } from 'drizzle-orm'
+import { and, eq, lt, sql, SQL, desc, getTableColumns } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface NotificationsQueryFilters {
@@ -34,23 +34,35 @@ export class NotificationsRepository {
 
         const whereClause = and(...conditions)
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(notifications)
-                .where(whereClause)
-                .orderBy(desc(notifications.created_at))
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(notifications),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(notifications)
+            .where(whereClause)
+            .orderBy(desc(notifications.created_at))
+            .limit(limit)
+            .offset((page - 1) * limit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(notifications)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(
+            ({ total_count, ...notification }) => notification
+        )
 
         return {
             data,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 

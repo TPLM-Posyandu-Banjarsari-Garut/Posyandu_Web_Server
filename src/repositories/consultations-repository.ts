@@ -1,5 +1,14 @@
 import { NewConsultation, Consultation, consultations } from '@/db'
-import { and, eq, ilike, sql, SQL, asc, desc } from 'drizzle-orm'
+import {
+    and,
+    eq,
+    ilike,
+    sql,
+    SQL,
+    asc,
+    desc,
+    getTableColumns
+} from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ConsultationsQueryFilters {
@@ -94,27 +103,39 @@ export class ConsultationsRepository {
 
         const whereClause = and(...conditions)
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(consultations)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(consultations.created_at)
-                        : desc(consultations.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(consultations),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(consultations)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc'
+                    ? asc(consultations.created_at)
+                    : desc(consultations.created_at)
+            )
+            .limit(limit)
+            .offset((page - 1) * limit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(consultations)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(
+            ({ total_count, ...consultation }) => consultation
+        )
 
         return {
             data,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 

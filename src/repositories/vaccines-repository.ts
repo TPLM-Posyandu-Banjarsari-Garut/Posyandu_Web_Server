@@ -1,5 +1,5 @@
 import { NewVaccine, Vaccine, vaccines } from '@/db'
-import { and, eq, ilike, sql, asc, desc } from 'drizzle-orm'
+import { and, eq, ilike, sql, asc, desc, getTableColumns } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface VaccineQueryFilters {
@@ -55,27 +55,37 @@ export class VaccineRepository {
 
         const whereClause = and(...conditions)
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(vaccines)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(vaccines.created_at)
-                        : desc(vaccines.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(vaccines),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(vaccines)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc'
+                    ? asc(vaccines.created_at)
+                    : desc(vaccines.created_at)
+            )
+            .limit(limit)
+            .offset((page - 1) * limit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(vaccines)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(({ total_count, ...vaccine }) => vaccine)
 
         return {
             data,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 

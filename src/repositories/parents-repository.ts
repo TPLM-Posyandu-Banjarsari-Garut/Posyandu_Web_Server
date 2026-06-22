@@ -1,5 +1,15 @@
 import { NewParent, Parent, parents, relationChildrens } from '@/db'
-import { and, eq, ilike, or, sql, SQL, asc, desc } from 'drizzle-orm'
+import {
+    and,
+    eq,
+    ilike,
+    or,
+    sql,
+    SQL,
+    asc,
+    desc,
+    getTableColumns
+} from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ParentQueryFilters {
@@ -59,27 +69,37 @@ export class ParentRepository {
             statusCondition
         )
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(parents)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(parents.created_at)
-                        : desc(parents.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(parents),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(parents)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc'
+                    ? asc(parents.created_at)
+                    : desc(parents.created_at)
+            )
+            .limit(limit)
+            .offset((page - 1) * limit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(parents)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(({ total_count, ...parent }) => parent)
 
         return {
             data,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 

@@ -9,7 +9,16 @@ import {
     nutritionRecords,
     vitaminRecords
 } from '@/db'
-import { and, eq, ilike, sql, inArray, asc, desc } from 'drizzle-orm'
+import {
+    and,
+    eq,
+    ilike,
+    sql,
+    inArray,
+    asc,
+    desc,
+    getTableColumns
+} from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ChildrenQueryFilters {
@@ -81,28 +90,38 @@ export class ChildrenRepository {
 
         const whereClause = and(...conditions)
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(childrens)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(childrens.created_at)
-                        : desc(childrens.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(childrens),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(childrens)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc'
+                    ? asc(childrens.created_at)
+                    : desc(childrens.created_at)
+            )
+            .limit(limit)
+            .offset((page - 1) * limit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(childrens)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(({ total_count, ...child }) => child)
 
         if (data.length === 0) {
             return {
                 data: [],
-                totalItems: Number(countResult[0]?.count || 0)
+                totalItems
             }
         }
 
@@ -144,7 +163,7 @@ export class ChildrenRepository {
 
         return {
             data: enrichedData,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 

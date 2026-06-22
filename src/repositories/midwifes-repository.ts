@@ -1,5 +1,15 @@
 import { NewMidwife, Midwife, midwifes } from '@/db'
-import { and, eq, ilike, or, sql, SQL, asc, desc } from 'drizzle-orm'
+import {
+    and,
+    eq,
+    ilike,
+    or,
+    sql,
+    SQL,
+    asc,
+    desc,
+    getTableColumns
+} from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface MidwifeQueryFilters {
@@ -59,27 +69,37 @@ export class MidwifeRepository {
             statusCondition
         )
 
-        const [data, countResult] = await Promise.all([
-            this.db
-                .select()
-                .from(midwifes)
-                .where(whereClause)
-                .orderBy(
-                    order === 'asc'
-                        ? asc(midwifes.created_at)
-                        : desc(midwifes.created_at)
-                )
-                .limit(limit)
-                .offset((page - 1) * limit),
-            this.db
+        const dataWithCount = await this.db
+            .select({
+                ...getTableColumns(midwifes),
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(midwifes)
+            .where(whereClause)
+            .orderBy(
+                order === 'asc'
+                    ? asc(midwifes.created_at)
+                    : desc(midwifes.created_at)
+            )
+            .limit(limit)
+            .offset((page - 1) * limit)
+
+        let totalItems = 0
+        if (dataWithCount.length > 0) {
+            totalItems = dataWithCount[0].total_count
+        } else {
+            const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(midwifes)
                 .where(whereClause)
-        ])
+            totalItems = Number(countResult[0]?.count || 0)
+        }
+
+        const data = dataWithCount.map(({ total_count, ...midwife }) => midwife)
 
         return {
             data,
-            totalItems: Number(countResult[0]?.count || 0)
+            totalItems
         }
     }
 
