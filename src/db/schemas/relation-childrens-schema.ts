@@ -10,10 +10,10 @@ export const relationChildrens = pgTable('relation_childrens', {
 
     parent_id: text('parent_id')
         .notNull()
-        .references(() => parents.id),
+        .references(() => parents.id, { onDelete: 'cascade' }),
     children_id: text('children_id')
         .notNull()
-        .references(() => childrens.id),
+        .references(() => childrens.id, { onDelete: 'cascade' }),
 
     relation: familyRelationEnum('relation').notNull(),
 

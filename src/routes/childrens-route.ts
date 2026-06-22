@@ -4,6 +4,7 @@ import { Router } from 'express'
 import { ChildrenController } from '@/controllers/childrens-controller'
 import { ChildrenService } from '@/services/childrens-service'
 import { ChildrenRepository } from '@/repositories/childrens-repository'
+import { ParentRepository } from '@/repositories/parents-repository'
 import { AsyncHandler } from '@/utils/async-handler'
 import { validateRequest } from '@/middlewares/validate-request'
 import {
@@ -18,7 +19,11 @@ import db from '@/configs/db'
 const router = Router()
 
 const children_repository = new ChildrenRepository(db)
-const children_service = new ChildrenService(children_repository)
+const parent_repository = new ParentRepository(db)
+const children_service = new ChildrenService(
+    children_repository,
+    parent_repository
+)
 const children_controller = new ChildrenController(children_service)
 
 router.post(

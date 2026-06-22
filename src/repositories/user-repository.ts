@@ -1,4 +1,4 @@
-import { NewUser, User, users, parents, midwifes, cadres } from '@/db'
+import { NewUser, User, users, parents, midwifes, cadres, sessions } from '@/db'
 import { and, eq, ilike, or, sql, SQL, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
@@ -11,6 +11,12 @@ export interface UserQueryFilters {
     includeDeleted?: boolean
     order?: 'asc' | 'desc'
 }
+
+const roleTableMap = {
+    parent: parents,
+    midwife: midwifes,
+    cadre: cadres
+} as const
 
 export class UserRepository {
     constructor(private readonly db: NodePgDatabase) {}
@@ -167,19 +173,75 @@ export class UserRepository {
     }
 
     async softDelete(public_id: string): Promise<User | undefined> {
-        return this.updateStatus(public_id, 'inactive')
+        return this.db.transaction(async tx => {
+            const [user] = await tx
+                .update(users)
+                .set({ status: 'inactive' })
+                .where(eq(users.id, public_id))
+                .returning()
+            if (!user) return undefined
+
+            // Delete sessions to immediately log out the soft-deleted user
+            await tx.delete(sessions).where(eq(sessions.user_id, public_id))
+
+            const targetTable =
+                roleTableMap[user.role as keyof typeof roleTableMap]
+            if (targetTable) {
+                await tx
+                    .update(targetTable)
+                    .set({ status: 'inactive' })
+                    .where(eq(targetTable.user_id, public_id))
+            }
+
+            return user
+        })
     }
 
     async hardDelete(public_id: string): Promise<User | undefined> {
-        const [user] = await this.db
-            .delete(users)
-            .where(eq(users.id, public_id))
-            .returning()
-        return user
+        return this.db.transaction(async tx => {
+            const [user] = await tx
+                .select()
+                .from(users)
+                .where(eq(users.id, public_id))
+                .limit(1)
+            if (!user) return undefined
+
+            const targetTable =
+                roleTableMap[user.role as keyof typeof roleTableMap]
+            if (targetTable) {
+                await tx
+                    .delete(targetTable)
+                    .where(eq(targetTable.user_id, public_id))
+            }
+
+            const [deleted] = await tx
+                .delete(users)
+                .where(eq(users.id, public_id))
+                .returning()
+            return deleted
+        })
     }
 
     async restore(public_id: string): Promise<User | undefined> {
-        return this.updateStatus(public_id, 'active')
+        return this.db.transaction(async tx => {
+            const [user] = await tx
+                .update(users)
+                .set({ status: 'active' })
+                .where(eq(users.id, public_id))
+                .returning()
+            if (!user) return undefined
+
+            const targetTable =
+                roleTableMap[user.role as keyof typeof roleTableMap]
+            if (targetTable) {
+                await tx
+                    .update(targetTable)
+                    .set({ status: 'active' })
+                    .where(eq(targetTable.user_id, public_id))
+            }
+
+            return user
+        })
     }
 
     private async checkExists(condition: SQL | undefined): Promise<boolean> {

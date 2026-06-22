@@ -75,10 +75,14 @@ export class PosyanduRepository {
         }
     }
 
-    async findById(public_id: string): Promise<Posyandu | undefined> {
-        return this.findByCondition(
-            and(eq(posyandus.id, public_id), eq(posyandus.status, 'active'))
-        )
+    async findById(
+        public_id: string,
+        includeDeleted = false
+    ): Promise<Posyandu | undefined> {
+        const condition = includeDeleted
+            ? eq(posyandus.id, public_id)
+            : and(eq(posyandus.id, public_id), eq(posyandus.status, 'active'))
+        return this.findByCondition(condition)
     }
 
     async update(

@@ -25,6 +25,7 @@ import { registerPregnancyRecordsRoutes } from '@/docs/pregnancy-records-docs'
 import { registerExaminationsRoutes } from '@/docs/examinations-docs'
 import { registerExaminationSchedulesRoutes } from '@/docs/examination-schedules-docs'
 import { registerExaminationRecordsRoutes } from '@/docs/examination-records-docs'
+import { registerTrashRoutes } from '@/docs/trash-docs'
 
 import { registerAuthRoutes } from '@/docs/auth-docs'
 import env from '@/configs/env'
@@ -42,8 +43,12 @@ registry.registerComponent('securitySchemes', 'BearerAuth', {
 // auth (Better Auth)
 registerAuthRoutes(registry)
 
+// trash
+registerTrashRoutes(registry)
+
 // users
 registerUsersRoutes(registry)
+
 registerParentsRoutes(registry)
 registerCadresRoutes(registry)
 registerMidwifesRoutes(registry)

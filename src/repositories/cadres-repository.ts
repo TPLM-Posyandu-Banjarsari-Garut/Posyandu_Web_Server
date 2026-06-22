@@ -86,10 +86,14 @@ export class CadreRepository {
         }
     }
 
-    async findById(public_id: string): Promise<Cadre | undefined> {
-        return this.findByCondition(
-            and(eq(cadres.id, public_id), eq(cadres.status, 'active'))
-        )
+    async findById(
+        public_id: string,
+        includeDeleted = false
+    ): Promise<Cadre | undefined> {
+        const condition = includeDeleted
+            ? eq(cadres.id, public_id)
+            : and(eq(cadres.id, public_id), eq(cadres.status, 'active'))
+        return this.findByCondition(condition)
     }
 
     async findByUserId(user_id: string): Promise<Cadre[]> {

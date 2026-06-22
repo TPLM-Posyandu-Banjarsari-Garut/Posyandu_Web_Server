@@ -68,7 +68,15 @@ export class PosyanduService {
         public_id: string,
         is_permanent: boolean = false
     ): Promise<Posyandu> {
-        await this.getPosyanduById(public_id)
+        const existing = await this.posyandu_repository.findById(
+            public_id,
+            true
+        )
+        if (!existing) throw new Error('Posyandu not found')
+
+        if (!is_permanent && existing.status === 'inactive') {
+            return existing
+        }
 
         const deleted = is_permanent
             ? await this.posyandu_repository.hardDelete(public_id)

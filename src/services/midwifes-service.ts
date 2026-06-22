@@ -1,3 +1,4 @@
+import { randomInt } from 'node:crypto'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewMidwife, Midwife } from '@/db'
 import {
@@ -16,6 +17,22 @@ export class MidwifeService {
             if (existingMidwife) {
                 throw new Error('User is already registered as a midwife')
             }
+        }
+
+        if (!midwife_payload.identity_number) {
+            let uniqueNik = ''
+            let isUsed = true
+            while (isUsed) {
+                uniqueNik = randomInt(
+                    1000000000000000,
+                    10000000000000000
+                ).toString()
+                isUsed =
+                    await this.midwife_repository.existsByIdentityNumber(
+                        uniqueNik
+                    )
+            }
+            midwife_payload.identity_number = uniqueNik
         }
 
         const isIdentityNumberUsed =
@@ -118,7 +135,12 @@ export class MidwifeService {
         public_id: string,
         is_permanent: boolean = false
     ): Promise<Midwife> {
-        await this.getMidwifeById(public_id)
+        const existing = await this.midwife_repository.findById(public_id, true)
+        if (!existing) throw new Error('Midwife not found')
+
+        if (!is_permanent && existing.status === 'inactive') {
+            return existing
+        }
 
         const deleted = is_permanent
             ? await this.midwife_repository.hardDelete(public_id)

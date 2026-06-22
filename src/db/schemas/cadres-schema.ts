@@ -18,7 +18,7 @@ export const cadres = pgTable(
 
         user_id: text('user_id')
             .notNull()
-            .references(() => users.id),
+            .references(() => users.id, { onDelete: 'cascade' }),
         posyandu_id: text('posyandu_id')
             .notNull()
             .references(() => posyandus.id),

@@ -1,0 +1,4012 @@
+{
+    "id": "5c34072f-44e3-4672-b6fb-1efbf2d2ff58",
+    "prevId": "f1f6c398-6b1a-4b4d-a521-55cadf3bb655",
+    "version": "7",
+    "dialect": "postgresql",
+    "tables": {
+        "public.users": {
+            "name": "users",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "email": {
+                    "name": "email",
+                    "type": "varchar(255)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "email_verified": {
+                    "name": "email_verified",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": false
+                },
+                "phone_number": {
+                    "name": "phone_number",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "avatar_url": {
+                    "name": "avatar_url",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "role": {
+                    "name": "role",
+                    "type": "account_role",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'parent'"
+                },
+                "status": {
+                    "name": "status",
+                    "type": "account_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'active'"
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "users_email_unique": {
+                    "name": "users_email_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["email"]
+                },
+                "users_phone_number_unique": {
+                    "name": "users_phone_number_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["phone_number"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.sessions": {
+            "name": "sessions",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "token": {
+                    "name": "token",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "expires_at": {
+                    "name": "expires_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "user_agent": {
+                    "name": "user_agent",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "ip_address": {
+                    "name": "ip_address",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "sessions_user_id_users_id_fk": {
+                    "name": "sessions_user_id_users_id_fk",
+                    "tableFrom": "sessions",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "sessions_token_unique": {
+                    "name": "sessions_token_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["token"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.accounts": {
+            "name": "accounts",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "account_id": {
+                    "name": "account_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "provider_id": {
+                    "name": "provider_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "access_token": {
+                    "name": "access_token",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "refresh_token": {
+                    "name": "refresh_token",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "id_token": {
+                    "name": "id_token",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "access_token_expires_at": {
+                    "name": "access_token_expires_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "refresh_token_expires_at": {
+                    "name": "refresh_token_expires_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "scope": {
+                    "name": "scope",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "password": {
+                    "name": "password",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "accounts_user_id_users_id_fk": {
+                    "name": "accounts_user_id_users_id_fk",
+                    "tableFrom": "accounts",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.verifications": {
+            "name": "verifications",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "identifier": {
+                    "name": "identifier",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "value": {
+                    "name": "value",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "expires_at": {
+                    "name": "expires_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.parents": {
+            "name": "parents",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "identity_number": {
+                    "name": "identity_number",
+                    "type": "varchar(16)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "place_of_birth": {
+                    "name": "place_of_birth",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "date_of_birth": {
+                    "name": "date_of_birth",
+                    "type": "date",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "blood_type": {
+                    "name": "blood_type",
+                    "type": "blood_type",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "education": {
+                    "name": "education",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "occupation": {
+                    "name": "occupation",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "address_line": {
+                    "name": "address_line",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "rt": {
+                    "name": "rt",
+                    "type": "varchar(5)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "rw": {
+                    "name": "rw",
+                    "type": "varchar(5)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "village_name": {
+                    "name": "village_name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'Banjarsari'"
+                },
+                "status": {
+                    "name": "status",
+                    "type": "account_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'active'"
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "parents_user_id_users_id_fk": {
+                    "name": "parents_user_id_users_id_fk",
+                    "tableFrom": "parents",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "parents_user_id_unique": {
+                    "name": "parents_user_id_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["user_id"]
+                },
+                "parents_identity_number_unique": {
+                    "name": "parents_identity_number_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["identity_number"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.cadres": {
+            "name": "cadres",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "posyandu_id": {
+                    "name": "posyandu_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "identity_number": {
+                    "name": "identity_number",
+                    "type": "varchar(16)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "position": {
+                    "name": "position",
+                    "type": "cadre_position",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'member'"
+                },
+                "is_primary_assignment": {
+                    "name": "is_primary_assignment",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": true
+                },
+                "duty_area_notes": {
+                    "name": "duty_area_notes",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "status": {
+                    "name": "status",
+                    "type": "account_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'active'"
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {
+                "cadres_user_id_posyandu_id_unique": {
+                    "name": "cadres_user_id_posyandu_id_unique",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        },
+                        {
+                            "expression": "posyandu_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": true,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "cadres_user_id_users_id_fk": {
+                    "name": "cadres_user_id_users_id_fk",
+                    "tableFrom": "cadres",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "cadres_posyandu_id_posyandus_id_fk": {
+                    "name": "cadres_posyandu_id_posyandus_id_fk",
+                    "tableFrom": "cadres",
+                    "tableTo": "posyandus",
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.midwifes": {
+            "name": "midwifes",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "posyandu_id": {
+                    "name": "posyandu_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "identity_number": {
+                    "name": "identity_number",
+                    "type": "varchar(16)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "employee_number": {
+                    "name": "employee_number",
+                    "type": "varchar(32)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "license_number": {
+                    "name": "license_number",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "is_mtbs_trained": {
+                    "name": "is_mtbs_trained",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": false
+                },
+                "is_kelas_ibu_balita_facilitator": {
+                    "name": "is_kelas_ibu_balita_facilitator",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": false
+                },
+                "is_pkat_member": {
+                    "name": "is_pkat_member",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": false
+                },
+                "is_poned_provider": {
+                    "name": "is_poned_provider",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": false
+                },
+                "is_primary_assignment": {
+                    "name": "is_primary_assignment",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": true
+                },
+                "duty_area_notes": {
+                    "name": "duty_area_notes",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "status": {
+                    "name": "status",
+                    "type": "account_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'active'"
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {
+                "midwives_user_id_posyandu_id_unique": {
+                    "name": "midwives_user_id_posyandu_id_unique",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        },
+                        {
+                            "expression": "posyandu_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": true,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "midwives_str_number_unique": {
+                    "name": "midwives_str_number_unique",
+                    "columns": [
+                        {
+                            "expression": "license_number",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": true,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "midwifes_user_id_users_id_fk": {
+                    "name": "midwifes_user_id_users_id_fk",
+                    "tableFrom": "midwifes",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "midwifes_posyandu_id_posyandus_id_fk": {
+                    "name": "midwifes_posyandu_id_posyandus_id_fk",
+                    "tableFrom": "midwifes",
+                    "tableTo": "posyandus",
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.posyandus": {
+            "name": "posyandus",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "address_line": {
+                    "name": "address_line",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "rt": {
+                    "name": "rt",
+                    "type": "varchar(5)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "rw": {
+                    "name": "rw",
+                    "type": "varchar(5)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "village_name": {
+                    "name": "village_name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'Banjarsari'"
+                },
+                "contact_number": {
+                    "name": "contact_number",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "status": {
+                    "name": "status",
+                    "type": "status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'active'"
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "posyandus_name_unique": {
+                    "name": "posyandus_name_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["name"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.childrens": {
+            "name": "childrens",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "posyandu_id": {
+                    "name": "posyandu_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "identity_number": {
+                    "name": "identity_number",
+                    "type": "varchar(16)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "gender": {
+                    "name": "gender",
+                    "type": "gender",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "child_category": {
+                    "name": "child_category",
+                    "type": "child_category",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "place_of_birth": {
+                    "name": "place_of_birth",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "birth_date": {
+                    "name": "birth_date",
+                    "type": "date",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "birth_order": {
+                    "name": "birth_order",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "blood_type": {
+                    "name": "blood_type",
+                    "type": "blood_type",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "birth_weight": {
+                    "name": "birth_weight",
+                    "type": "numeric(5, 2)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "birth_length": {
+                    "name": "birth_length",
+                    "type": "numeric(5, 2)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "birth_head_circumference": {
+                    "name": "birth_head_circumference",
+                    "type": "numeric(5, 2)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "childrens_posyandu_id_posyandus_id_fk": {
+                    "name": "childrens_posyandu_id_posyandus_id_fk",
+                    "tableFrom": "childrens",
+                    "tableTo": "posyandus",
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "childrens_identity_number_unique": {
+                    "name": "childrens_identity_number_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["identity_number"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.relation_childrens": {
+            "name": "relation_childrens",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "parent_id": {
+                    "name": "parent_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "children_id": {
+                    "name": "children_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "relation": {
+                    "name": "relation",
+                    "type": "family_relation",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "relation_childrens_parent_id_parents_id_fk": {
+                    "name": "relation_childrens_parent_id_parents_id_fk",
+                    "tableFrom": "relation_childrens",
+                    "tableTo": "parents",
+                    "columnsFrom": ["parent_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "relation_childrens_children_id_childrens_id_fk": {
+                    "name": "relation_childrens_children_id_childrens_id_fk",
+                    "tableFrom": "relation_childrens",
+                    "tableTo": "childrens",
+                    "columnsFrom": ["children_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.vaccines": {
+            "name": "vaccines",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "code": {
+                    "name": "code",
+                    "type": "varchar(10)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "target_age_months": {
+                    "name": "target_age_months",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "max_doses": {
+                    "name": "max_doses",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "min_interval_days": {
+                    "name": "min_interval_days",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "route": {
+                    "name": "route",
+                    "type": "vaccine_route",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "vaccines_code_unique": {
+                    "name": "vaccines_code_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["code"]
+                },
+                "vaccines_name_unique": {
+                    "name": "vaccines_name_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["name"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.vitamins": {
+            "name": "vitamins",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "capsule_color": {
+                    "name": "capsule_color",
+                    "type": "capsule_color",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "dosage_iu": {
+                    "name": "dosage_iu",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "min_age_months": {
+                    "name": "min_age_months",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "max_age_months": {
+                    "name": "max_age_months",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "distributions_per_year": {
+                    "name": "distributions_per_year",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "target_age_months": {
+                    "name": "target_age_months",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "vitamins_name_unique": {
+                    "name": "vitamins_name_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["name"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.immunization_records": {
+            "name": "immunization_records",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "children_id": {
+                    "name": "children_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "vaccine_id": {
+                    "name": "vaccine_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "cadre_id": {
+                    "name": "cadre_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "midwife_id": {
+                    "name": "midwife_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "posyandu_id": {
+                    "name": "posyandu_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "inventory_id": {
+                    "name": "inventory_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "dose_number": {
+                    "name": "dose_number",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "date_given": {
+                    "name": "date_given",
+                    "type": "date",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "batch_number": {
+                    "name": "batch_number",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "status": {
+                    "name": "status",
+                    "type": "immunization_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'scheduled'"
+                },
+                "kipi_status": {
+                    "name": "kipi_status",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": false
+                },
+                "schedule_compliance": {
+                    "name": "schedule_compliance",
+                    "type": "schedule_compliance",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "status_dofu": {
+                    "name": "status_dofu",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": false
+                },
+                "sync_status": {
+                    "name": "sync_status",
+                    "type": "sync_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'pending'"
+                },
+                "external_ref_id": {
+                    "name": "external_ref_id",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "location_type": {
+                    "name": "location_type",
+                    "type": "service_location_type",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "notes": {
+                    "name": "notes",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "immunization_records_children_id_childrens_id_fk": {
+                    "name": "immunization_records_children_id_childrens_id_fk",
+                    "tableFrom": "immunization_records",
+                    "tableTo": "childrens",
+                    "columnsFrom": ["children_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "immunization_records_vaccine_id_vaccines_id_fk": {
+                    "name": "immunization_records_vaccine_id_vaccines_id_fk",
+                    "tableFrom": "immunization_records",
+                    "tableTo": "vaccines",
+                    "columnsFrom": ["vaccine_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "immunization_records_cadre_id_cadres_id_fk": {
+                    "name": "immunization_records_cadre_id_cadres_id_fk",
+                    "tableFrom": "immunization_records",
+                    "tableTo": "cadres",
+                    "columnsFrom": ["cadre_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "immunization_records_midwife_id_midwifes_id_fk": {
+                    "name": "immunization_records_midwife_id_midwifes_id_fk",
+                    "tableFrom": "immunization_records",
+                    "tableTo": "midwifes",
+                    "columnsFrom": ["midwife_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "immunization_records_posyandu_id_posyandus_id_fk": {
+                    "name": "immunization_records_posyandu_id_posyandus_id_fk",
+                    "tableFrom": "immunization_records",
+                    "tableTo": "posyandus",
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "immunization_records_inventory_id_inventories_id_fk": {
+                    "name": "immunization_records_inventory_id_inventories_id_fk",
+                    "tableFrom": "immunization_records",
+                    "tableTo": "inventories",
+                    "columnsFrom": ["inventory_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "immunization_records_child_vaccine_dose_unique": {
+                    "name": "immunization_records_child_vaccine_dose_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["children_id", "vaccine_id", "dose_number"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.vitamin_records": {
+            "name": "vitamin_records",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "children_id": {
+                    "name": "children_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "vitamin_id": {
+                    "name": "vitamin_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "cadre_id": {
+                    "name": "cadre_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "midwife_id": {
+                    "name": "midwife_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "posyandu_id": {
+                    "name": "posyandu_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "distribution_period": {
+                    "name": "distribution_period",
+                    "type": "distribution_period",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "distribution_year": {
+                    "name": "distribution_year",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "date_given": {
+                    "name": "date_given",
+                    "type": "date",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "status": {
+                    "name": "status",
+                    "type": "vitamin_record_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'not_yet'"
+                },
+                "given_deworming": {
+                    "name": "given_deworming",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": false
+                },
+                "is_sweeping": {
+                    "name": "is_sweeping",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": false
+                },
+                "is_received": {
+                    "name": "is_received",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "location_type": {
+                    "name": "location_type",
+                    "type": "service_location_type",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "sync_status": {
+                    "name": "sync_status",
+                    "type": "sync_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'pending'"
+                },
+                "external_ref_id": {
+                    "name": "external_ref_id",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "special_condition_notes": {
+                    "name": "special_condition_notes",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "notes": {
+                    "name": "notes",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "vitamin_records_children_id_childrens_id_fk": {
+                    "name": "vitamin_records_children_id_childrens_id_fk",
+                    "tableFrom": "vitamin_records",
+                    "tableTo": "childrens",
+                    "columnsFrom": ["children_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "vitamin_records_vitamin_id_vitamins_id_fk": {
+                    "name": "vitamin_records_vitamin_id_vitamins_id_fk",
+                    "tableFrom": "vitamin_records",
+                    "tableTo": "vitamins",
+                    "columnsFrom": ["vitamin_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "vitamin_records_cadre_id_cadres_id_fk": {
+                    "name": "vitamin_records_cadre_id_cadres_id_fk",
+                    "tableFrom": "vitamin_records",
+                    "tableTo": "cadres",
+                    "columnsFrom": ["cadre_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "vitamin_records_midwife_id_midwifes_id_fk": {
+                    "name": "vitamin_records_midwife_id_midwifes_id_fk",
+                    "tableFrom": "vitamin_records",
+                    "tableTo": "midwifes",
+                    "columnsFrom": ["midwife_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "vitamin_records_posyandu_id_posyandus_id_fk": {
+                    "name": "vitamin_records_posyandu_id_posyandus_id_fk",
+                    "tableFrom": "vitamin_records",
+                    "tableTo": "posyandus",
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "vitamin_records_child_period_year_unique": {
+                    "name": "vitamin_records_child_period_year_unique",
+                    "nullsNotDistinct": false,
+                    "columns": [
+                        "children_id",
+                        "distribution_period",
+                        "distribution_year"
+                    ]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.kipi_details": {
+            "name": "kipi_details",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "immunization_record_id": {
+                    "name": "immunization_record_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "symptoms": {
+                    "name": "symptoms",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "severity": {
+                    "name": "severity",
+                    "type": "kipi_severity",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "action_taken": {
+                    "name": "action_taken",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "referred": {
+                    "name": "referred",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "kipi_details_immunization_record_id_immunization_records_id_fk": {
+                    "name": "kipi_details_immunization_record_id_immunization_records_id_fk",
+                    "tableFrom": "kipi_details",
+                    "tableTo": "immunization_records",
+                    "columnsFrom": ["immunization_record_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "kipi_details_immunization_record_id_unique": {
+                    "name": "kipi_details_immunization_record_id_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["immunization_record_id"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.nutrition_records": {
+            "name": "nutrition_records",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "children_id": {
+                    "name": "children_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "measurement_date": {
+                    "name": "measurement_date",
+                    "type": "date",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "weight_kg": {
+                    "name": "weight_kg",
+                    "type": "numeric(5, 2)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "height_cm": {
+                    "name": "height_cm",
+                    "type": "numeric(5, 2)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "head_circumference_cm": {
+                    "name": "head_circumference_cm",
+                    "type": "numeric(5, 2)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "age_months": {
+                    "name": "age_months",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "nutrition_status": {
+                    "name": "nutrition_status",
+                    "type": "nutrition_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "cadre_id": {
+                    "name": "cadre_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "midwife_id": {
+                    "name": "midwife_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "notes": {
+                    "name": "notes",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {
+                "nutrition_records_children_id_idx": {
+                    "name": "nutrition_records_children_id_idx",
+                    "columns": [
+                        {
+                            "expression": "children_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "nutrition_records_cadre_id_idx": {
+                    "name": "nutrition_records_cadre_id_idx",
+                    "columns": [
+                        {
+                            "expression": "cadre_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "nutrition_records_midwife_id_idx": {
+                    "name": "nutrition_records_midwife_id_idx",
+                    "columns": [
+                        {
+                            "expression": "midwife_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "nutrition_records_children_id_childrens_id_fk": {
+                    "name": "nutrition_records_children_id_childrens_id_fk",
+                    "tableFrom": "nutrition_records",
+                    "tableTo": "childrens",
+                    "columnsFrom": ["children_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "nutrition_records_cadre_id_cadres_id_fk": {
+                    "name": "nutrition_records_cadre_id_cadres_id_fk",
+                    "tableFrom": "nutrition_records",
+                    "tableTo": "cadres",
+                    "columnsFrom": ["cadre_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "nutrition_records_midwife_id_midwifes_id_fk": {
+                    "name": "nutrition_records_midwife_id_midwifes_id_fk",
+                    "tableFrom": "nutrition_records",
+                    "tableTo": "midwifes",
+                    "columnsFrom": ["midwife_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.pregnancy_records": {
+            "name": "pregnancy_records",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "parent_id": {
+                    "name": "parent_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "posyandu_id": {
+                    "name": "posyandu_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "midwife_id": {
+                    "name": "midwife_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "pregnancy_status": {
+                    "name": "pregnancy_status",
+                    "type": "pregnancy_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'first_trimester'"
+                },
+                "risk_level": {
+                    "name": "risk_level",
+                    "type": "pregnancy_risk",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'low'"
+                },
+                "last_menstrual_period": {
+                    "name": "last_menstrual_period",
+                    "type": "date",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "estimated_due_date": {
+                    "name": "estimated_due_date",
+                    "type": "date",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "gravida": {
+                    "name": "gravida",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "parity": {
+                    "name": "parity",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "abortus": {
+                    "name": "abortus",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "is_active": {
+                    "name": "is_active",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": true
+                },
+                "notes": {
+                    "name": "notes",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {
+                "pregnancy_records_parent_id_idx": {
+                    "name": "pregnancy_records_parent_id_idx",
+                    "columns": [
+                        {
+                            "expression": "parent_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "pregnancy_records_posyandu_id_idx": {
+                    "name": "pregnancy_records_posyandu_id_idx",
+                    "columns": [
+                        {
+                            "expression": "posyandu_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "pregnancy_records_midwife_id_idx": {
+                    "name": "pregnancy_records_midwife_id_idx",
+                    "columns": [
+                        {
+                            "expression": "midwife_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "pregnancy_records_parent_id_parents_id_fk": {
+                    "name": "pregnancy_records_parent_id_parents_id_fk",
+                    "tableFrom": "pregnancy_records",
+                    "tableTo": "parents",
+                    "columnsFrom": ["parent_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "pregnancy_records_posyandu_id_posyandus_id_fk": {
+                    "name": "pregnancy_records_posyandu_id_posyandus_id_fk",
+                    "tableFrom": "pregnancy_records",
+                    "tableTo": "posyandus",
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "pregnancy_records_midwife_id_midwifes_id_fk": {
+                    "name": "pregnancy_records_midwife_id_midwifes_id_fk",
+                    "tableFrom": "pregnancy_records",
+                    "tableTo": "midwifes",
+                    "columnsFrom": ["midwife_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.consultations": {
+            "name": "consultations",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "parent_id": {
+                    "name": "parent_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "pregnancy_record_id": {
+                    "name": "pregnancy_record_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "children_id": {
+                    "name": "children_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "midwife_id": {
+                    "name": "midwife_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "cadre_id": {
+                    "name": "cadre_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "posyandu_id": {
+                    "name": "posyandu_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "consultation_type": {
+                    "name": "consultation_type",
+                    "type": "consultation_type",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'pregnancy'"
+                },
+                "scheduled_at": {
+                    "name": "scheduled_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "actual_start_at": {
+                    "name": "actual_start_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "duration_minutes": {
+                    "name": "duration_minutes",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "follow_up_required": {
+                    "name": "follow_up_required",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": false
+                },
+                "follow_up_date": {
+                    "name": "follow_up_date",
+                    "type": "date",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "status": {
+                    "name": "status",
+                    "type": "consultation_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'pending'"
+                },
+                "notes": {
+                    "name": "notes",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "cancellation_reason": {
+                    "name": "cancellation_reason",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {
+                "consultations_slot_unique_idx": {
+                    "name": "consultations_slot_unique_idx",
+                    "columns": [
+                        {
+                            "expression": "posyandu_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        },
+                        {
+                            "expression": "consultation_type",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        },
+                        {
+                            "expression": "scheduled_at",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": true,
+                    "where": "status != 'cancelled' AND deleted_at IS NULL",
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "consultations_parent_schedule_unique_idx": {
+                    "name": "consultations_parent_schedule_unique_idx",
+                    "columns": [
+                        {
+                            "expression": "parent_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        },
+                        {
+                            "expression": "scheduled_at",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": true,
+                    "where": "status != 'cancelled' AND deleted_at IS NULL",
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "consultations_parent_id_idx": {
+                    "name": "consultations_parent_id_idx",
+                    "columns": [
+                        {
+                            "expression": "parent_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "consultations_pregnancy_record_id_idx": {
+                    "name": "consultations_pregnancy_record_id_idx",
+                    "columns": [
+                        {
+                            "expression": "pregnancy_record_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "consultations_children_id_idx": {
+                    "name": "consultations_children_id_idx",
+                    "columns": [
+                        {
+                            "expression": "children_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "consultations_posyandu_id_idx": {
+                    "name": "consultations_posyandu_id_idx",
+                    "columns": [
+                        {
+                            "expression": "posyandu_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "consultations_midwife_id_idx": {
+                    "name": "consultations_midwife_id_idx",
+                    "columns": [
+                        {
+                            "expression": "midwife_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "consultations_cadre_id_idx": {
+                    "name": "consultations_cadre_id_idx",
+                    "columns": [
+                        {
+                            "expression": "cadre_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "consultations_parent_id_parents_id_fk": {
+                    "name": "consultations_parent_id_parents_id_fk",
+                    "tableFrom": "consultations",
+                    "tableTo": "parents",
+                    "columnsFrom": ["parent_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "consultations_pregnancy_record_id_pregnancy_records_id_fk": {
+                    "name": "consultations_pregnancy_record_id_pregnancy_records_id_fk",
+                    "tableFrom": "consultations",
+                    "tableTo": "pregnancy_records",
+                    "columnsFrom": ["pregnancy_record_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "consultations_children_id_childrens_id_fk": {
+                    "name": "consultations_children_id_childrens_id_fk",
+                    "tableFrom": "consultations",
+                    "tableTo": "childrens",
+                    "columnsFrom": ["children_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "consultations_midwife_id_midwifes_id_fk": {
+                    "name": "consultations_midwife_id_midwifes_id_fk",
+                    "tableFrom": "consultations",
+                    "tableTo": "midwifes",
+                    "columnsFrom": ["midwife_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "consultations_cadre_id_cadres_id_fk": {
+                    "name": "consultations_cadre_id_cadres_id_fk",
+                    "tableFrom": "consultations",
+                    "tableTo": "cadres",
+                    "columnsFrom": ["cadre_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "consultations_posyandu_id_posyandus_id_fk": {
+                    "name": "consultations_posyandu_id_posyandus_id_fk",
+                    "tableFrom": "consultations",
+                    "tableTo": "posyandus",
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {
+                "consultations_context_check": {
+                    "name": "consultations_context_check",
+                    "value": "(\"consultations\".\"consultation_type\" = 'pregnancy' AND \"consultations\".\"pregnancy_record_id\" IS NOT NULL AND \"consultations\".\"children_id\" IS NULL) OR (\"consultations\".\"consultation_type\" = 'child_development' AND \"consultations\".\"children_id\" IS NOT NULL AND \"consultations\".\"pregnancy_record_id\" IS NULL) OR (\"consultations\".\"consultation_type\" = 'general' AND \"consultations\".\"pregnancy_record_id\" IS NULL AND \"consultations\".\"children_id\" IS NULL)"
+                }
+            },
+            "isRLSEnabled": false
+        },
+        "public.notifications": {
+            "name": "notifications",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "type": {
+                    "name": "type",
+                    "type": "notification_type",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'system'"
+                },
+                "status": {
+                    "name": "status",
+                    "type": "notification_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'unread'"
+                },
+                "title": {
+                    "name": "title",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "body": {
+                    "name": "body",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "data": {
+                    "name": "data",
+                    "type": "jsonb",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "read_at": {
+                    "name": "read_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {
+                "notifications_user_id_idx": {
+                    "name": "notifications_user_id_idx",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "notifications_user_status_idx": {
+                    "name": "notifications_user_status_idx",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        },
+                        {
+                            "expression": "status",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "notifications_created_at_idx": {
+                    "name": "notifications_created_at_idx",
+                    "columns": [
+                        {
+                            "expression": "created_at",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "notifications_user_id_users_id_fk": {
+                    "name": "notifications_user_id_users_id_fk",
+                    "tableFrom": "notifications",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.examinations": {
+            "name": "examinations",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "posyandu_id": {
+                    "name": "posyandu_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "examination_type": {
+                    "name": "examination_type",
+                    "type": "examination_type",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "target_age_months": {
+                    "name": "target_age_months",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "target_trimester": {
+                    "name": "target_trimester",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "checklist_items": {
+                    "name": "checklist_items",
+                    "type": "jsonb",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "is_active": {
+                    "name": "is_active",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": true
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {
+                "examinations_posyandu_id_name_unique": {
+                    "name": "examinations_posyandu_id_name_unique",
+                    "columns": [
+                        {
+                            "expression": "posyandu_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        },
+                        {
+                            "expression": "name",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": true,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "examinations_posyandu_id_posyandus_id_fk": {
+                    "name": "examinations_posyandu_id_posyandus_id_fk",
+                    "tableFrom": "examinations",
+                    "tableTo": "posyandus",
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.examination_schedules": {
+            "name": "examination_schedules",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "examination_id": {
+                    "name": "examination_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "posyandu_id": {
+                    "name": "posyandu_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "midwife_id": {
+                    "name": "midwife_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "cadre_id": {
+                    "name": "cadre_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "scheduled_date": {
+                    "name": "scheduled_date",
+                    "type": "date",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "start_time": {
+                    "name": "start_time",
+                    "type": "time",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "end_time": {
+                    "name": "end_time",
+                    "type": "time",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "max_participants": {
+                    "name": "max_participants",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": 20
+                },
+                "current_participants": {
+                    "name": "current_participants",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": 0
+                },
+                "location_notes": {
+                    "name": "location_notes",
+                    "type": "varchar(200)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "status": {
+                    "name": "status",
+                    "type": "examination_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'pending'"
+                },
+                "notes": {
+                    "name": "notes",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {
+                "examination_schedules_examination_id_idx": {
+                    "name": "examination_schedules_examination_id_idx",
+                    "columns": [
+                        {
+                            "expression": "examination_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "examination_schedules_posyandu_id_idx": {
+                    "name": "examination_schedules_posyandu_id_idx",
+                    "columns": [
+                        {
+                            "expression": "posyandu_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "examination_schedules_midwife_id_idx": {
+                    "name": "examination_schedules_midwife_id_idx",
+                    "columns": [
+                        {
+                            "expression": "midwife_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "examination_schedules_cadre_id_idx": {
+                    "name": "examination_schedules_cadre_id_idx",
+                    "columns": [
+                        {
+                            "expression": "cadre_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "examination_schedules_examination_id_examinations_id_fk": {
+                    "name": "examination_schedules_examination_id_examinations_id_fk",
+                    "tableFrom": "examination_schedules",
+                    "tableTo": "examinations",
+                    "columnsFrom": ["examination_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "examination_schedules_posyandu_id_posyandus_id_fk": {
+                    "name": "examination_schedules_posyandu_id_posyandus_id_fk",
+                    "tableFrom": "examination_schedules",
+                    "tableTo": "posyandus",
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "examination_schedules_midwife_id_midwifes_id_fk": {
+                    "name": "examination_schedules_midwife_id_midwifes_id_fk",
+                    "tableFrom": "examination_schedules",
+                    "tableTo": "midwifes",
+                    "columnsFrom": ["midwife_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "examination_schedules_cadre_id_cadres_id_fk": {
+                    "name": "examination_schedules_cadre_id_cadres_id_fk",
+                    "tableFrom": "examination_schedules",
+                    "tableTo": "cadres",
+                    "columnsFrom": ["cadre_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.examination_records": {
+            "name": "examination_records",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "examination_id": {
+                    "name": "examination_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "schedule_id": {
+                    "name": "schedule_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "posyandu_id": {
+                    "name": "posyandu_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "children_id": {
+                    "name": "children_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "parent_id": {
+                    "name": "parent_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "cadre_id": {
+                    "name": "cadre_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "midwife_id": {
+                    "name": "midwife_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "examination_date": {
+                    "name": "examination_date",
+                    "type": "date",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "status": {
+                    "name": "status",
+                    "type": "examination_status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'pending'"
+                },
+                "result_summary": {
+                    "name": "result_summary",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "notes": {
+                    "name": "notes",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "medically_validated_at": {
+                    "name": "medically_validated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "medically_validated_by_midwife_id": {
+                    "name": "medically_validated_by_midwife_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "examination_records_examination_id_examinations_id_fk": {
+                    "name": "examination_records_examination_id_examinations_id_fk",
+                    "tableFrom": "examination_records",
+                    "tableTo": "examinations",
+                    "columnsFrom": ["examination_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "examination_records_schedule_id_examination_schedules_id_fk": {
+                    "name": "examination_records_schedule_id_examination_schedules_id_fk",
+                    "tableFrom": "examination_records",
+                    "tableTo": "examination_schedules",
+                    "columnsFrom": ["schedule_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "examination_records_posyandu_id_posyandus_id_fk": {
+                    "name": "examination_records_posyandu_id_posyandus_id_fk",
+                    "tableFrom": "examination_records",
+                    "tableTo": "posyandus",
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "examination_records_children_id_childrens_id_fk": {
+                    "name": "examination_records_children_id_childrens_id_fk",
+                    "tableFrom": "examination_records",
+                    "tableTo": "childrens",
+                    "columnsFrom": ["children_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "examination_records_parent_id_parents_id_fk": {
+                    "name": "examination_records_parent_id_parents_id_fk",
+                    "tableFrom": "examination_records",
+                    "tableTo": "parents",
+                    "columnsFrom": ["parent_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "examination_records_cadre_id_cadres_id_fk": {
+                    "name": "examination_records_cadre_id_cadres_id_fk",
+                    "tableFrom": "examination_records",
+                    "tableTo": "cadres",
+                    "columnsFrom": ["cadre_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "examination_records_midwife_id_midwifes_id_fk": {
+                    "name": "examination_records_midwife_id_midwifes_id_fk",
+                    "tableFrom": "examination_records",
+                    "tableTo": "midwifes",
+                    "columnsFrom": ["midwife_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "examination_records_medically_validated_by_midwife_id_midwifes_id_fk": {
+                    "name": "examination_records_medically_validated_by_midwife_id_midwifes_id_fk",
+                    "tableFrom": "examination_records",
+                    "tableTo": "midwifes",
+                    "columnsFrom": ["medically_validated_by_midwife_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {
+                "examination_records_subject_check": {
+                    "name": "examination_records_subject_check",
+                    "value": "\"examination_records\".\"children_id\" IS NOT NULL OR \"examination_records\".\"parent_id\" IS NOT NULL"
+                }
+            },
+            "isRLSEnabled": false
+        },
+        "public.educations": {
+            "name": "educations",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "title": {
+                    "name": "title",
+                    "type": "varchar(200)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "content": {
+                    "name": "content",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "summary": {
+                    "name": "summary",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "image_url": {
+                    "name": "image_url",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "category_id": {
+                    "name": "category_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "views_count": {
+                    "name": "views_count",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": 0
+                },
+                "read_time": {
+                    "name": "read_time",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": 1
+                },
+                "posyandu_id": {
+                    "name": "posyandu_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_by_user_id": {
+                    "name": "created_by_user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "status": {
+                    "name": "status",
+                    "type": "status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'active'"
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "educations_category_id_education_categories_id_fk": {
+                    "name": "educations_category_id_education_categories_id_fk",
+                    "tableFrom": "educations",
+                    "tableTo": "education_categories",
+                    "columnsFrom": ["category_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "educations_posyandu_id_posyandus_id_fk": {
+                    "name": "educations_posyandu_id_posyandus_id_fk",
+                    "tableFrom": "educations",
+                    "tableTo": "posyandus",
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "educations_created_by_user_id_users_id_fk": {
+                    "name": "educations_created_by_user_id_users_id_fk",
+                    "tableFrom": "educations",
+                    "tableTo": "users",
+                    "columnsFrom": ["created_by_user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.education_categories": {
+            "name": "education_categories",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "slug": {
+                    "name": "slug",
+                    "type": "varchar(120)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "status": {
+                    "name": "status",
+                    "type": "status",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'active'"
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "education_categories_name_unique": {
+                    "name": "education_categories_name_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["name"]
+                },
+                "education_categories_slug_unique": {
+                    "name": "education_categories_slug_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["slug"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.inventories": {
+            "name": "inventories",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "posyandu_id": {
+                    "name": "posyandu_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "item_name": {
+                    "name": "item_name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "item_type": {
+                    "name": "item_type",
+                    "type": "inventory_item_type",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'general'"
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "quantity": {
+                    "name": "quantity",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": 0
+                },
+                "unit": {
+                    "name": "unit",
+                    "type": "inventory_unit",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'pcs'"
+                },
+                "condition": {
+                    "name": "condition",
+                    "type": "inventory_condition",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'good'"
+                },
+                "batch_number": {
+                    "name": "batch_number",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "expiry_date": {
+                    "name": "expiry_date",
+                    "type": "date",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "last_checked_date": {
+                    "name": "last_checked_date",
+                    "type": "date",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "managed_by_midwife_id": {
+                    "name": "managed_by_midwife_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "notes": {
+                    "name": "notes",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "inventories_posyandu_id_posyandus_id_fk": {
+                    "name": "inventories_posyandu_id_posyandus_id_fk",
+                    "tableFrom": "inventories",
+                    "tableTo": "posyandus",
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "inventories_managed_by_midwife_id_midwifes_id_fk": {
+                    "name": "inventories_managed_by_midwife_id_midwifes_id_fk",
+                    "tableFrom": "inventories",
+                    "tableTo": "midwifes",
+                    "columnsFrom": ["managed_by_midwife_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.audit_logs": {
+            "name": "audit_logs",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "action": {
+                    "name": "action",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "entity_type": {
+                    "name": "entity_type",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "entity_id": {
+                    "name": "entity_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "old_value": {
+                    "name": "old_value",
+                    "type": "jsonb",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "new_value": {
+                    "name": "new_value",
+                    "type": "jsonb",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "ip_address": {
+                    "name": "ip_address",
+                    "type": "varchar(45)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "user_agent": {
+                    "name": "user_agent",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "payload": {
+                    "name": "payload",
+                    "type": "jsonb",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "status_code": {
+                    "name": "status_code",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {
+                "audit_logs_user_id_idx": {
+                    "name": "audit_logs_user_id_idx",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "audit_logs_entity_idx": {
+                    "name": "audit_logs_entity_idx",
+                    "columns": [
+                        {
+                            "expression": "entity_type",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        },
+                        {
+                            "expression": "entity_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "audit_logs_created_at_idx": {
+                    "name": "audit_logs_created_at_idx",
+                    "columns": [
+                        {
+                            "expression": "created_at",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.media": {
+            "name": "media",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "file_name": {
+                    "name": "file_name",
+                    "type": "varchar(255)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "original_name": {
+                    "name": "original_name",
+                    "type": "varchar(255)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "file_size": {
+                    "name": "file_size",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "mime_type": {
+                    "name": "mime_type",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "file_extension": {
+                    "name": "file_extension",
+                    "type": "varchar(10)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "file_category": {
+                    "name": "file_category",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "url": {
+                    "name": "url",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "r2_key": {
+                    "name": "r2_key",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "uploaded_by": {
+                    "name": "uploaded_by",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp with time zone",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {
+                "media_uploaded_by_idx": {
+                    "name": "media_uploaded_by_idx",
+                    "columns": [
+                        {
+                            "expression": "uploaded_by",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "media_file_category_idx": {
+                    "name": "media_file_category_idx",
+                    "columns": [
+                        {
+                            "expression": "file_category",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "media_created_at_idx": {
+                    "name": "media_created_at_idx",
+                    "columns": [
+                        {
+                            "expression": "created_at",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "media_uploaded_by_users_id_fk": {
+                    "name": "media_uploaded_by_users_id_fk",
+                    "tableFrom": "media",
+                    "tableTo": "users",
+                    "columnsFrom": ["uploaded_by"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        }
+    },
+    "enums": {
+        "public.account_role": {
+            "name": "account_role",
+            "schema": "public",
+            "values": [
+                "posyandu_admin",
+                "village_admin",
+                "parent",
+                "cadre",
+                "midwife"
+            ]
+        },
+        "public.account_status": {
+            "name": "account_status",
+            "schema": "public",
+            "values": ["active", "inactive", "disabled", "pending_verification"]
+        },
+        "public.admin_type": {
+            "name": "admin_type",
+            "schema": "public",
+            "values": ["posyandu_admin", "village_admin", "super_admin"]
+        },
+        "public.age_unit": {
+            "name": "age_unit",
+            "schema": "public",
+            "values": ["day", "month", "year"]
+        },
+        "public.blood_type": {
+            "name": "blood_type",
+            "schema": "public",
+            "values": ["A", "B", "AB", "O", "UNKNOWN"]
+        },
+        "public.cadre_position": {
+            "name": "cadre_position",
+            "schema": "public",
+            "values": ["leader", "secretary", "treasurer", "member"]
+        },
+        "public.capsule_color": {
+            "name": "capsule_color",
+            "schema": "public",
+            "values": ["blue", "red"]
+        },
+        "public.child_category": {
+            "name": "child_category",
+            "schema": "public",
+            "values": ["infant", "young_child", "toddler"]
+        },
+        "public.consultation_status": {
+            "name": "consultation_status",
+            "schema": "public",
+            "values": [
+                "pending",
+                "confirmed",
+                "completed",
+                "cancelled",
+                "rescheduled"
+            ]
+        },
+        "public.consultation_type": {
+            "name": "consultation_type",
+            "schema": "public",
+            "values": ["pregnancy", "child_development", "general"]
+        },
+        "public.distribution_period": {
+            "name": "distribution_period",
+            "schema": "public",
+            "values": ["february", "august"]
+        },
+        "public.examination_status": {
+            "name": "examination_status",
+            "schema": "public",
+            "values": ["pending", "processing", "completed", "cancelled"]
+        },
+        "public.examination_type": {
+            "name": "examination_type",
+            "schema": "public",
+            "values": ["infant", "pregnant_mother", "toddler", "young_child"]
+        },
+        "public.family_relation": {
+            "name": "family_relation",
+            "schema": "public",
+            "values": ["father", "mother", "guardian"]
+        },
+        "public.gender": {
+            "name": "gender",
+            "schema": "public",
+            "values": ["male", "female"]
+        },
+        "public.immunization_status": {
+            "name": "immunization_status",
+            "schema": "public",
+            "values": ["not_yet", "scheduled", "completed", "missed"]
+        },
+        "public.inventory_condition": {
+            "name": "inventory_condition",
+            "schema": "public",
+            "values": [
+                "good",
+                "minor_damage",
+                "major_damage",
+                "out_of_stock",
+                "under_repair"
+            ]
+        },
+        "public.inventory_item_type": {
+            "name": "inventory_item_type",
+            "schema": "public",
+            "values": ["vaccine", "vitamin", "general"]
+        },
+        "public.inventory_unit": {
+            "name": "inventory_unit",
+            "schema": "public",
+            "values": ["pcs", "box", "bottle", "pack", "set"]
+        },
+        "public.kipi_severity": {
+            "name": "kipi_severity",
+            "schema": "public",
+            "values": ["mild", "moderate", "severe"]
+        },
+        "public.notification_status": {
+            "name": "notification_status",
+            "schema": "public",
+            "values": ["unread", "read"]
+        },
+        "public.notification_type": {
+            "name": "notification_type",
+            "schema": "public",
+            "values": [
+                "immunization",
+                "consultation",
+                "examination",
+                "education",
+                "system"
+            ]
+        },
+        "public.nutrition_status": {
+            "name": "nutrition_status",
+            "schema": "public",
+            "values": [
+                "normal",
+                "underweight",
+                "severely_underweight",
+                "stunted",
+                "wasted",
+                "overweight"
+            ]
+        },
+        "public.pregnancy_risk": {
+            "name": "pregnancy_risk",
+            "schema": "public",
+            "values": ["low", "moderate", "high"]
+        },
+        "public.pregnancy_status": {
+            "name": "pregnancy_status",
+            "schema": "public",
+            "values": [
+                "first_trimester",
+                "second_trimester",
+                "third_trimester",
+                "delivered"
+            ]
+        },
+        "public.schedule_compliance": {
+            "name": "schedule_compliance",
+            "schema": "public",
+            "values": ["on_time", "late", "non_compliant"]
+        },
+        "public.service_location_type": {
+            "name": "service_location_type",
+            "schema": "public",
+            "values": [
+                "posyandu",
+                "puskesmas",
+                "pustu",
+                "home",
+                "school",
+                "paud",
+                "kindergarten",
+                "daycare"
+            ]
+        },
+        "public.status": {
+            "name": "status",
+            "schema": "public",
+            "values": ["active", "inactive"]
+        },
+        "public.sync_status": {
+            "name": "sync_status",
+            "schema": "public",
+            "values": ["pending", "synced", "failed"]
+        },
+        "public.vaccine_route": {
+            "name": "vaccine_route",
+            "schema": "public",
+            "values": ["injection", "oral"]
+        },
+        "public.vitamin_record_status": {
+            "name": "vitamin_record_status",
+            "schema": "public",
+            "values": ["not_yet", "given", "missed", "sweeping"]
+        }
+    },
+    "schemas": {},
+    "sequences": {},
+    "roles": {},
+    "policies": {},
+    "views": {},
+    "_meta": {
+        "columns": {},
+        "schemas": {},
+        "tables": {}
+    }
+}

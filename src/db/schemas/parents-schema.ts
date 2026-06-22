@@ -10,7 +10,7 @@ export const parents = pgTable('parents', {
     user_id: text('user_id')
         .notNull()
         .unique()
-        .references(() => users.id),
+        .references(() => users.id, { onDelete: 'cascade' }),
 
     identity_number: varchar('identity_number', { length: 16 }).unique(), // NIK
     place_of_birth: varchar('place_of_birth', { length: 50 }),

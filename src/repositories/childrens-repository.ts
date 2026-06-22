@@ -1,4 +1,14 @@
-import { NewChildren, Children, childrens, relationChildrens } from '@/db'
+import {
+    NewChildren,
+    Children,
+    childrens,
+    relationChildrens,
+    parents,
+    users,
+    posyandus,
+    nutritionRecords,
+    vitaminRecords
+} from '@/db'
 import { and, eq, ilike, sql, inArray, asc, desc } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
@@ -15,7 +25,7 @@ export interface ChildrenQueryFilters {
 }
 
 export class ChildrenRepository {
-    constructor(private readonly db: NodePgDatabase) {}
+    constructor(private readonly db: NodePgDatabase<Record<string, never>>) {}
 
     async create(new_children: NewChildren): Promise<Children> {
         const [child] = await this.db
@@ -61,11 +71,11 @@ export class ChildrenRepository {
         }
 
         if (parent_id) {
+            // Filter children by parent_id via relation_childrens junction table
             const parentChildSubquery = this.db
                 .select({ children_id: relationChildrens.children_id })
                 .from(relationChildrens)
                 .where(eq(relationChildrens.parent_id, parent_id))
-
             conditions.push(inArray(childrens.id, parentChildSubquery))
         }
 
@@ -89,24 +99,124 @@ export class ChildrenRepository {
                 .where(whereClause)
         ])
 
+        if (data.length === 0) {
+            return {
+                data: [],
+                totalItems: Number(countResult[0]?.count || 0)
+            }
+        }
+
+        // Enrich with posyandu_detail and mother_name
+        const childIds = data.map(c => c.id)
+
+        const posyanduIds = [
+            ...new Set(data.map(c => c.posyandu_id).filter(Boolean) as string[])
+        ]
+        const posyanduRecords =
+            posyanduIds.length > 0
+                ? await this.db
+                      .select()
+                      .from(posyandus)
+                      .where(inArray(posyandus.id, posyanduIds))
+                : []
+        const posyanduMap = new Map(posyanduRecords.map(p => [p.id, p]))
+
+        const parentRecords = await this.db
+            .select({
+                child_id: relationChildrens.children_id,
+                mother_name: users.name
+            })
+            .from(relationChildrens)
+            .innerJoin(parents, eq(parents.id, relationChildrens.parent_id))
+            .innerJoin(users, eq(users.id, parents.user_id))
+            .where(inArray(relationChildrens.children_id, childIds))
+        const parentMap = new Map(
+            parentRecords.map(p => [p.child_id, p.mother_name])
+        )
+
+        const enrichedData = data.map(child => ({
+            ...child,
+            posyandu_detail: child.posyandu_id
+                ? posyanduMap.get(child.posyandu_id)
+                : undefined,
+            mother_name: parentMap.get(child.id) || null
+        }))
+
         return {
-            data,
+            data: enrichedData,
             totalItems: Number(countResult[0]?.count || 0)
         }
     }
 
-    async findById(public_id: string): Promise<Children | undefined> {
-        const [child] = await this.db
-            .select()
+    async findById(
+        public_id: string,
+        includeDeleted = false
+    ): Promise<
+        | (Children & {
+              mother_name?: string | null
+              parent_user_id?: string | null
+              posyandu_detail?: typeof posyandus.$inferSelect
+              latest_nutrition?: typeof nutritionRecords.$inferSelect
+              latest_vitamin?: typeof vitaminRecords.$inferSelect
+          })
+        | undefined
+    > {
+        const condition = includeDeleted
+            ? eq(childrens.id, public_id)
+            : and(
+                  eq(childrens.id, public_id),
+                  sql`${childrens.deleted_at} IS NULL`
+              )
+
+        const [row] = await this.db
+            .select({
+                child: childrens,
+                mother_name: users.name,
+                parent_user_id: parents.user_id
+            })
             .from(childrens)
-            .where(
+            .leftJoin(
+                relationChildrens,
                 and(
-                    eq(childrens.id, public_id),
-                    sql`${childrens.deleted_at} IS NULL`
+                    eq(relationChildrens.children_id, childrens.id),
+                    eq(relationChildrens.relation, 'mother')
                 )
             )
+            .leftJoin(parents, eq(parents.id, relationChildrens.parent_id))
+            .leftJoin(users, eq(users.id, parents.user_id))
+            .where(condition)
             .limit(1)
-        return child
+
+        if (!row) return undefined
+
+        const [posyandu] = await this.db
+            .select()
+            .from(posyandus)
+            .where(eq(posyandus.id, row.child.posyandu_id))
+            .limit(1)
+
+        const [latestNutrition] = await this.db
+            .select()
+            .from(nutritionRecords)
+            .where(eq(nutritionRecords.children_id, row.child.id))
+            .orderBy(desc(nutritionRecords.measurement_date))
+            .limit(1)
+
+        const [latestVitamin] = await this.db
+            .select()
+            .from(vitaminRecords)
+            .where(eq(vitaminRecords.children_id, row.child.id))
+            .orderBy(desc(vitaminRecords.created_at))
+            .limit(1)
+
+        return {
+            ...row.child,
+            mother_name: row.mother_name,
+            parent_user_id: row.parent_user_id,
+            posyandu_detail: posyandu,
+            latest_nutrition: latestNutrition,
+            latest_vitamin: latestVitamin
+        }
     }
 
     async findByIdentityNumber(
@@ -126,7 +236,7 @@ export class ChildrenRepository {
     }
 
     async findByParentId(parent_id: string): Promise<Children[]> {
-        const records = await this.db
+        return this.db
             .select({
                 id: childrens.id,
                 posyandu_id: childrens.posyandu_id,
@@ -156,8 +266,6 @@ export class ChildrenRepository {
                     sql`${childrens.deleted_at} IS NULL`
                 )
             )
-
-        return records
     }
 
     async update(
@@ -175,9 +283,7 @@ export class ChildrenRepository {
     async softDelete(public_id: string): Promise<Children | undefined> {
         const [child] = await this.db
             .update(childrens)
-            .set({
-                deleted_at: new Date()
-            })
+            .set({ deleted_at: new Date() })
             .where(eq(childrens.id, public_id))
             .returning()
         return child
@@ -194,9 +300,7 @@ export class ChildrenRepository {
     async restore(public_id: string): Promise<Children | undefined> {
         const [child] = await this.db
             .update(childrens)
-            .set({
-                deleted_at: null
-            })
+            .set({ deleted_at: null })
             .where(eq(childrens.id, public_id))
             .returning()
         return child
@@ -209,5 +313,31 @@ export class ChildrenRepository {
             .where(eq(childrens.identity_number, identity_number))
             .limit(1)
         return !!child
+    }
+
+    /**
+     * Menyimpan relasi ibu kandung ke tabel relation_childrens.
+     * parent_user_id adalah user.id dari ibu (tabel users).
+     * Method ini akan mencari parent profile lalu menyimpan ke relation_childrens.
+     */
+    async linkParent(children_id: string, parent_id: string): Promise<void> {
+        // parent_id di sini sudah berupa parents.id (profile ID), bukan user.id
+        // Hapus relasi existing untuk child ini dulu
+        await this.db
+            .delete(relationChildrens)
+            .where(eq(relationChildrens.children_id, children_id))
+
+        // Simpan relasi baru
+        await this.db.insert(relationChildrens).values({
+            parent_id: parent_id,
+            children_id: children_id,
+            relation: 'mother'
+        })
+    }
+
+    async unlinkParent(children_id: string): Promise<void> {
+        await this.db
+            .delete(relationChildrens)
+            .where(eq(relationChildrens.children_id, children_id))
     }
 }

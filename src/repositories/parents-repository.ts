@@ -83,10 +83,14 @@ export class ParentRepository {
         }
     }
 
-    async findById(public_id: string): Promise<Parent | undefined> {
-        return this.findByCondition(
-            and(eq(parents.id, public_id), eq(parents.status, 'active'))
-        )
+    async findById(
+        public_id: string,
+        includeDeleted = false
+    ): Promise<Parent | undefined> {
+        const condition = includeDeleted
+            ? eq(parents.id, public_id)
+            : and(eq(parents.id, public_id), eq(parents.status, 'active'))
+        return this.findByCondition(condition)
     }
 
     async findByUserId(user_id: string): Promise<Parent | undefined> {

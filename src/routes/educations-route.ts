@@ -30,6 +30,12 @@ router.post(
     '/',
     verifyAuth,
     authorizeRoles('admin', 'midwife', 'cadre'),
+    (req, res, next) => {
+        if (res.locals.user) {
+            req.body.created_by_user_id = res.locals.user.id
+        }
+        next()
+    },
     validateRequest({ body: createEducationSchema }),
     AsyncHandler(educationController.createEducation)
 )

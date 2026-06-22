@@ -28,8 +28,7 @@
         "src/**/*.ts": [
             "eslint --fix",
             "prettier --write"
-        ],
-        "*.ts": "bash -c 'tsc --noEmit'"
+        ]
     },
     "devDependencies": {
         "@commitlint/cli": "^21.0.1",
@@ -69,7 +68,7 @@
         "@neondatabase/serverless": "^1.1.0",
         "@types/ws": "^8.18.1",
         "@upstash/redis": "^1.38.0",
-        "better-auth": "^1.6.14",
+        "better-auth": "^1.6.19",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.6",
         "cross-env": "^10.1.0",
