@@ -1,3 +1,4 @@
+import { randomInt } from 'node:crypto'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewMidwife, Midwife } from '@/db'
 import {
@@ -22,8 +23,9 @@ export class MidwifeService {
             let uniqueNik = ''
             let isUsed = true
             while (isUsed) {
-                uniqueNik = Math.floor(
-                    1000000000000000 + Math.random() * 9000000000000000
+                uniqueNik = randomInt(
+                    1000000000000000,
+                    10000000000000000
                 ).toString()
                 isUsed =
                     await this.midwife_repository.existsByIdentityNumber(
