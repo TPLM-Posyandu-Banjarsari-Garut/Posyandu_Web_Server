@@ -32,7 +32,7 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
     validateRequest({ query: getPosyandusQuerySchema }),
     AsyncHandler(posyandu_controller.getPosyandus)
 )
@@ -40,7 +40,7 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
     validateRequest({ params: posyanduParamsSchema }),
     AsyncHandler(posyandu_controller.getPosyanduById)
 )
