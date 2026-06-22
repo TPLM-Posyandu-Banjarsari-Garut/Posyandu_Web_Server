@@ -29,23 +29,18 @@ export class ChildrenService {
         }
 
         // Pisahkan parent_user_id dari data bayi
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { parent_user_id, ...childData } = children_payload as any
+        const { parent_user_id, ...childData } = children_payload
         const child = await this.children_repository.create(childData)
 
         // Simpan relasi ke relation_childrens jika parent_user_id ada
         if (parent_user_id && this.parent_repository) {
             let parent =
                 await this.parent_repository.findByUserId(parent_user_id)
-            if (!parent) {
-                parent = await this.parent_repository.create({
-                    user_id: parent_user_id,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    rt: null as any,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    rw: null as any
-                })
-            }
+            parent ??= await this.parent_repository.create({
+                user_id: parent_user_id,
+                rt: null,
+                rw: null
+            })
             if (parent) {
                 await this.children_repository.linkParent(child.id, parent.id)
             }
@@ -65,8 +60,11 @@ export class ChildrenService {
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async getChildrenById(public_id: string): Promise<Children & any> {
+    async getChildrenById(
+        public_id: string
+    ): Promise<
+        Exclude<Awaited<ReturnType<ChildrenRepository['findById']>>, undefined>
+    > {
         const child = await this.children_repository.findById(public_id)
         if (!child) throw new Error('Children not found')
         return child
@@ -105,8 +103,7 @@ export class ChildrenService {
         }
 
         // Pisahkan parent_user_id dari data update
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { parent_user_id, ...childData } = children_payload as any
+        const { parent_user_id, ...childData } = children_payload
         const updated = await this.children_repository.update(
             public_id,
             childData
@@ -121,15 +118,11 @@ export class ChildrenService {
             } else {
                 let parent =
                     await this.parent_repository.findByUserId(parent_user_id)
-                if (!parent) {
-                    parent = await this.parent_repository.create({
-                        user_id: parent_user_id,
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        rt: null as any,
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        rw: null as any
-                    })
-                }
+                parent ??= await this.parent_repository.create({
+                    user_id: parent_user_id,
+                    rt: null,
+                    rw: null
+                })
                 if (parent) {
                     await this.children_repository.linkParent(
                         updated.id,

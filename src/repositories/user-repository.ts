@@ -12,6 +12,12 @@ export interface UserQueryFilters {
     order?: 'asc' | 'desc'
 }
 
+const roleTableMap = {
+    parent: parents,
+    midwife: midwifes,
+    cadre: cadres
+} as const
+
 export class UserRepository {
     constructor(private readonly db: NodePgDatabase) {}
 
@@ -178,21 +184,13 @@ export class UserRepository {
             // Delete sessions to immediately log out the soft-deleted user
             await tx.delete(sessions).where(eq(sessions.user_id, public_id))
 
-            if (user.role === 'parent') {
+            const targetTable =
+                roleTableMap[user.role as keyof typeof roleTableMap]
+            if (targetTable) {
                 await tx
-                    .update(parents)
+                    .update(targetTable)
                     .set({ status: 'inactive' })
-                    .where(eq(parents.user_id, public_id))
-            } else if (user.role === 'midwife') {
-                await tx
-                    .update(midwifes)
-                    .set({ status: 'inactive' })
-                    .where(eq(midwifes.user_id, public_id))
-            } else if (user.role === 'cadre') {
-                await tx
-                    .update(cadres)
-                    .set({ status: 'inactive' })
-                    .where(eq(cadres.user_id, public_id))
+                    .where(eq(targetTable.user_id, public_id))
             }
 
             return user
@@ -208,12 +206,12 @@ export class UserRepository {
                 .limit(1)
             if (!user) return undefined
 
-            if (user.role === 'parent') {
-                await tx.delete(parents).where(eq(parents.user_id, public_id))
-            } else if (user.role === 'midwife') {
-                await tx.delete(midwifes).where(eq(midwifes.user_id, public_id))
-            } else if (user.role === 'cadre') {
-                await tx.delete(cadres).where(eq(cadres.user_id, public_id))
+            const targetTable =
+                roleTableMap[user.role as keyof typeof roleTableMap]
+            if (targetTable) {
+                await tx
+                    .delete(targetTable)
+                    .where(eq(targetTable.user_id, public_id))
             }
 
             const [deleted] = await tx
@@ -233,21 +231,13 @@ export class UserRepository {
                 .returning()
             if (!user) return undefined
 
-            if (user.role === 'parent') {
+            const targetTable =
+                roleTableMap[user.role as keyof typeof roleTableMap]
+            if (targetTable) {
                 await tx
-                    .update(parents)
+                    .update(targetTable)
                     .set({ status: 'active' })
-                    .where(eq(parents.user_id, public_id))
-            } else if (user.role === 'midwife') {
-                await tx
-                    .update(midwifes)
-                    .set({ status: 'active' })
-                    .where(eq(midwifes.user_id, public_id))
-            } else if (user.role === 'cadre') {
-                await tx
-                    .update(cadres)
-                    .set({ status: 'active' })
-                    .where(eq(cadres.user_id, public_id))
+                    .where(eq(targetTable.user_id, public_id))
             }
 
             return user
