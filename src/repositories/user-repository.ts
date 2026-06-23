@@ -1,4 +1,5 @@
 import { NewUser, User, users, parents, midwifes, cadres, sessions } from '@/db'
+import { ApiError } from '@/utils/api-error'
 import {
     and,
     eq,
@@ -20,6 +21,13 @@ export interface UserQueryFilters {
     limit?: number
     includeDeleted?: boolean
     order?: 'asc' | 'desc'
+}
+
+export interface UserWithProfile extends User {
+    parent_id?: string | null
+    midwife_id?: string | null
+    cadre_id?: string | null
+    posyandu_id?: string | null
 }
 
 const roleTableMap = {
@@ -93,7 +101,6 @@ export class UserRepository {
         if (dataWithCount.length > 0) {
             totalItems = dataWithCount[0].total_count
         } else {
-            // Out of bounds page fallback: count the items separately
             const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(users)
@@ -140,6 +147,26 @@ export class UserRepository {
             .where(eq(users.id, public_id))
             .limit(1)
         return user
+    }
+
+    async findByIdWithProfile(
+        public_id: string
+    ): Promise<UserWithProfile | undefined> {
+        const [result] = await this.db
+            .select({
+                ...getTableColumns(users),
+                parent_id: parents.id,
+                midwife_id: midwifes.id,
+                cadre_id: cadres.id,
+                posyandu_id: sql<string>`COALESCE(${midwifes.posyandu_id}, ${cadres.posyandu_id})`
+            })
+            .from(users)
+            .leftJoin(parents, eq(users.id, parents.user_id))
+            .leftJoin(midwifes, eq(users.id, midwifes.user_id))
+            .leftJoin(cadres, eq(users.id, cadres.user_id))
+            .where(and(eq(users.id, public_id), eq(users.status, 'active')))
+            .limit(1)
+        return result
     }
 
     async findByName(name: string): Promise<User[]> {
@@ -207,16 +234,21 @@ export class UserRepository {
                 .returning()
             if (!user) return undefined
 
-            // Delete sessions to immediately log out the soft-deleted user
             await tx.delete(sessions).where(eq(sessions.user_id, public_id))
 
             const targetTable =
                 roleTableMap[user.role as keyof typeof roleTableMap]
             if (targetTable) {
-                await tx
+                const res = await tx
                     .update(targetTable)
                     .set({ status: 'inactive' })
                     .where(eq(targetTable.user_id, public_id))
+                    .returning()
+                if (res.length === 0) {
+                    throw ApiError.notFound(
+                        `Profile not found for user role: ${user.role}`
+                    )
+                }
             }
 
             return user
@@ -260,10 +292,16 @@ export class UserRepository {
             const targetTable =
                 roleTableMap[user.role as keyof typeof roleTableMap]
             if (targetTable) {
-                await tx
+                const res = await tx
                     .update(targetTable)
                     .set({ status: 'active' })
                     .where(eq(targetTable.user_id, public_id))
+                    .returning()
+                if (res.length === 0) {
+                    throw ApiError.notFound(
+                        `Profile not found for user role: ${user.role}`
+                    )
+                }
             }
 
             return user

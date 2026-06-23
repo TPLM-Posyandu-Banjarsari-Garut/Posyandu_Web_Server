@@ -1,3 +1,4 @@
+import { ApiError } from '@/utils/api-error'
 import { NewCadre, Cadre } from '@/db'
 import {
     CadreRepository,
@@ -15,7 +16,7 @@ export class CadreService {
         })
 
         if (checks.isAlreadyCadre) {
-            throw new Error('User is already a cadre in this posyandu')
+            throw ApiError.conflict('User is already a cadre in this posyandu')
         }
 
         return this.cadre_repository.create(cadre_payload)
@@ -34,7 +35,7 @@ export class CadreService {
 
     async getCadreById(public_id: string): Promise<Cadre> {
         const cadre = await this.cadre_repository.findById(public_id)
-        if (!cadre) throw new Error('Cadre not found')
+        if (!cadre) throw ApiError.notFound('Cadre not found')
         return cadre
     }
 
@@ -58,7 +59,9 @@ export class CadreService {
             })
 
             if (checks.isAlreadyCadre) {
-                throw new Error('User is already a cadre in this posyandu')
+                throw ApiError.conflict(
+                    'User is already a cadre in this posyandu'
+                )
             }
         }
 
@@ -66,7 +69,7 @@ export class CadreService {
             public_id,
             cadre_payload
         )
-        if (!updated) throw new Error('Failed to update cadre')
+        if (!updated) throw ApiError.badRequest('Failed to update cadre')
         return updated
     }
 
@@ -75,7 +78,7 @@ export class CadreService {
         is_permanent: boolean = false
     ): Promise<Cadre> {
         const existing = await this.cadre_repository.findById(public_id, true)
-        if (!existing) throw new Error('Cadre not found')
+        if (!existing) throw ApiError.notFound('Cadre not found')
 
         if (!is_permanent && existing.status === 'inactive') {
             return existing
@@ -85,13 +88,13 @@ export class CadreService {
             ? await this.cadre_repository.hardDelete(public_id)
             : await this.cadre_repository.softDelete(public_id)
 
-        if (!deleted) throw new Error('Failed to delete cadre')
+        if (!deleted) throw ApiError.badRequest('Failed to delete cadre')
         return deleted
     }
 
     async restoreCadre(public_id: string): Promise<Cadre> {
         const restored = await this.cadre_repository.restore(public_id)
-        if (!restored) throw new Error('Failed to restore cadre')
+        if (!restored) throw ApiError.badRequest('Failed to restore cadre')
         return restored
     }
 }

@@ -24,7 +24,7 @@ const controller = new ExaminationsController(service)
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ body: createExaminationSchema }),
     AsyncHandler(controller.createExamination)
 )
@@ -32,7 +32,13 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ query: getExaminationsQuerySchema }),
     AsyncHandler(controller.getExaminations)
 )
@@ -40,7 +46,13 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ params: examinationParamsSchema }),
     AsyncHandler(controller.getExaminationById)
 )
@@ -48,7 +60,7 @@ router.get(
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: examinationParamsSchema,
         body: updateExaminationSchema
@@ -59,7 +71,7 @@ router.put(
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: examinationParamsSchema,
         query: deleteExaminationQuerySchema
@@ -70,7 +82,7 @@ router.delete(
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ params: examinationParamsSchema }),
     AsyncHandler(controller.restoreExamination)
 )

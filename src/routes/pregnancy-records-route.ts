@@ -24,7 +24,7 @@ const controller = new PregnancyRecordsController(service)
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ body: createPregnancyRecordSchema }),
     AsyncHandler(controller.createPregnancyRecord)
 )
@@ -32,7 +32,13 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ query: getPregnancyRecordsQuerySchema }),
     AsyncHandler(controller.getPregnancyRecords)
 )
@@ -40,7 +46,13 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ params: pregnancyRecordParamsSchema }),
     AsyncHandler(controller.getPregnancyRecordById)
 )
@@ -48,7 +60,7 @@ router.get(
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: pregnancyRecordParamsSchema,
         body: updatePregnancyRecordSchema
@@ -59,7 +71,7 @@ router.put(
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: pregnancyRecordParamsSchema,
         query: deletePregnancyRecordQuerySchema
@@ -70,7 +82,7 @@ router.delete(
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ params: pregnancyRecordParamsSchema }),
     AsyncHandler(controller.restorePregnancyRecord)
 )

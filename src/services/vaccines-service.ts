@@ -1,3 +1,4 @@
+import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewVaccine, Vaccine } from '@/db'
 import {
@@ -15,10 +16,10 @@ export class VaccineService {
         })
 
         if (checks.nameExists) {
-            throw new Error('Vaccine name is already registered')
+            throw ApiError.conflict('Vaccine name is already registered')
         }
         if (checks.codeExists) {
-            throw new Error('Vaccine code is already registered')
+            throw ApiError.conflict('Vaccine code is already registered')
         }
 
         return this.vaccine_repository.create(vaccine_payload)
@@ -37,7 +38,7 @@ export class VaccineService {
 
     async getVaccineById(public_id: string): Promise<Vaccine> {
         const vaccine = await this.vaccine_repository.findById(public_id)
-        if (!vaccine) throw new Error('Vaccine not found')
+        if (!vaccine) throw ApiError.notFound('Vaccine not found')
         return vaccine
     }
 
@@ -61,12 +62,12 @@ export class VaccineService {
         })
 
         if (checks.nameExists) {
-            throw new Error(
+            throw ApiError.conflict(
                 'Vaccine name is already registered by another vaccine'
             )
         }
         if (checks.codeExists) {
-            throw new Error(
+            throw ApiError.conflict(
                 'Vaccine code is already registered by another vaccine'
             )
         }
@@ -75,7 +76,7 @@ export class VaccineService {
             public_id,
             vaccine_payload
         )
-        if (!updated) throw new Error('Failed to update vaccine')
+        if (!updated) throw ApiError.badRequest('Failed to update vaccine')
         return updated
     }
 
@@ -89,13 +90,13 @@ export class VaccineService {
             ? await this.vaccine_repository.hardDelete(public_id)
             : await this.vaccine_repository.softDelete(public_id)
 
-        if (!deleted) throw new Error('Failed to delete vaccine')
+        if (!deleted) throw ApiError.badRequest('Failed to delete vaccine')
         return deleted
     }
 
     async restoreVaccine(public_id: string): Promise<Vaccine> {
         const restored = await this.vaccine_repository.restore(public_id)
-        if (!restored) throw new Error('Failed to restore vaccine')
+        if (!restored) throw ApiError.badRequest('Failed to restore vaccine')
         return restored
     }
 }

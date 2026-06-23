@@ -28,7 +28,7 @@ const consultations_controller = new ConsultationsController(
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'parent'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'parent'),
     validateRequest({ body: createConsultationSchema }),
     AsyncHandler(consultations_controller.createBooking)
 )
@@ -36,7 +36,13 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ query: getConsultationsQuerySchema }),
     AsyncHandler(consultations_controller.getConsultations)
 )
@@ -44,7 +50,13 @@ router.get(
 router.get(
     '/slots/available',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ query: getAvailableSlotsQuerySchema }),
     AsyncHandler(consultations_controller.getAvailableSlots)
 )
@@ -52,7 +64,13 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ params: consultationParamsSchema }),
     AsyncHandler(consultations_controller.getConsultationById)
 )
@@ -60,7 +78,7 @@ router.get(
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'parent'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'parent'),
     validateRequest({
         params: consultationParamsSchema,
         body: updateConsultationSchema
@@ -71,7 +89,13 @@ router.put(
 router.put(
     '/:public_id/status',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({
         params: consultationParamsSchema,
         body: updateConsultationStatusSchema
@@ -82,7 +106,7 @@ router.put(
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'parent'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'parent'),
     validateRequest({
         params: consultationParamsSchema,
         query: deleteConsultationQuerySchema
@@ -93,7 +117,7 @@ router.delete(
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin', 'parent'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'parent'),
     validateRequest({ params: consultationParamsSchema }),
     AsyncHandler(consultations_controller.restoreBooking)
 )

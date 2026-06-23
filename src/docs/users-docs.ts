@@ -17,7 +17,7 @@ export const registerUsersRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/users',
         tags: USER_TAG,
-        summary: 'Create a new user [Roles: admin]',
+        summary: 'Create a new user [Roles: posyandu_admin, village_admin]',
         request: {
             body: {
                 content: { 'application/json': { schema: createUserSchema } }
@@ -33,7 +33,8 @@ export const registerUsersRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/users',
         tags: USER_TAG,
-        summary: 'Get list of users [Roles: admin, midwife, cadre]',
+        summary:
+            'Get list of users [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { query: getUsersQuerySchema },
         responses: {
             200: { description: 'Success get list of users' }
@@ -44,7 +45,8 @@ export const registerUsersRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/users/{public_id}',
         tags: USER_TAG,
-        summary: 'Get user by public ID [Roles: admin, midwife, cadre, parent]',
+        summary:
+            'Get user by public ID [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { params: userParamsSchema },
         responses: {
             200: { description: 'Success get user detail' },
@@ -56,7 +58,7 @@ export const registerUsersRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/users/{public_id}',
         tags: USER_TAG,
-        summary: 'Update user data [Roles: admin]',
+        summary: 'Update user data [Roles: posyandu_admin, village_admin]',
         request: {
             params: userParamsSchema,
             body: {
@@ -74,7 +76,7 @@ export const registerUsersRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/users/{public_id}',
         tags: USER_TAG,
-        summary: 'Delete user [Roles: admin]',
+        summary: 'Delete user [Roles: posyandu_admin, village_admin]',
         request: { params: userParamsSchema, query: deleteUserQuerySchema },
         responses: {
             200: { description: 'User deleted successfully' },
@@ -86,7 +88,8 @@ export const registerUsersRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/users/{public_id}/restore',
         tags: USER_TAG,
-        summary: 'Restore soft-deleted user [Roles: admin]',
+        summary:
+            'Restore soft-deleted user [Roles: posyandu_admin, village_admin]',
         request: { params: userParamsSchema },
         responses: {
             200: { description: 'User restored successfully' },

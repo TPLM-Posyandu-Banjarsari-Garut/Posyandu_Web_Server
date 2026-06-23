@@ -24,7 +24,8 @@ export const registerConsultationsRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/consultations',
         tags: TAG,
-        summary: 'Create a new consultation booking [Roles: admin, parent]',
+        summary:
+            'Create a new consultation booking [Roles: posyandu_admin, village_admin, parent]',
         request: {
             body: {
                 content: {
@@ -43,7 +44,7 @@ export const registerConsultationsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/consultations',
         tags: TAG,
         summary:
-            'Get list of consultations [Roles: admin, midwife, cadre, parent]',
+            'Get list of consultations [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { query: getConsultationsQuerySchema },
         responses: {
             200: { description: 'Success retrieve list of consultations' }
@@ -55,7 +56,7 @@ export const registerConsultationsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/consultations/slots/available',
         tags: TAG,
         summary:
-            'Get available time slots [Roles: admin, midwife, cadre, parent]',
+            'Get available time slots [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { query: getAvailableSlotsQuerySchema },
         responses: {
             200: { description: 'Success retrieve available time slots' },
@@ -68,7 +69,7 @@ export const registerConsultationsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/consultations/{public_id}',
         tags: TAG,
         summary:
-            'Get consultation by public ID [Roles: admin, midwife, cadre, parent]',
+            'Get consultation by public ID [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { params: consultationParamsSchema },
         responses: {
             200: { description: 'Success get consultation detail' },
@@ -80,7 +81,8 @@ export const registerConsultationsRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/consultations/{public_id}',
         tags: TAG,
-        summary: 'Update consultation booking [Roles: admin, parent]',
+        summary:
+            'Update consultation booking [Roles: posyandu_admin, village_admin, parent]',
         request: {
             params: consultationParamsSchema,
             body: {
@@ -101,7 +103,7 @@ export const registerConsultationsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/consultations/{public_id}/status',
         tags: TAG,
         summary:
-            'Update consultation status [Roles: admin, midwife, cadre, parent]',
+            'Update consultation status [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: {
             params: consultationParamsSchema,
             body: {
@@ -123,7 +125,8 @@ export const registerConsultationsRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/consultations/{public_id}',
         tags: TAG,
-        summary: 'Delete consultation [Roles: admin, parent]',
+        summary:
+            'Delete consultation [Roles: posyandu_admin, village_admin, parent]',
         request: {
             params: consultationParamsSchema,
             query: deleteConsultationQuerySchema
@@ -138,7 +141,8 @@ export const registerConsultationsRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/consultations/{public_id}/restore',
         tags: TAG,
-        summary: 'Restore soft-deleted consultation [Roles: admin, parent]',
+        summary:
+            'Restore soft-deleted consultation [Roles: posyandu_admin, village_admin, parent]',
         request: { params: consultationParamsSchema },
         responses: {
             200: { description: 'Consultation restored successfully' },

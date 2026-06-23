@@ -17,7 +17,8 @@ export const registerVitaminsRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/vitamins',
         tags: VIT_TAG,
-        summary: 'Create a new vitamin [Roles: admin, midwife, cadre]',
+        summary:
+            'Create a new vitamin [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             body: {
                 content: {
@@ -35,7 +36,8 @@ export const registerVitaminsRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/vitamins',
         tags: VIT_TAG,
-        summary: 'Get list of vitamins [Roles: admin, midwife, cadre, parent]',
+        summary:
+            'Get list of vitamins [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { query: getVitaminsQuerySchema },
         responses: {
             200: { description: 'Success get list of vitamins' }
@@ -47,7 +49,7 @@ export const registerVitaminsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/vitamins/{public_id}',
         tags: VIT_TAG,
         summary:
-            'Get vitamin by public ID [Roles: admin, midwife, cadre, parent]',
+            'Get vitamin by public ID [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { params: vitaminParamsSchema },
         responses: {
             200: { description: 'Success get vitamin detail' },
@@ -59,7 +61,8 @@ export const registerVitaminsRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/vitamins/{public_id}',
         tags: VIT_TAG,
-        summary: 'Update vitamin data [Roles: admin, midwife, cadre]',
+        summary:
+            'Update vitamin data [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: vitaminParamsSchema,
             body: {
@@ -79,7 +82,8 @@ export const registerVitaminsRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/vitamins/{public_id}',
         tags: VIT_TAG,
-        summary: 'Delete vitamin [Roles: admin, midwife, cadre]',
+        summary:
+            'Delete vitamin [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: vitaminParamsSchema,
             query: deleteVitaminQuerySchema
@@ -94,7 +98,8 @@ export const registerVitaminsRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/vitamins/{public_id}/restore',
         tags: VIT_TAG,
-        summary: 'Restore soft-deleted vitamin [Roles: admin, midwife, cadre]',
+        summary:
+            'Restore soft-deleted vitamin [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { params: vitaminParamsSchema },
         responses: {
             200: { description: 'Vitamin restored successfully' },

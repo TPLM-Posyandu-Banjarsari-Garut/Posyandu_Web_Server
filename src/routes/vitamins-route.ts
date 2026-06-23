@@ -24,7 +24,7 @@ const vitamin_controller = new VitaminController(vitamin_service)
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ body: createVitaminSchema }),
     AsyncHandler(vitamin_controller.createVitamin)
 )
@@ -32,7 +32,13 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ query: getVitaminsQuerySchema }),
     AsyncHandler(vitamin_controller.getVitamins)
 )
@@ -40,7 +46,13 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ params: vitaminParamsSchema }),
     AsyncHandler(vitamin_controller.getVitaminById)
 )
@@ -48,7 +60,7 @@ router.get(
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: vitaminParamsSchema,
         body: updateVitaminSchema
@@ -59,7 +71,7 @@ router.put(
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: vitaminParamsSchema,
         query: deleteVitaminQuerySchema
@@ -70,7 +82,7 @@ router.delete(
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ params: vitaminParamsSchema }),
     AsyncHandler(vitamin_controller.restoreVitamin)
 )

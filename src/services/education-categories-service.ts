@@ -1,3 +1,4 @@
+import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewEducationCategory, EducationCategory } from '@/db'
 import {
@@ -13,12 +14,11 @@ export class EducationCategoryService {
     async createCategory(
         payload: NewEducationCategory
     ): Promise<EducationCategory> {
-        // Check if slug or name already exists
         const existingCategory = await this.categoryRepository.findBySlug(
             payload.slug
         )
         if (existingCategory) {
-            throw new Error('Category with this slug already exists')
+            throw ApiError.conflict('Category with this slug already exists')
         }
 
         return this.categoryRepository.create(payload)
@@ -37,7 +37,7 @@ export class EducationCategoryService {
 
     async getCategoryById(public_id: string): Promise<EducationCategory> {
         const category = await this.categoryRepository.findById(public_id)
-        if (!category) throw new Error('Education category not found')
+        if (!category) throw ApiError.notFound('Education category not found')
         return category
     }
 
@@ -52,12 +52,15 @@ export class EducationCategoryService {
                 payload.slug
             )
             if (existingCategory && existingCategory.id !== public_id) {
-                throw new Error('Category with this slug already exists')
+                throw ApiError.conflict(
+                    'Category with this slug already exists'
+                )
             }
         }
 
         const updated = await this.categoryRepository.update(public_id, payload)
-        if (!updated) throw new Error('Failed to update education category')
+        if (!updated)
+            throw ApiError.badRequest('Failed to update education category')
         return updated
     }
 
@@ -71,13 +74,15 @@ export class EducationCategoryService {
             ? await this.categoryRepository.hardDelete(public_id)
             : await this.categoryRepository.softDelete(public_id)
 
-        if (!deleted) throw new Error('Failed to delete education category')
+        if (!deleted)
+            throw ApiError.badRequest('Failed to delete education category')
         return deleted
     }
 
     async restoreCategory(public_id: string): Promise<EducationCategory> {
         const restored = await this.categoryRepository.restore(public_id)
-        if (!restored) throw new Error('Failed to restore education category')
+        if (!restored)
+            throw ApiError.badRequest('Failed to restore education category')
         return restored
     }
 }

@@ -1,3 +1,4 @@
+import { ApiError } from '@/utils/api-error'
 import { randomInt } from 'node:crypto'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewMidwife, Midwife } from '@/db'
@@ -38,13 +39,15 @@ export class MidwifeService {
         })
 
         if (checks.userExists) {
-            throw new Error('User is already registered as a midwife')
+            throw ApiError.conflict('User is already registered as a midwife')
         }
         if (checks.identityExists) {
-            throw new Error('Identity number (NIK) is already registered')
+            throw ApiError.badRequest(
+                'Identity number (NIK) is already registered'
+            )
         }
         if (checks.licenseExists) {
-            throw new Error('STR number is already registered')
+            throw ApiError.conflict('STR number is already registered')
         }
 
         return this.midwife_repository.create(midwife_payload)
@@ -63,7 +66,7 @@ export class MidwifeService {
 
     async getMidwifeById(public_id: string): Promise<Midwife> {
         const midwife = await this.midwife_repository.findById(public_id)
-        if (!midwife) throw new Error('Midwife not found')
+        if (!midwife) throw ApiError.notFound('Midwife not found')
         return midwife
     }
 
@@ -94,15 +97,15 @@ export class MidwifeService {
         })
 
         if (checks.userExists) {
-            throw new Error('User is already registered as a midwife')
+            throw ApiError.conflict('User is already registered as a midwife')
         }
         if (checks.identityExists) {
-            throw new Error(
+            throw ApiError.badRequest(
                 'Identity number (NIK) is already registered by another midwife'
             )
         }
         if (checks.licenseExists) {
-            throw new Error(
+            throw ApiError.conflict(
                 'STR number is already registered by another midwife'
             )
         }
@@ -111,7 +114,7 @@ export class MidwifeService {
             public_id,
             midwife_payload
         )
-        if (!updated) throw new Error('Failed to update midwife')
+        if (!updated) throw ApiError.badRequest('Failed to update midwife')
         return updated
     }
 
@@ -120,7 +123,7 @@ export class MidwifeService {
         is_permanent: boolean = false
     ): Promise<Midwife> {
         const existing = await this.midwife_repository.findById(public_id, true)
-        if (!existing) throw new Error('Midwife not found')
+        if (!existing) throw ApiError.notFound('Midwife not found')
 
         if (!is_permanent && existing.status === 'inactive') {
             return existing
@@ -130,13 +133,13 @@ export class MidwifeService {
             ? await this.midwife_repository.hardDelete(public_id)
             : await this.midwife_repository.softDelete(public_id)
 
-        if (!deleted) throw new Error('Failed to delete midwife')
+        if (!deleted) throw ApiError.badRequest('Failed to delete midwife')
         return deleted
     }
 
     async restoreMidwife(public_id: string): Promise<Midwife> {
         const restored = await this.midwife_repository.restore(public_id)
-        if (!restored) throw new Error('Failed to restore midwife')
+        if (!restored) throw ApiError.badRequest('Failed to restore midwife')
         return restored
     }
 }

@@ -1,3 +1,4 @@
+import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewVitamin, Vitamin } from '@/db'
 import {
@@ -13,7 +14,7 @@ export class VitaminService {
             name: vitamin_payload.name || undefined
         })
         if (checks.nameExists) {
-            throw new Error('Vitamin name is already registered')
+            throw ApiError.conflict('Vitamin name is already registered')
         }
 
         return this.vitamin_repository.create(vitamin_payload)
@@ -32,7 +33,7 @@ export class VitaminService {
 
     async getVitaminById(public_id: string): Promise<Vitamin> {
         const vitamin = await this.vitamin_repository.findById(public_id)
-        if (!vitamin) throw new Error('Vitamin not found')
+        if (!vitamin) throw ApiError.notFound('Vitamin not found')
         return vitamin
     }
 
@@ -51,7 +52,7 @@ export class VitaminService {
         })
 
         if (checks.nameExists) {
-            throw new Error(
+            throw ApiError.conflict(
                 'Vitamin name is already registered by another vitamin'
             )
         }
@@ -60,7 +61,7 @@ export class VitaminService {
             public_id,
             vitamin_payload
         )
-        if (!updated) throw new Error('Failed to update vitamin')
+        if (!updated) throw ApiError.badRequest('Failed to update vitamin')
         return updated
     }
 
@@ -74,13 +75,13 @@ export class VitaminService {
             ? await this.vitamin_repository.hardDelete(public_id)
             : await this.vitamin_repository.softDelete(public_id)
 
-        if (!deleted) throw new Error('Failed to delete vitamin')
+        if (!deleted) throw ApiError.badRequest('Failed to delete vitamin')
         return deleted
     }
 
     async restoreVitamin(public_id: string): Promise<Vitamin> {
         const restored = await this.vitamin_repository.restore(public_id)
-        if (!restored) throw new Error('Failed to restore vitamin')
+        if (!restored) throw ApiError.badRequest('Failed to restore vitamin')
         return restored
     }
 }

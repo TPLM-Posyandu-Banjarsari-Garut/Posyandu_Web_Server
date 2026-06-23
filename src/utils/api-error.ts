@@ -1,8 +1,8 @@
 import { STATUS_CODES, StatusCode } from '@/constants/status-codes'
 
 export class ApiError extends Error {
-    static internal(arg0: string) {
-        throw new Error('Method not implemented.')
+    static internal(message = 'Internal Server Error') {
+        return ApiError.server(message)
     }
     public readonly statusCode: StatusCode
     public readonly isOperational: boolean

@@ -10,6 +10,7 @@ export const ACCOUNT_STATUS_VALUES = [
 ] as const
 
 export const ACCOUNT_ROLE_VALUES = [
+    'admin',
     'posyandu_admin',
     'village_admin',
     'parent',

@@ -24,7 +24,7 @@ const posyandu_controller = new PosyanduController(posyandu_service)
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('admin'),
+    authorizeRoles('posyandu_admin', 'village_admin'),
     validateRequest({ body: createPosyanduSchema }),
     AsyncHandler(posyandu_controller.createPosyandu)
 )
@@ -32,7 +32,7 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ query: getPosyandusQuerySchema }),
     AsyncHandler(posyandu_controller.getPosyandus)
 )
@@ -40,7 +40,7 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ params: posyanduParamsSchema }),
     AsyncHandler(posyandu_controller.getPosyanduById)
 )
@@ -48,7 +48,7 @@ router.get(
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin'),
+    authorizeRoles('posyandu_admin', 'village_admin'),
     validateRequest({
         params: posyanduParamsSchema,
         body: updatePosyanduSchema
@@ -59,7 +59,7 @@ router.put(
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin'),
+    authorizeRoles('posyandu_admin', 'village_admin'),
     validateRequest({
         params: posyanduParamsSchema,
         query: deletePosyanduQuerySchema
@@ -70,7 +70,7 @@ router.delete(
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin'),
+    authorizeRoles('posyandu_admin', 'village_admin'),
     validateRequest({ params: posyanduParamsSchema }),
     AsyncHandler(posyandu_controller.restorePosyandu)
 )

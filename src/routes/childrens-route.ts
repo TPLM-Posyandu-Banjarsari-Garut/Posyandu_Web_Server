@@ -29,7 +29,13 @@ const children_controller = new ChildrenController(children_service)
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'parent', 'cadre', 'midwife'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'parent',
+        'cadre',
+        'midwife'
+    ),
     validateRequest({ body: createChildSchema }),
     AsyncHandler(children_controller.createChildren)
 )
@@ -37,7 +43,13 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'parent', 'cadre', 'midwife'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'parent',
+        'cadre',
+        'midwife'
+    ),
     validateRequest({ query: getChildrenQuerySchema }),
     AsyncHandler(children_controller.getChildrens)
 )
@@ -45,7 +57,13 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'parent', 'cadre', 'midwife'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'parent',
+        'cadre',
+        'midwife'
+    ),
     validateRequest({ params: childParamsSchema }),
     AsyncHandler(children_controller.getChildrenById)
 )
@@ -53,7 +71,13 @@ router.get(
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'parent', 'cadre', 'midwife'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'parent',
+        'cadre',
+        'midwife'
+    ),
     validateRequest({
         params: childParamsSchema,
         body: updateChildSchema
@@ -64,7 +88,13 @@ router.put(
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'parent', 'cadre', 'midwife'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'parent',
+        'cadre',
+        'midwife'
+    ),
     validateRequest({
         params: childParamsSchema,
         query: deleteChildQuerySchema
@@ -75,7 +105,13 @@ router.delete(
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin', 'parent', 'cadre', 'midwife'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'parent',
+        'cadre',
+        'midwife'
+    ),
     validateRequest({ params: childParamsSchema }),
     AsyncHandler(children_controller.restoreChildren)
 )
