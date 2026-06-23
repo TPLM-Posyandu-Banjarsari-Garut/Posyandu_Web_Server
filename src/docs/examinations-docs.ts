@@ -18,7 +18,7 @@ export const registerExaminationsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/examinations',
         tags: TAG,
         summary:
-            'Create a new examination template [Roles: admin, midwife, cadre]',
+            'Create a new examination template [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             body: {
                 content: {
@@ -37,7 +37,7 @@ export const registerExaminationsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/examinations',
         tags: TAG,
         summary:
-            'Get list of examination templates [Roles: admin, midwife, cadre, parent]',
+            'Get list of examination templates [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { query: getExaminationsQuerySchema },
         responses: {
             200: {
@@ -51,7 +51,7 @@ export const registerExaminationsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/examinations/{public_id}',
         tags: TAG,
         summary:
-            'Get examination template by ID [Roles: admin, midwife, cadre, parent]',
+            'Get examination template by ID [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { params: examinationParamsSchema },
         responses: {
             200: { description: 'Success get examination template detail' },
@@ -63,7 +63,8 @@ export const registerExaminationsRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/examinations/{public_id}',
         tags: TAG,
-        summary: 'Update examination template [Roles: admin, midwife, cadre]',
+        summary:
+            'Update examination template [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: examinationParamsSchema,
             body: {
@@ -83,7 +84,8 @@ export const registerExaminationsRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/examinations/{public_id}',
         tags: TAG,
-        summary: 'Delete examination template [Roles: admin, midwife, cadre]',
+        summary:
+            'Delete examination template [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: examinationParamsSchema,
             query: deleteExaminationQuerySchema
@@ -99,7 +101,7 @@ export const registerExaminationsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/examinations/{public_id}/restore',
         tags: TAG,
         summary:
-            'Restore soft-deleted examination template [Roles: admin, midwife, cadre]',
+            'Restore soft-deleted examination template [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { params: examinationParamsSchema },
         responses: {
             200: { description: 'Examination template restored successfully' },

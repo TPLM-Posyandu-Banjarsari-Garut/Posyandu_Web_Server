@@ -1,3 +1,4 @@
+import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewChildren, Children } from '@/db'
 import {
@@ -12,11 +13,6 @@ export class ChildrenService {
         private readonly parent_repository?: ParentRepository
     ) {}
 
-    /**
-     * Buat data bayi baru.
-     * Jika parent_user_id diberikan (user.id ibu), akan dicari parent profile-nya
-     * lalu disimpan relasinya ke tabel relation_childrens.
-     */
     async createChildren(
         children_payload: NewChildren & { parent_user_id?: string | null }
     ): Promise<Children> {
@@ -24,14 +20,14 @@ export class ChildrenService {
             identity_number: children_payload.identity_number || undefined
         })
         if (checks.identityExists) {
-            throw new Error('Identity number (NIK) is already registered')
+            throw ApiError.badRequest(
+                'Identity number (NIK) is already registered'
+            )
         }
 
-        // Pisahkan parent_user_id dari data bayi
         const { parent_user_id, ...childData } = children_payload
         const child = await this.children_repository.create(childData)
 
-        // Simpan relasi ke relation_childrens jika parent_user_id ada
         if (parent_user_id && this.parent_repository) {
             let parent =
                 await this.parent_repository.findByUserId(parent_user_id)
@@ -65,7 +61,7 @@ export class ChildrenService {
         Exclude<Awaited<ReturnType<ChildrenRepository['findById']>>, undefined>
     > {
         const child = await this.children_repository.findById(public_id)
-        if (!child) throw new Error('Children not found')
+        if (!child) throw ApiError.notFound('Children not found')
         return child
     }
 
@@ -73,11 +69,6 @@ export class ChildrenService {
         return this.children_repository.findByParentId(parent_id)
     }
 
-    /**
-     * Update data bayi.
-     * Jika parent_user_id diberikan (user.id ibu), relasi akan diperbarui.
-     * Jika parent_user_id null/undefined, relasi tidak diubah.
-     */
     async updateChildren(
         public_id: string,
         children_payload: Partial<NewChildren> & {
@@ -96,23 +87,21 @@ export class ChildrenService {
         })
 
         if (checks.identityExists) {
-            throw new Error(
+            throw ApiError.badRequest(
                 'Identity number (NIK) is already registered by another child'
             )
         }
 
-        // Pisahkan parent_user_id dari data update
         const { parent_user_id, ...childData } = children_payload
         const updated = await this.children_repository.update(
             public_id,
             childData
         )
-        if (!updated) throw new Error('Failed to update children data')
+        if (!updated)
+            throw ApiError.badRequest('Failed to update children data')
 
-        // Update relasi ke relation_childrens jika parent_user_id diberikan
         if (parent_user_id !== undefined && this.parent_repository) {
             if (parent_user_id === null || parent_user_id === '') {
-                // Hapus relasi jika dikirimkan null/empty
                 await this.children_repository.unlinkParent(public_id)
             } else {
                 let parent =
@@ -142,7 +131,7 @@ export class ChildrenService {
             public_id,
             true
         )
-        if (!existing) throw new Error('Children not found')
+        if (!existing) throw ApiError.notFound('Children not found')
 
         if (!is_permanent && existing.deleted_at !== null) {
             return existing
@@ -152,13 +141,15 @@ export class ChildrenService {
             ? await this.children_repository.hardDelete(public_id)
             : await this.children_repository.softDelete(public_id)
 
-        if (!deleted) throw new Error('Failed to delete children data')
+        if (!deleted)
+            throw ApiError.badRequest('Failed to delete children data')
         return deleted
     }
 
     async restoreChildren(public_id: string): Promise<Children> {
         const restored = await this.children_repository.restore(public_id)
-        if (!restored) throw new Error('Failed to restore children data')
+        if (!restored)
+            throw ApiError.badRequest('Failed to restore children data')
         return restored
     }
 
@@ -172,7 +163,7 @@ export class ChildrenService {
         const hasAccess = parentChildren.some(child => child.id === public_id)
 
         if (!hasAccess) {
-            throw new Error(
+            throw ApiError.badRequest(
                 'Unauthorized access: This children record does not belong to the user'
             )
         }

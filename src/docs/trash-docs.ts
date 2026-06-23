@@ -12,7 +12,7 @@ export const registerTrashRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/trash',
         tags: TRASH_TAG,
         summary:
-            'Get list of deleted/inactive items from trash bin [Roles: admin]',
+            'Get list of deleted/inactive items from trash bin [Roles: posyandu_admin, village_admin]',
         request: { query: getTrashQuerySchema },
         responses: {
             200: { description: 'Success get list of deleted items' },
@@ -26,7 +26,7 @@ export const registerTrashRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/trash/{type}/{public_id}/restore',
         tags: TRASH_TAG,
         summary:
-            'Restore a deleted/inactive item from trash bin [Roles: admin]',
+            'Restore a deleted/inactive item from trash bin [Roles: posyandu_admin, village_admin]',
         request: { params: restoreParamsSchema },
         responses: {
             200: { description: 'Item restored successfully' },

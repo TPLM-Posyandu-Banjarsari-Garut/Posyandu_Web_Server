@@ -17,7 +17,8 @@ export const registerMidwifesRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/midwifes',
         tags: MIDWIFE_TAG,
-        summary: 'Create a new midwife [Roles: admin, midwife]',
+        summary:
+            'Create a new midwife [Roles: posyandu_admin, village_admin, midwife]',
         request: {
             body: {
                 content: { 'application/json': { schema: createMidwifeSchema } }
@@ -33,7 +34,8 @@ export const registerMidwifesRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/midwifes',
         tags: MIDWIFE_TAG,
-        summary: 'Get list of midwife [Roles: admin, midwife]',
+        summary:
+            'Get list of midwife [Roles: posyandu_admin, village_admin, midwife]',
         request: { query: getMidwifesQuerySchema },
         responses: {
             200: { description: 'Success get list of midwife' }
@@ -44,7 +46,8 @@ export const registerMidwifesRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/midwifes/{public_id}',
         tags: MIDWIFE_TAG,
-        summary: 'Get midwife by public ID [Roles: admin, midwife]',
+        summary:
+            'Get midwife by public ID [Roles: posyandu_admin, village_admin, midwife]',
         request: { params: midwifeParamsSchema },
         responses: {
             200: { description: 'Success get midwife detail' },
@@ -56,7 +59,8 @@ export const registerMidwifesRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/midwifes/{public_id}',
         tags: MIDWIFE_TAG,
-        summary: 'Update midwife data [Roles: admin, midwife]',
+        summary:
+            'Update midwife data [Roles: posyandu_admin, village_admin, midwife]',
         request: {
             params: midwifeParamsSchema,
             body: {
@@ -74,7 +78,8 @@ export const registerMidwifesRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/midwifes/{public_id}',
         tags: MIDWIFE_TAG,
-        summary: 'Delete midwife [Roles: admin, midwife]',
+        summary:
+            'Delete midwife [Roles: posyandu_admin, village_admin, midwife]',
         request: {
             params: midwifeParamsSchema,
             query: deleteMidwifeQuerySchema
@@ -89,7 +94,8 @@ export const registerMidwifesRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/midwifes/{public_id}/restore',
         tags: MIDWIFE_TAG,
-        summary: 'Restore soft-deleted midwife [Roles: admin, midwife]',
+        summary:
+            'Restore soft-deleted midwife [Roles: posyandu_admin, village_admin, midwife]',
         request: { params: midwifeParamsSchema },
         responses: {
             200: { description: 'Midwife restored successfully' },

@@ -1,3 +1,4 @@
+import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewEducation, Education } from '@/db'
 import {
@@ -13,12 +14,11 @@ export class EducationService {
     ) {}
 
     async createEducation(payload: NewEducation): Promise<Education> {
-        // Validate category exists
         const category = await this.categoryRepository.findById(
             payload.category_id
         )
         if (!category) {
-            throw new Error('Education category not found')
+            throw ApiError.notFound('Education category not found')
         }
 
         return this.educationRepository.create(payload)
@@ -45,7 +45,7 @@ export class EducationService {
         } else {
             education = await this.educationRepository.findById(public_id)
         }
-        if (!education) throw new Error('Education article not found')
+        if (!education) throw ApiError.notFound('Education article not found')
         return education
     }
 
@@ -60,7 +60,7 @@ export class EducationService {
                 payload.category_id
             )
             if (!category) {
-                throw new Error('Education category not found')
+                throw ApiError.notFound('Education category not found')
             }
         }
 
@@ -68,7 +68,8 @@ export class EducationService {
             public_id,
             payload
         )
-        if (!updated) throw new Error('Failed to update education article')
+        if (!updated)
+            throw ApiError.badRequest('Failed to update education article')
         return updated
     }
 
@@ -80,7 +81,7 @@ export class EducationService {
             public_id,
             true
         )
-        if (!existing) throw new Error('Education article not found')
+        if (!existing) throw ApiError.notFound('Education article not found')
 
         if (!isPermanent && existing.status === 'inactive') {
             return existing
@@ -90,13 +91,15 @@ export class EducationService {
             ? await this.educationRepository.hardDelete(public_id)
             : await this.educationRepository.softDelete(public_id)
 
-        if (!deleted) throw new Error('Failed to delete education article')
+        if (!deleted)
+            throw ApiError.badRequest('Failed to delete education article')
         return deleted
     }
 
     async restoreEducation(public_id: string): Promise<Education> {
         const restored = await this.educationRepository.restore(public_id)
-        if (!restored) throw new Error('Failed to restore education article')
+        if (!restored)
+            throw ApiError.badRequest('Failed to restore education article')
         return restored
     }
 }

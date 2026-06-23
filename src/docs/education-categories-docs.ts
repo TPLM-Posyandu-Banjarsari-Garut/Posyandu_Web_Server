@@ -26,7 +26,7 @@ export const registerEducationCategoriesRoutes = (
         path: '/api/education-categories',
         tags: CAT_TAG,
         summary:
-            'Create a new education category [Roles: admin, midwife, cadre]',
+            'Create a new education category [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             body: {
                 content: {
@@ -47,7 +47,7 @@ export const registerEducationCategoriesRoutes = (
         path: '/api/education-categories',
         tags: CAT_TAG,
         summary:
-            'Get list of education categories [Roles: admin, midwife, cadre, parent]',
+            'Get list of education categories [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { query: getEducationCategoriesQuerySchema },
         responses: {
             200: { description: 'Success get list of categories' }
@@ -59,7 +59,7 @@ export const registerEducationCategoriesRoutes = (
         path: '/api/education-categories/{public_id}',
         tags: CAT_TAG,
         summary:
-            'Get category by public ID [Roles: admin, midwife, cadre, parent]',
+            'Get category by public ID [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { params: educationCategoryParamsSchema },
         responses: {
             200: { description: 'Success get category detail' },
@@ -71,7 +71,8 @@ export const registerEducationCategoriesRoutes = (
         method: 'put',
         path: '/api/education-categories/{public_id}',
         tags: CAT_TAG,
-        summary: 'Update category data [Roles: admin, midwife, cadre]',
+        summary:
+            'Update category data [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: educationCategoryParamsSchema,
             body: {
@@ -93,7 +94,8 @@ export const registerEducationCategoriesRoutes = (
         method: 'delete',
         path: '/api/education-categories/{public_id}',
         tags: CAT_TAG,
-        summary: 'Delete category [Roles: admin, midwife, cadre]',
+        summary:
+            'Delete category [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: educationCategoryParamsSchema,
             query: deleteEducationCategoryQuerySchema
@@ -108,7 +110,8 @@ export const registerEducationCategoriesRoutes = (
         method: 'post',
         path: '/api/education-categories/{public_id}/restore',
         tags: CAT_TAG,
-        summary: 'Restore soft-deleted category [Roles: admin, midwife, cadre]',
+        summary:
+            'Restore soft-deleted category [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { params: educationCategoryParamsSchema },
         responses: {
             200: { description: 'Category restored successfully' },

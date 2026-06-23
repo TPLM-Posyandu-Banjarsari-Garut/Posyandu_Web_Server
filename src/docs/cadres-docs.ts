@@ -17,7 +17,8 @@ export const registerCadresRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/cadres',
         tags: CADRE_TAG,
-        summary: 'Create a new cadre [Roles: admin, cadre]',
+        summary:
+            'Create a new cadre [Roles: posyandu_admin, village_admin, cadre]',
         request: {
             body: {
                 content: { 'application/json': { schema: createCadreSchema } }
@@ -33,7 +34,8 @@ export const registerCadresRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/cadres',
         tags: CADRE_TAG,
-        summary: 'Get list of cadres [Roles: admin, cadre]',
+        summary:
+            'Get list of cadres [Roles: posyandu_admin, village_admin, cadre]',
         request: { query: getCadresQuerySchema },
         responses: {
             200: { description: 'Success get list of cadres' }
@@ -44,7 +46,8 @@ export const registerCadresRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/cadres/{public_id}',
         tags: CADRE_TAG,
-        summary: 'Get cadre by public ID [Roles: admin, cadre]',
+        summary:
+            'Get cadre by public ID [Roles: posyandu_admin, village_admin, cadre]',
         request: { params: cadreParamsSchema },
         responses: {
             200: { description: 'Success get cadre detail' },
@@ -56,7 +59,8 @@ export const registerCadresRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/cadres/{public_id}',
         tags: CADRE_TAG,
-        summary: 'Update cadre data [Roles: admin, cadre]',
+        summary:
+            'Update cadre data [Roles: posyandu_admin, village_admin, cadre]',
         request: {
             params: cadreParamsSchema,
             body: {
@@ -74,7 +78,7 @@ export const registerCadresRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/cadres/{public_id}',
         tags: CADRE_TAG,
-        summary: 'Delete cadre [Roles: admin, cadre]',
+        summary: 'Delete cadre [Roles: posyandu_admin, village_admin, cadre]',
         request: { params: cadreParamsSchema, query: deleteCadreQuerySchema },
         responses: {
             200: { description: 'Cadre deleted successfully' },
@@ -86,7 +90,8 @@ export const registerCadresRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/cadres/{public_id}/restore',
         tags: CADRE_TAG,
-        summary: 'Restore soft-deleted cadre [Roles: admin, cadre]',
+        summary:
+            'Restore soft-deleted cadre [Roles: posyandu_admin, village_admin, cadre]',
         request: { params: cadreParamsSchema },
         responses: {
             200: { description: 'Cadre restored successfully' },

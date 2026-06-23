@@ -24,7 +24,7 @@ const kipi_detail_controller = new KipiDetailController(kipi_detail_service)
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ body: createKipiDetailSchema }),
     AsyncHandler(kipi_detail_controller.createKipiDetail)
 )
@@ -32,7 +32,7 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ query: getKipiDetailsQuerySchema }),
     AsyncHandler(kipi_detail_controller.getKipiDetails)
 )
@@ -40,7 +40,7 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ params: kipiDetailParamsSchema }),
     AsyncHandler(kipi_detail_controller.getKipiDetailById)
 )
@@ -48,7 +48,7 @@ router.get(
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: kipiDetailParamsSchema,
         body: updateKipiDetailSchema
@@ -59,7 +59,7 @@ router.put(
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: kipiDetailParamsSchema,
         query: deleteKipiDetailQuerySchema
@@ -70,7 +70,7 @@ router.delete(
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ params: kipiDetailParamsSchema }),
     AsyncHandler(kipi_detail_controller.restoreKipiDetail)
 )

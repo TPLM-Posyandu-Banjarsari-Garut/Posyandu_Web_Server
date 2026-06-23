@@ -1,3 +1,4 @@
+import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewNutritionRecord, NutritionRecord } from '@/db'
 import {
@@ -32,7 +33,7 @@ export class NutritionRecordService {
     async getNutritionRecordById(public_id: string): Promise<NutritionRecord> {
         const record =
             await this.nutrition_record_repository.findById(public_id)
-        if (!record) throw new Error('Nutrition record not found')
+        if (!record) throw ApiError.notFound('Nutrition record not found')
         return record
     }
 
@@ -46,7 +47,8 @@ export class NutritionRecordService {
             public_id,
             record_payload
         )
-        if (!updated) throw new Error('Failed to update nutrition record')
+        if (!updated)
+            throw ApiError.badRequest('Failed to update nutrition record')
         return updated
     }
 
@@ -60,14 +62,16 @@ export class NutritionRecordService {
             ? await this.nutrition_record_repository.hardDelete(public_id)
             : await this.nutrition_record_repository.softDelete(public_id)
 
-        if (!deleted) throw new Error('Failed to delete nutrition record')
+        if (!deleted)
+            throw ApiError.badRequest('Failed to delete nutrition record')
         return deleted
     }
 
     async restoreNutritionRecord(public_id: string): Promise<NutritionRecord> {
         const restored =
             await this.nutrition_record_repository.restore(public_id)
-        if (!restored) throw new Error('Failed to restore nutrition record')
+        if (!restored)
+            throw ApiError.badRequest('Failed to restore nutrition record')
         return restored
     }
 }

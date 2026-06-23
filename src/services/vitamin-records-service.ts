@@ -1,3 +1,4 @@
+import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewVitaminRecord, VitaminRecord } from '@/db'
 import {
@@ -20,7 +21,7 @@ export class VitaminRecordService {
                 record_payload.distribution_year
             )
         if (isDuplicate) {
-            throw new Error(
+            throw ApiError.conflict(
                 'Vitamin record for this child, period, and year already exists'
             )
         }
@@ -43,7 +44,7 @@ export class VitaminRecordService {
 
     async getVitaminRecordById(public_id: string): Promise<VitaminRecord> {
         const record = await this.vitamin_record_repository.findById(public_id)
-        if (!record) throw new Error('Vitamin record not found')
+        if (!record) throw ApiError.notFound('Vitamin record not found')
         return record
     }
 
@@ -72,7 +73,7 @@ export class VitaminRecordService {
                     year
                 )
             if (isDuplicate) {
-                throw new Error(
+                throw ApiError.conflict(
                     'Vitamin record with the same child, period, and year already exists'
                 )
             }
@@ -82,7 +83,8 @@ export class VitaminRecordService {
             public_id,
             record_payload
         )
-        if (!updated) throw new Error('Failed to update vitamin record')
+        if (!updated)
+            throw ApiError.badRequest('Failed to update vitamin record')
         return updated
     }
 
@@ -96,13 +98,15 @@ export class VitaminRecordService {
             ? await this.vitamin_record_repository.hardDelete(public_id)
             : await this.vitamin_record_repository.softDelete(public_id)
 
-        if (!deleted) throw new Error('Failed to delete vitamin record')
+        if (!deleted)
+            throw ApiError.badRequest('Failed to delete vitamin record')
         return deleted
     }
 
     async restoreVitaminRecord(public_id: string): Promise<VitaminRecord> {
         const restored = await this.vitamin_record_repository.restore(public_id)
-        if (!restored) throw new Error('Failed to restore vitamin record')
+        if (!restored)
+            throw ApiError.badRequest('Failed to restore vitamin record')
         return restored
     }
 }

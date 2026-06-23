@@ -24,7 +24,7 @@ const midwife_controller = new MidwifeController(midwife_service)
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife'),
     validateRequest({ body: createMidwifeSchema }),
     AsyncHandler(midwife_controller.createMidwife)
 )
@@ -32,7 +32,7 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife'),
     validateRequest({ query: getMidwifesQuerySchema }),
     AsyncHandler(midwife_controller.getmidwifes)
 )
@@ -40,7 +40,7 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife'),
     validateRequest({ params: midwifeParamsSchema }),
     AsyncHandler(midwife_controller.getMidwifeById)
 )
@@ -48,7 +48,7 @@ router.get(
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife'),
     validateRequest({ params: midwifeParamsSchema, body: updateMidwifeSchema }),
     AsyncHandler(midwife_controller.updateMidwife)
 )
@@ -56,7 +56,7 @@ router.put(
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife'),
     validateRequest({
         params: midwifeParamsSchema,
         query: deleteMidwifeQuerySchema
@@ -67,7 +67,7 @@ router.delete(
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin', 'midwife'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife'),
     validateRequest({ params: midwifeParamsSchema }),
     AsyncHandler(midwife_controller.restoreMidwife)
 )

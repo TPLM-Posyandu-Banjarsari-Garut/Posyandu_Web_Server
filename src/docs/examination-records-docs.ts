@@ -24,7 +24,7 @@ export const registerExaminationRecordsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/examination-records',
         tags: TAG,
         summary:
-            'Create a new examination record [Roles: admin, midwife, cadre]',
+            'Create a new examination record [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             body: {
                 content: {
@@ -45,7 +45,7 @@ export const registerExaminationRecordsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/examination-records',
         tags: TAG,
         summary:
-            'Get list of examination records [Roles: admin, midwife, cadre, parent]',
+            'Get list of examination records [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { query: getExaminationRecordsQuerySchema },
         responses: {
             200: { description: 'Success retrieve list of examination records' }
@@ -57,7 +57,7 @@ export const registerExaminationRecordsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/examination-records/{public_id}',
         tags: TAG,
         summary:
-            'Get examination record by ID [Roles: admin, midwife, cadre, parent]',
+            'Get examination record by ID [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { params: examinationRecordParamsSchema },
         responses: {
             200: { description: 'Success get examination record detail' },
@@ -69,7 +69,8 @@ export const registerExaminationRecordsRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/examination-records/{public_id}',
         tags: TAG,
-        summary: 'Update examination record [Roles: admin, midwife, cadre]',
+        summary:
+            'Update examination record [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: examinationRecordParamsSchema,
             body: {
@@ -91,7 +92,8 @@ export const registerExaminationRecordsRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/examination-records/{public_id}',
         tags: TAG,
-        summary: 'Delete examination record [Roles: admin, midwife, cadre]',
+        summary:
+            'Delete examination record [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: examinationRecordParamsSchema,
             query: deleteExaminationRecordQuerySchema
@@ -107,7 +109,7 @@ export const registerExaminationRecordsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/examination-records/{public_id}/restore',
         tags: TAG,
         summary:
-            'Restore soft-deleted examination record [Roles: admin, midwife, cadre]',
+            'Restore soft-deleted examination record [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { params: examinationRecordParamsSchema },
         responses: {
             200: { description: 'Examination record restored successfully' },

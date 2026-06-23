@@ -17,7 +17,8 @@ export const registerKipiDetailsRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/kipi-details',
         tags: KIPI_TAG,
-        summary: 'Create a new KIPI detail [Roles: admin, midwife, cadre]',
+        summary:
+            'Create a new KIPI detail [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             body: {
                 content: {
@@ -35,7 +36,8 @@ export const registerKipiDetailsRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/kipi-details',
         tags: KIPI_TAG,
-        summary: 'Get list of KIPI details [Roles: admin, midwife, cadre]',
+        summary:
+            'Get list of KIPI details [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { query: getKipiDetailsQuerySchema },
         responses: {
             200: { description: 'Success get list of KIPI details' }
@@ -46,7 +48,8 @@ export const registerKipiDetailsRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/kipi-details/{public_id}',
         tags: KIPI_TAG,
-        summary: 'Get KIPI detail by public ID [Roles: admin, midwife, cadre]',
+        summary:
+            'Get KIPI detail by public ID [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { params: kipiDetailParamsSchema },
         responses: {
             200: { description: 'Success get KIPI detail' },
@@ -58,7 +61,8 @@ export const registerKipiDetailsRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/kipi-details/{public_id}',
         tags: KIPI_TAG,
-        summary: 'Update KIPI detail data [Roles: admin, midwife, cadre]',
+        summary:
+            'Update KIPI detail data [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: kipiDetailParamsSchema,
             body: {
@@ -78,7 +82,8 @@ export const registerKipiDetailsRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/kipi-details/{public_id}',
         tags: KIPI_TAG,
-        summary: 'Delete KIPI detail [Roles: admin, midwife, cadre]',
+        summary:
+            'Delete KIPI detail [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: kipiDetailParamsSchema,
             query: deleteKipiDetailQuerySchema
@@ -94,7 +99,7 @@ export const registerKipiDetailsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/kipi-details/{public_id}/restore',
         tags: KIPI_TAG,
         summary:
-            'Restore soft-deleted KIPI detail [Roles: admin, midwife, cadre]',
+            'Restore soft-deleted KIPI detail [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { params: kipiDetailParamsSchema },
         responses: {
             200: { description: 'KIPI detail restored successfully' },

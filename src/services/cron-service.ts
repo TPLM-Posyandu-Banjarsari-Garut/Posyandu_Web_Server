@@ -239,7 +239,7 @@ export class CronService {
                 .set({
                     status: 'cancelled',
                     cancellation_reason:
-                        'Otomatis dibatalkan: pasien tidak hadir (no-show)'
+                        'Automatically cancelled: patient no-show'
                 })
                 .where(
                     and(

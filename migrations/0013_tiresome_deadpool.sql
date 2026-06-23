@@ -1,0 +1,1 @@
+ALTER TYPE "public"."account_role" ADD VALUE 'admin' BEFORE 'posyandu_admin';

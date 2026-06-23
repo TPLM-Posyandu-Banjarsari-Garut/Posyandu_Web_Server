@@ -29,7 +29,7 @@ const educationController = new EducationController(educationService)
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     (req, res, next) => {
         if (res.locals.user) {
             req.body.created_by_user_id = res.locals.user.id
@@ -43,7 +43,13 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ query: getEducationsQuerySchema }),
     AsyncHandler(educationController.getEducations)
 )
@@ -51,7 +57,13 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ params: educationParamsSchema }),
     AsyncHandler(educationController.getEducationById)
 )
@@ -59,7 +71,7 @@ router.get(
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: educationParamsSchema,
         body: updateEducationSchema
@@ -70,7 +82,7 @@ router.put(
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: educationParamsSchema,
         query: deleteEducationQuerySchema
@@ -81,7 +93,7 @@ router.delete(
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ params: educationParamsSchema }),
     AsyncHandler(educationController.restoreEducation)
 )

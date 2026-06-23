@@ -24,7 +24,7 @@ const vaccine_controller = new VaccineController(vaccine_service)
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ body: createVaccineSchema }),
     AsyncHandler(vaccine_controller.createVaccine)
 )
@@ -32,7 +32,13 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ query: getVaccinesQuerySchema }),
     AsyncHandler(vaccine_controller.getVaccines)
 )
@@ -40,7 +46,13 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ params: vaccineParamsSchema }),
     AsyncHandler(vaccine_controller.getVaccineById)
 )
@@ -48,7 +60,7 @@ router.get(
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: vaccineParamsSchema,
         body: updateVaccineSchema
@@ -59,7 +71,7 @@ router.put(
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: vaccineParamsSchema,
         query: deleteVaccineQuerySchema
@@ -70,7 +82,7 @@ router.delete(
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ params: vaccineParamsSchema }),
     AsyncHandler(vaccine_controller.restoreVaccine)
 )

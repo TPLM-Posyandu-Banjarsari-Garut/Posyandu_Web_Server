@@ -17,7 +17,8 @@ export const registerInventoriesRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/inventories',
         tags: INV_TAG,
-        summary: 'Create a new inventory [Roles: admin, midwife, cadre]',
+        summary:
+            'Create a new inventory [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             body: {
                 content: {
@@ -35,7 +36,8 @@ export const registerInventoriesRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/inventories',
         tags: INV_TAG,
-        summary: 'Get list of inventories [Roles: admin, midwife, cadre]',
+        summary:
+            'Get list of inventories [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { query: getInventoriesQuerySchema },
         responses: {
             200: { description: 'Success get list of inventories' }
@@ -46,7 +48,8 @@ export const registerInventoriesRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/inventories/{public_id}',
         tags: INV_TAG,
-        summary: 'Get inventory by public ID [Roles: admin, midwife, cadre]',
+        summary:
+            'Get inventory by public ID [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { params: inventoryParamsSchema },
         responses: {
             200: { description: 'Success get inventory detail' },
@@ -58,7 +61,8 @@ export const registerInventoriesRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/inventories/{public_id}',
         tags: INV_TAG,
-        summary: 'Update inventory data [Roles: admin, midwife, cadre]',
+        summary:
+            'Update inventory data [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: inventoryParamsSchema,
             body: {
@@ -78,7 +82,8 @@ export const registerInventoriesRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/inventories/{public_id}',
         tags: INV_TAG,
-        summary: 'Delete inventory [Roles: admin, midwife, cadre]',
+        summary:
+            'Delete inventory [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: inventoryParamsSchema,
             query: deleteInventoryQuerySchema
@@ -94,7 +99,7 @@ export const registerInventoriesRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/inventories/{public_id}/restore',
         tags: INV_TAG,
         summary:
-            'Restore soft-deleted inventory [Roles: admin, midwife, cadre]',
+            'Restore soft-deleted inventory [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { params: inventoryParamsSchema },
         responses: {
             200: { description: 'Inventory restored successfully' },

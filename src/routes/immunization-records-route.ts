@@ -28,7 +28,7 @@ const immunization_record_controller = new ImmunizationRecordController(
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ body: createImmunizationRecordSchema }),
     AsyncHandler(immunization_record_controller.createImmunizationRecord)
 )
@@ -36,7 +36,13 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ query: getImmunizationRecordsQuerySchema }),
     AsyncHandler(immunization_record_controller.getImmunizationRecords)
 )
@@ -44,7 +50,13 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ params: immunizationRecordParamsSchema }),
     AsyncHandler(immunization_record_controller.getImmunizationRecordById)
 )
@@ -52,7 +64,7 @@ router.get(
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: immunizationRecordParamsSchema,
         body: updateImmunizationRecordSchema
@@ -63,7 +75,7 @@ router.put(
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: immunizationRecordParamsSchema,
         query: deleteImmunizationRecordQuerySchema
@@ -74,7 +86,7 @@ router.delete(
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ params: immunizationRecordParamsSchema }),
     AsyncHandler(immunization_record_controller.restoreImmunizationRecord)
 )

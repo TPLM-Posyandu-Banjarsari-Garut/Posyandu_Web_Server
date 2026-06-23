@@ -14,6 +14,7 @@ import {
     deleteUserQuerySchema
 } from '@/validations/users-validation'
 import db from '@/configs/db'
+import { signupRateLimiter } from '@/middlewares/rate-limiter'
 
 const router = Router()
 
@@ -23,8 +24,9 @@ const user_controller = new UserController(user_service)
 
 router.post(
     '/',
+    signupRateLimiter,
     verifyAuth,
-    authorizeRoles('admin'),
+    authorizeRoles('posyandu_admin', 'village_admin'),
     validateRequest({ body: createUserSchema }),
     AsyncHandler(user_controller.createUser)
 )
@@ -32,7 +34,7 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ query: getUsersQuerySchema }),
     AsyncHandler(user_controller.getUsers)
 )
@@ -40,34 +42,37 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ params: userParamsSchema }),
     AsyncHandler(user_controller.getUserById)
 )
 
-// UPDATE user — hanya admin
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin'),
+    authorizeRoles('posyandu_admin', 'village_admin'),
     validateRequest({ params: userParamsSchema, body: updateUserSchema }),
     AsyncHandler(user_controller.updateUser)
 )
 
-// DELETE user — hanya admin
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin'),
+    authorizeRoles('posyandu_admin', 'village_admin'),
     validateRequest({ params: userParamsSchema, query: deleteUserQuerySchema }),
     AsyncHandler(user_controller.deleteUser)
 )
 
-// RESTORE user — hanya admin
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin'),
+    authorizeRoles('posyandu_admin', 'village_admin'),
     validateRequest({ params: userParamsSchema }),
     AsyncHandler(user_controller.restoreUser)
 )

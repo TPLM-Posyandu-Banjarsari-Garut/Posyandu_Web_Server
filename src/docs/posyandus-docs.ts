@@ -17,7 +17,7 @@ export const registerPosyandusRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/posyandus',
         tags: POSYANDU_TAG,
-        summary: 'Create a new posyandu [Roles: admin]',
+        summary: 'Create a new posyandu [Roles: posyandu_admin, village_admin]',
         request: {
             body: {
                 content: {
@@ -35,7 +35,7 @@ export const registerPosyandusRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/posyandus',
         tags: POSYANDU_TAG,
-        summary: 'Get list of posyandus [Roles: admin]',
+        summary: 'Get list of posyandus [Roles: posyandu_admin, village_admin]',
         request: { query: getPosyandusQuerySchema },
         responses: {
             200: { description: 'Success get list of posyandus' }
@@ -46,7 +46,8 @@ export const registerPosyandusRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/posyandus/{public_id}',
         tags: POSYANDU_TAG,
-        summary: 'Get posyandu by public ID [Roles: admin]',
+        summary:
+            'Get posyandu by public ID [Roles: posyandu_admin, village_admin]',
         request: { params: posyanduParamsSchema },
         responses: {
             200: { description: 'Success get posyandu detail' },
@@ -58,7 +59,7 @@ export const registerPosyandusRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/posyandus/{public_id}',
         tags: POSYANDU_TAG,
-        summary: 'Update posyandu data [Roles: admin]',
+        summary: 'Update posyandu data [Roles: posyandu_admin, village_admin]',
         request: {
             params: posyanduParamsSchema,
             body: {
@@ -78,7 +79,7 @@ export const registerPosyandusRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/posyandus/{public_id}',
         tags: POSYANDU_TAG,
-        summary: 'Delete posyandu [Roles: admin]',
+        summary: 'Delete posyandu [Roles: posyandu_admin, village_admin]',
         request: {
             params: posyanduParamsSchema,
             query: deletePosyanduQuerySchema
@@ -93,7 +94,8 @@ export const registerPosyandusRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/posyandus/{public_id}/restore',
         tags: POSYANDU_TAG,
-        summary: 'Restore soft-deleted posyandu [Roles: admin]',
+        summary:
+            'Restore soft-deleted posyandu [Roles: posyandu_admin, village_admin]',
         request: { params: posyanduParamsSchema },
         responses: {
             200: { description: 'Posyandu restored successfully' },

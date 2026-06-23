@@ -7,6 +7,8 @@ import {
 
 import { AuthService } from '@/services/auth-service'
 import { createPaginationMeta } from '@/utils/pagination'
+import { ApiError } from '@/utils/api-error'
+import { RegisterMultiRolePayload } from '@/types/auth-types'
 
 export class UserService {
     constructor(private readonly user_repository: UserRepository) {}
@@ -17,9 +19,10 @@ export class UserService {
             phone_number: user_payload.phone_number
         })
 
-        if (checks.emailExists) throw new Error('Email already registered')
+        if (checks.emailExists)
+            throw ApiError.badRequest('Email already registered')
         if (checks.phoneExists)
-            throw new Error('Phone number already registered')
+            throw ApiError.badRequest('Phone number already registered')
 
         const auth_service = new AuthService(this.user_repository)
         return await auth_service.registerWithEmail({
@@ -27,10 +30,17 @@ export class UserService {
             password: user_payload.password,
             name: user_payload.name,
             phone_number: user_payload.phone_number,
-            avatar_url: (user_payload as Record<string, unknown>).avatar_url as
-                | string
-                | undefined,
-            role: user_payload.role || 'parent'
+            avatar_url: user_payload.avatar_url,
+            role: user_payload.role,
+            parent_data: user_payload.parent_data
+                ? (user_payload.parent_data as RegisterMultiRolePayload['parent_data'])
+                : undefined,
+            cadre_data: user_payload.cadre_data
+                ? (user_payload.cadre_data as RegisterMultiRolePayload['cadre_data'])
+                : undefined,
+            midwife_data: user_payload.midwife_data
+                ? (user_payload.midwife_data as RegisterMultiRolePayload['midwife_data'])
+                : undefined
         })
     }
 
@@ -47,7 +57,7 @@ export class UserService {
 
     async getUserById(public_id: string): Promise<User> {
         const user = await this.user_repository.findById(public_id)
-        if (!user) throw new Error('User not found')
+        if (!user) throw ApiError.notFound('User not found')
         return user
     }
 
@@ -70,17 +80,19 @@ export class UserService {
         })
 
         if (checks.emailExists) {
-            throw new Error('Email already taken by another user')
+            throw ApiError.conflict('Email already taken by another user')
         }
         if (checks.phoneExists) {
-            throw new Error('Phone number already taken by another user')
+            throw ApiError.conflict(
+                'Phone number already taken by another user'
+            )
         }
 
         const updated = await this.user_repository.update(
             public_id,
             user_payload
         )
-        if (!updated) throw new Error('Failed to update user')
+        if (!updated) throw ApiError.badRequest('Failed to update user')
         return updated
     }
 
@@ -90,7 +102,7 @@ export class UserService {
     ): Promise<User> {
         const existing_user =
             await this.user_repository.findByPublicId(public_id)
-        if (!existing_user) throw new Error('User not found')
+        if (!existing_user) throw ApiError.notFound('User not found')
 
         if (!is_permanent && existing_user.status === 'inactive') {
             return existing_user
@@ -100,13 +112,13 @@ export class UserService {
             ? await this.user_repository.hardDelete(public_id)
             : await this.user_repository.softDelete(public_id)
 
-        if (!deleted) throw new Error('Failed to delete user')
+        if (!deleted) throw ApiError.badRequest('Failed to delete user')
         return deleted
     }
 
     async restoreUser(public_id: string): Promise<User> {
         const restored = await this.user_repository.restore(public_id)
-        if (!restored) throw new Error('Failed to restore user')
+        if (!restored) throw ApiError.badRequest('Failed to restore user')
         return restored
     }
 }

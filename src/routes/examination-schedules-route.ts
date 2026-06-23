@@ -24,7 +24,7 @@ const controller = new ExaminationSchedulesController(service)
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ body: createExaminationScheduleSchema }),
     AsyncHandler(controller.createSchedule)
 )
@@ -32,7 +32,13 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ query: getExaminationSchedulesQuerySchema }),
     AsyncHandler(controller.getSchedules)
 )
@@ -40,7 +46,13 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ params: examinationScheduleParamsSchema }),
     AsyncHandler(controller.getScheduleById)
 )
@@ -48,7 +60,7 @@ router.get(
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: examinationScheduleParamsSchema,
         body: updateExaminationScheduleSchema
@@ -59,7 +71,7 @@ router.put(
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({
         params: examinationScheduleParamsSchema,
         query: deleteExaminationScheduleQuerySchema
@@ -70,7 +82,7 @@ router.delete(
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ params: examinationScheduleParamsSchema }),
     AsyncHandler(controller.restoreSchedule)
 )
