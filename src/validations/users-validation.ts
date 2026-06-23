@@ -14,7 +14,7 @@ import { createMidwifeSchema } from './midwifes-validation'
 
 extendZodWithOpenApi(z)
 
-export const createUserSchema = createInsertSchema(users, {
+export const baseCreateUserSchema = createInsertSchema(users, {
     email: z
         .email('Invalid email format')
         .max(255, 'Email cannot exceed 255 characters')
@@ -92,6 +92,8 @@ export const createUserSchema = createInsertSchema(users, {
         updated_at: true,
         deleted_at: true
     })
+
+export const createUserSchema = baseCreateUserSchema
     .superRefine((data, ctx) => {
         if (data.role === 'cadre') {
             if (!data.cadre_data?.posyandu_id) {
@@ -171,7 +173,7 @@ export const deleteUserQuerySchema = z
     })
     .openapi('DeleteUserQuery')
 
-export const updateUserSchema = createUserSchema
+export const updateUserSchema = baseCreateUserSchema
     .partial()
     .openapi('UpdateUserInput')
 
