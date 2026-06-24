@@ -23,7 +23,11 @@ const app: Express = express()
 app.set('trust proxy', 1)
 
 const corsOrigins = [env.CORS_ORIGIN, ...env.TRUSTED_ORIGINS]
-if (env.NODE_ENV === 'development') {
+if (
+    env.NODE_ENV === 'development' ||
+    env.CORS_ORIGIN.includes('localhost') ||
+    env.CORS_ORIGIN.includes('127.0.0.1')
+) {
     corsOrigins.push('http://localhost:3001')
 }
 

@@ -8,7 +8,11 @@ import env from '@/configs/env'
 import { EmailService } from '@/services/email-service'
 
 const trustedOrigins = [env.CORS_ORIGIN, ...env.TRUSTED_ORIGINS]
-if (env.NODE_ENV === 'development') {
+if (
+    env.NODE_ENV === 'development' ||
+    env.CORS_ORIGIN.includes('localhost') ||
+    env.CORS_ORIGIN.includes('127.0.0.1')
+) {
     trustedOrigins.push('http://localhost:3001')
 }
 

@@ -313,14 +313,18 @@ export class ConsultationsService {
     private async invalidateSlotsCache(
         posyandu_id: string,
         consultation_type: string,
-        scheduled_at: Date
+        scheduled_at: Date,
+        midwife_id?: string | null
     ): Promise<void> {
         if (!redis) return
         try {
             const dateString = scheduled_at.toISOString().split('T')[0]
-            const cacheKey = `slots:${posyandu_id}:${consultation_type}:${dateString}`
-            await redis.del(cacheKey)
-            logger.debug({ cacheKey }, 'Invalidated slot availability cache')
+            const baseKey = `slots:${posyandu_id}:${consultation_type}:${dateString}`
+            await redis.del(baseKey)
+            if (midwife_id) {
+                await redis.del(`${baseKey}:${midwife_id}`)
+            }
+            logger.debug({ dateString, midwife_id }, 'Invalidated slot availability cache')
         } catch (err) {
             logger.error(err, 'Failed to invalidate slots cache')
         }
@@ -382,9 +386,12 @@ export class ConsultationsService {
     async getAvailableSlots(
         posyandu_id: string,
         consultation_type: ConsultationType,
-        dateString: string
+        dateString: string,
+        midwife_id?: string | null
     ): Promise<{ time: string; available: boolean }[]> {
-        const cacheKey = `slots:${posyandu_id}:${consultation_type}:${dateString}`
+        const cacheKey = midwife_id
+            ? `slots:${posyandu_id}:${consultation_type}:${dateString}:${midwife_id}`
+            : `slots:${posyandu_id}:${consultation_type}:${dateString}`
         if (redis) {
             try {
                 const cached = await redis.get<unknown[]>(cacheKey)
@@ -409,19 +416,26 @@ export class ConsultationsService {
         const startOfDay = new Date(Date.UTC(year, month, day, 0, 0, 0, 0))
         const endOfDay = new Date(Date.UTC(year, month, day, 23, 59, 59, 999))
 
+        const conditions = [
+            gte(consultations.scheduled_at, startOfDay),
+            lte(consultations.scheduled_at, endOfDay),
+            sql`${consultations.deleted_at} IS NULL`,
+            ne(consultations.status, 'cancelled')
+        ]
+
+        if (midwife_id) {
+            conditions.push(eq(consultations.midwife_id, midwife_id))
+        } else {
+            conditions.push(
+                eq(consultations.posyandu_id, posyandu_id),
+                eq(consultations.consultation_type, consultation_type)
+            )
+        }
+
         const activeBookings = await this.dbInstance
             .select({ scheduled_at: consultations.scheduled_at })
             .from(consultations)
-            .where(
-                and(
-                    eq(consultations.posyandu_id, posyandu_id),
-                    eq(consultations.consultation_type, consultation_type),
-                    gte(consultations.scheduled_at, startOfDay),
-                    lte(consultations.scheduled_at, endOfDay),
-                    sql`${consultations.deleted_at} IS NULL`,
-                    ne(consultations.status, 'cancelled')
-                )
-            )
+            .where(and(...conditions))
 
         const timeslots =
             consultation_type === 'general'
@@ -467,6 +481,7 @@ export class ConsultationsService {
             children_id?: string | null
             notes?: string | null
             posyandu_id?: string | null
+            midwife_id?: string | null
         }
     ): Promise<
         | (Consultation & { queue_number: number })
@@ -509,21 +524,28 @@ export class ConsultationsService {
         const results = await this.dbInstance.transaction(async tx => {
             const createdBookings = []
             for (const schedDate of dates) {
+                const conditions = [
+                    eq(consultations.scheduled_at, schedDate),
+                    sql`${consultations.deleted_at} IS NULL`,
+                    ne(consultations.status, 'cancelled')
+                ]
+
+                if (payload.midwife_id) {
+                    conditions.push(eq(consultations.midwife_id, payload.midwife_id))
+                } else {
+                    conditions.push(
+                        eq(consultations.posyandu_id, finalPosyanduId),
+                        eq(
+                            consultations.consultation_type,
+                            payload.consultation_type
+                        )
+                    )
+                }
+
                 const existingBooking = await tx
                     .select()
                     .from(consultations)
-                    .where(
-                        and(
-                            eq(consultations.posyandu_id, finalPosyanduId),
-                            eq(
-                                consultations.consultation_type,
-                                payload.consultation_type
-                            ),
-                            eq(consultations.scheduled_at, schedDate),
-                            sql`${consultations.deleted_at} IS NULL`,
-                            ne(consultations.status, 'cancelled')
-                        )
-                    )
+                    .where(and(...conditions))
                     .limit(1)
 
                 if (existingBooking.length > 0) {
@@ -540,6 +562,7 @@ export class ConsultationsService {
                     pregnancy_record_id: payload.pregnancy_record_id || null,
                     children_id: payload.children_id || null,
                     notes: payload.notes || null,
+                    midwife_id: payload.midwife_id || null,
                     status: 'pending'
                 }
 
@@ -560,7 +583,8 @@ export class ConsultationsService {
             await this.invalidateSlotsCache(
                 finalPosyanduId,
                 payload.consultation_type,
-                created.scheduled_at
+                created.scheduled_at,
+                payload.midwife_id
             )
 
             try {
@@ -661,22 +685,30 @@ export class ConsultationsService {
         public_id: string
     ): Promise<void> {
         this.validateScheduledAt(consultation.consultation_type, scheduled_at)
+        
+        const conditions = [
+            eq(consultations.scheduled_at, scheduled_at),
+            sql`${consultations.deleted_at} IS NULL`,
+            ne(consultations.status, 'cancelled'),
+            ne(consultations.id, public_id)
+        ]
+
+        if (consultation.midwife_id) {
+            conditions.push(eq(consultations.midwife_id, consultation.midwife_id))
+        } else {
+            conditions.push(
+                eq(consultations.posyandu_id, consultation.posyandu_id),
+                eq(
+                    consultations.consultation_type,
+                    consultation.consultation_type
+                )
+            )
+        }
+
         const existingBooking = await this.dbInstance
             .select()
             .from(consultations)
-            .where(
-                and(
-                    eq(consultations.posyandu_id, consultation.posyandu_id),
-                    eq(
-                        consultations.consultation_type,
-                        consultation.consultation_type
-                    ),
-                    eq(consultations.scheduled_at, scheduled_at),
-                    sql`${consultations.deleted_at} IS NULL`,
-                    ne(consultations.status, 'cancelled'),
-                    ne(consultations.id, public_id)
-                )
-            )
+            .where(and(...conditions))
             .limit(1)
 
         if (existingBooking.length > 0) {
@@ -796,12 +828,13 @@ export class ConsultationsService {
         }
         const enriched = await this.enrichWithQueueNumber(result)
 
-        await this.invalidateSlotsCache(oldPosyanduId, oldType, oldScheduledAt)
+        await this.invalidateSlotsCache(oldPosyanduId, oldType, oldScheduledAt, consultation.midwife_id)
         if (payload.scheduled_at) {
             await this.invalidateSlotsCache(
                 oldPosyanduId,
                 oldType,
-                payload.scheduled_at
+                payload.scheduled_at,
+                consultation.midwife_id
             )
         }
 
@@ -964,7 +997,8 @@ export class ConsultationsService {
         await this.invalidateSlotsCache(
             consultation.posyandu_id,
             consultation.consultation_type,
-            consultation.scheduled_at
+            consultation.scheduled_at,
+            consultation.midwife_id
         )
 
         try {
@@ -1111,7 +1145,8 @@ export class ConsultationsService {
         await this.invalidateSlotsCache(
             consultation.posyandu_id,
             consultation.consultation_type,
-            consultation.scheduled_at
+            consultation.scheduled_at,
+            consultation.midwife_id
         )
 
         try {
@@ -1152,7 +1187,8 @@ export class ConsultationsService {
         await this.invalidateSlotsCache(
             consultation.posyandu_id,
             consultation.consultation_type,
-            consultation.scheduled_at
+            consultation.scheduled_at,
+            consultation.midwife_id
         )
 
         try {
