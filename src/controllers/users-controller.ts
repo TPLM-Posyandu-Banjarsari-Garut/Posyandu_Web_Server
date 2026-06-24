@@ -61,12 +61,17 @@ export class UserController {
 
     updateUser = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
+        const currentUser = res.locals.user
         logger.info(
             { public_id, body: req.body },
             'Incoming request: Update User'
         )
 
-        const user = await this.user_service.updateUser(public_id, req.body)
+        const user = await this.user_service.updateUser(
+            public_id,
+            req.body,
+            currentUser
+        )
         return ApiResponse.ok(res, 'User updated successfully', user)
     }
 

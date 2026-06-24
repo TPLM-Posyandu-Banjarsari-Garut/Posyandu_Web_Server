@@ -44,8 +44,8 @@ export const auth = betterAuth({
         enabled: true,
         autoSignIn: false,
         requireEmailVerification: true,
-        minPasswordLength: 8,
-        maxPasswordLength: 100,
+        minPasswordLength: 12,
+        maxPasswordLength: 128,
         sendResetPassword: async ({ user, url, token }, request) => {
             await EmailService.sendResetPasswordLink(user.email, url)
         }
@@ -83,11 +83,11 @@ export const auth = betterAuth({
         }
     },
     session: {
-        expiresIn: 60 * 60 * 8, // 8 hours
-        updateAge: 60 * 60, // 1 hour active update
+        expiresIn: env.SESSION_EXPIRES_IN,
+        updateAge: env.SESSION_UPDATE_AGE,
         cookieCache: {
-            enabled: true,
-            maxAge: 5 * 60 // 5 minutes cache
+            enabled: env.SESSION_COOKIE_CACHE_ENABLED,
+            maxAge: env.SESSION_COOKIE_CACHE_MAX_AGE
         },
         fields: {
             expiresAt: 'expires_at',

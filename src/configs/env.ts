@@ -91,7 +91,11 @@ export const envSchema = z.object({
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     UPSTASH_REDIS_URL: z.string().optional(),
 
-    CRON_SECRET: z.string().min(1, 'CRON_SECRET is required')
+    CRON_SECRET: z.string().min(1, 'CRON_SECRET is required'),
+    SESSION_EXPIRES_IN: numeric,
+    SESSION_UPDATE_AGE: numeric,
+    SESSION_COOKIE_CACHE_ENABLED: z.string().transform(val => val === 'true'),
+    SESSION_COOKIE_CACHE_MAX_AGE: numeric
 })
 
 export type Env = z.infer<typeof envSchema>

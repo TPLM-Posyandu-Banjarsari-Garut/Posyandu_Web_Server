@@ -14,7 +14,7 @@ export const parents = pgTable(
             .unique()
             .references(() => users.id, { onDelete: 'cascade' }),
 
-        identity_number: varchar('identity_number', { length: 16 }).unique(), // NIK
+        identity_number: varchar('identity_number', { length: 16 }).unique(),
         place_of_birth: varchar('place_of_birth', { length: 50 }),
         date_of_birth: date('date_of_birth', { mode: 'date' }),
 

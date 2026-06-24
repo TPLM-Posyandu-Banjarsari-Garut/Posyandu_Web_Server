@@ -39,7 +39,6 @@ export class EducationController {
         const public_id = req.params.public_id as string
         logger.info({ public_id }, 'Incoming request: Get Education By ID')
 
-        // Increment view count when fetching single article details
         const education = await this.educationService.getEducationById(
             public_id,
             true

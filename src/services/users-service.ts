@@ -9,9 +9,13 @@ import { AuthService } from '@/services/auth-service'
 import { createPaginationMeta } from '@/utils/pagination'
 import { ApiError } from '@/utils/api-error'
 import { RegisterMultiRolePayload } from '@/types/auth-types'
+import { AuthorizationService } from '@/services/authorization-service'
 
 export class UserService {
-    constructor(private readonly user_repository: UserRepository) {}
+    constructor(
+        private readonly user_repository: UserRepository,
+        private readonly authorization_service: AuthorizationService = new AuthorizationService()
+    ) {}
 
     async createUser(user_payload: CreateUserInput): Promise<User> {
         const checks = await this.user_repository.checkUniqueConstraints({
@@ -55,7 +59,19 @@ export class UserService {
         }
     }
 
-    async getUserById(public_id: string): Promise<User> {
+    async getUserById(public_id: string, currentUser?: User): Promise<User> {
+        if (currentUser) {
+            if (
+                !this.authorization_service.canAccessUser(
+                    currentUser,
+                    public_id
+                )
+            ) {
+                throw ApiError.forbidden(
+                    'You do not have permission to access this user'
+                )
+            }
+        }
         const user = await this.user_repository.findById(public_id)
         if (!user) throw ApiError.notFound('User not found')
         return user
@@ -63,9 +79,26 @@ export class UserService {
 
     async updateUser(
         public_id: string,
-        user_payload: Partial<NewUser>
+        user_payload: Partial<NewUser>,
+        currentUser?: User
     ): Promise<User> {
-        const existing_user = await this.getUserById(public_id)
+        if (currentUser) {
+            if (
+                !this.authorization_service.canAccessUser(
+                    currentUser,
+                    public_id
+                )
+            ) {
+                throw ApiError.forbidden(
+                    'You do not have permission to update this user'
+                )
+            }
+            if (user_payload.role && currentUser.role !== 'admin') {
+                throw ApiError.forbidden('Only admin can change user roles')
+            }
+        }
+        const existing_user = await this.user_repository.findById(public_id)
+        if (!existing_user) throw ApiError.notFound('User not found')
 
         const checks = await this.user_repository.checkUniqueConstraints({
             email:
@@ -98,8 +131,21 @@ export class UserService {
 
     async deleteUser(
         public_id: string,
-        is_permanent: boolean = false
+        is_permanent: boolean = false,
+        currentUser?: User
     ): Promise<User> {
+        if (currentUser) {
+            if (
+                !this.authorization_service.canAccessUser(
+                    currentUser,
+                    public_id
+                )
+            ) {
+                throw ApiError.forbidden(
+                    'You do not have permission to delete this user'
+                )
+            }
+        }
         const existing_user =
             await this.user_repository.findByPublicId(public_id)
         if (!existing_user) throw ApiError.notFound('User not found')
@@ -116,7 +162,19 @@ export class UserService {
         return deleted
     }
 
-    async restoreUser(public_id: string): Promise<User> {
+    async restoreUser(public_id: string, currentUser?: User): Promise<User> {
+        if (currentUser) {
+            if (
+                !this.authorization_service.canAccessUser(
+                    currentUser,
+                    public_id
+                )
+            ) {
+                throw ApiError.forbidden(
+                    'You do not have permission to restore this user'
+                )
+            }
+        }
         const restored = await this.user_repository.restore(public_id)
         if (!restored) throw ApiError.badRequest('Failed to restore user')
         return restored

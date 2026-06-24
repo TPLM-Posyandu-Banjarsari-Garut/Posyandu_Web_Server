@@ -29,7 +29,7 @@ export class ChildrenController {
     }
 
     getChildrens = async (req: Request, res: Response) => {
-        const user = res.locals.user // untuk error ini ada hubungannya
+        const user = res.locals.user
         const query = req.query as unknown as ChildrenQueryFilters
 
         logger.info(
@@ -53,15 +53,17 @@ export class ChildrenController {
     getChildrenById = async (req: Request, res: Response) => {
         const user = res.locals.user
 
-        return handleGetByIdRequest(req, res, 'Children', async public_id => {
-            if (user?.role === 'parent') {
-                await this.children_service.verifyParentAccess(
+        return handleGetByIdRequest(
+            req,
+            res,
+            'Children',
+            async (public_id, currentUser) => {
+                return this.children_service.getChildrenById(
                     public_id,
-                    user.parent_id
+                    currentUser
                 )
             }
-            return this.children_service.getChildrenById(public_id)
-        })
+        )
     }
 
     updateChildren = async (req: Request, res: Response) => {
@@ -73,37 +75,24 @@ export class ChildrenController {
             'Incoming request: Update Children'
         )
 
-        if (user?.role === 'parent') {
-            await this.children_service.verifyParentAccess(
-                public_id,
-                user.parent_id
-            )
-        }
-
         const child = await this.children_service.updateChildren(
             public_id,
-            req.body
+            req.body,
+            user
         )
         return ApiResponse.ok(res, 'Children updated successfully', child)
     }
 
     deleteChildren = async (req: Request, res: Response) => {
-        const user = res.locals.user
-
         return handleDeleteRequest(
             req,
             res,
             'Children',
-            async (public_id, is_permanent) => {
-                if (user?.role === 'parent') {
-                    await this.children_service.verifyParentAccess(
-                        public_id,
-                        user.parent_id
-                    )
-                }
+            async (public_id, is_permanent, currentUser) => {
                 return this.children_service.deleteChildren(
                     public_id,
-                    is_permanent
+                    is_permanent,
+                    currentUser
                 )
             }
         )
@@ -114,7 +103,12 @@ export class ChildrenController {
             req,
             res,
             'Children',
-            this.children_service.restoreChildren.bind(this.children_service)
+            async (public_id, currentUser) => {
+                return this.children_service.restoreChildren(
+                    public_id,
+                    currentUser
+                )
+            }
         )
     }
 }
