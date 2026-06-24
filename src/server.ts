@@ -20,6 +20,4 @@ const server = app.listen(port, () => {
     WsManager.attach(server)
 })
 
-configureGracefulShutdown(server, () => {
-    // Other graceful shutdowns can go here
-})
+configureGracefulShutdown(server, () => {})

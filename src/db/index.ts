@@ -1,5 +1,3 @@
-//? Export all schemas from schemas directory
-
 export * from '@/db/schemas/users-schema'
 export * from '@/db/schemas/sessions-schema'
 export * from '@/db/schemas/accounts-schema'

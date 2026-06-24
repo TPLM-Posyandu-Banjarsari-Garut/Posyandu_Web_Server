@@ -18,7 +18,12 @@ export const users = pgTable(
 
         ...timestamps
     },
-    table => [index('users_is_deleted_idx').on(table.is_deleted)]
+    table => [
+        index('users_is_deleted_idx').on(table.is_deleted),
+        index('users_email_status_idx').on(table.email, table.status),
+        index('users_role_status_idx').on(table.role, table.status),
+        index('users_phone_status_idx').on(table.phone_number, table.status)
+    ]
 )
 
 export type User = typeof users.$inferSelect

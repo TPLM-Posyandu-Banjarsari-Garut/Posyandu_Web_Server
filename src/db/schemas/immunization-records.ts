@@ -65,7 +65,11 @@ export const immunizationRecords = pgTable(
         index('immunization_records_midwife_id_idx').on(table.midwife_id),
         index('immunization_records_posyandu_id_idx').on(table.posyandu_id),
         index('immunization_records_inventory_id_idx').on(table.inventory_id),
-        index('immunization_records_is_deleted_idx').on(table.is_deleted)
+        index('immunization_records_is_deleted_idx').on(table.is_deleted),
+        index('immunization_records_date_idx').on(
+            table.date_given,
+            table.children_id
+        )
     ]
 )
 

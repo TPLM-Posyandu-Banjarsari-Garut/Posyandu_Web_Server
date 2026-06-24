@@ -1,16 +1,18 @@
 import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
-import { NewChildren, Children } from '@/db'
+import { NewChildren, Children, User } from '@/db'
 import {
     ChildrenRepository,
     ChildrenQueryFilters
 } from '@/repositories/childrens-repository'
 import { ParentRepository } from '@/repositories/parents-repository'
+import { AuthorizationService } from '@/services/authorization-service'
 
 export class ChildrenService {
     constructor(
         private readonly children_repository: ChildrenRepository,
-        private readonly parent_repository?: ParentRepository
+        private readonly parent_repository?: ParentRepository,
+        private readonly authorization_service: AuthorizationService = new AuthorizationService()
     ) {}
 
     async createChildren(
@@ -56,10 +58,22 @@ export class ChildrenService {
     }
 
     async getChildrenById(
-        public_id: string
+        public_id: string,
+        currentUser?: User
     ): Promise<
         Exclude<Awaited<ReturnType<ChildrenRepository['findById']>>, undefined>
     > {
+        if (currentUser) {
+            const canAccess = await this.authorization_service.canAccessChild(
+                currentUser,
+                public_id
+            )
+            if (!canAccess) {
+                throw ApiError.forbidden(
+                    'You do not have permission to access this child record'
+                )
+            }
+        }
         const child = await this.children_repository.findById(public_id)
         if (!child) throw ApiError.notFound('Children not found')
         return child
@@ -73,8 +87,21 @@ export class ChildrenService {
         public_id: string,
         children_payload: Partial<NewChildren> & {
             parent_user_id?: string | null
-        }
+        },
+        currentUser?: User
     ): Promise<Children> {
+        if (currentUser) {
+            const canAccess = await this.authorization_service.canAccessChild(
+                currentUser,
+                public_id
+            )
+            if (!canAccess) {
+                throw ApiError.forbidden(
+                    'You do not have permission to update this child record'
+                )
+            }
+        }
+
         const existingChild = await this.getChildrenById(public_id)
 
         const checks = await this.children_repository.checkUniqueConstraints({
@@ -125,9 +152,22 @@ export class ChildrenService {
 
     async deleteChildren(
         public_id: string,
-        is_permanent: boolean = false
+        is_permanent: boolean = false,
+        currentUser?: User
     ): Promise<Children> {
-        const existing = await this.children_repository.findById(
+        if (currentUser) {
+            const canAccess = await this.authorization_service.canAccessChild(
+                currentUser,
+                public_id
+            )
+            if (!canAccess) {
+                throw ApiError.forbidden(
+                    'You do not have permission to delete this child record'
+                )
+            }
+        }
+
+        const existing = await this.children_repository.findByIdWithEnrichment(
             public_id,
             true
         )
@@ -146,27 +186,24 @@ export class ChildrenService {
         return deleted
     }
 
-    async restoreChildren(public_id: string): Promise<Children> {
+    async restoreChildren(
+        public_id: string,
+        currentUser?: User
+    ): Promise<Children> {
+        if (currentUser) {
+            const canAccess = await this.authorization_service.canAccessChild(
+                currentUser,
+                public_id
+            )
+            if (!canAccess) {
+                throw ApiError.forbidden(
+                    'You do not have permission to restore this child record'
+                )
+            }
+        }
         const restored = await this.children_repository.restore(public_id)
         if (!restored)
             throw ApiError.badRequest('Failed to restore children data')
         return restored
-    }
-
-    async verifyParentAccess(
-        public_id: string,
-        parent_id: string
-    ): Promise<boolean> {
-        const parentChildren =
-            await this.children_repository.findByParentId(parent_id)
-
-        const hasAccess = parentChildren.some(child => child.id === public_id)
-
-        if (!hasAccess) {
-            throw ApiError.badRequest(
-                'Unauthorized access: This children record does not belong to the user'
-            )
-        }
-        return true
     }
 }

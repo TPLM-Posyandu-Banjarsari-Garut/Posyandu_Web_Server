@@ -4,6 +4,7 @@ import { Router } from 'express'
 import { UserController } from '@/controllers/users-controller'
 import { UserService } from '@/services/users-service'
 import { UserRepository } from '@/repositories/user-repository'
+import { AuthorizationService } from '@/services/authorization-service'
 import { AsyncHandler } from '@/utils/async-handler'
 import { validateRequest } from '@/middlewares/validate-request'
 import {
@@ -19,7 +20,8 @@ import { signupRateLimiter } from '@/middlewares/rate-limiter'
 const router = Router()
 
 const user_repository = new UserRepository(db)
-const user_service = new UserService(user_repository)
+const authorization_service = new AuthorizationService()
+const user_service = new UserService(user_repository, authorization_service)
 const user_controller = new UserController(user_service)
 
 router.post(

@@ -47,7 +47,6 @@ export const setupSwagger = (app: Express): void => {
         res.send(html)
     })
 
-    // Endpoint untuk mendapatkan OpenAPI spec dalam format JSON
     app.get('/api/docs/openapi.json', (_req: Request, res: Response) => {
         res.json(swaggerDocument)
     })

@@ -94,14 +94,31 @@ export class AuthService {
                 }
             })
         } catch (error) {
-            logger.error(
-                error,
-                'Error during multi-role user registration transaction'
-            )
-            await db.delete(users).where(eq(users.id, generated_public_id))
-            await db
-                .delete(accounts)
-                .where(eq(accounts.user_id, generated_public_id))
+            try {
+                await db.transaction(async tx => {
+                    await tx
+                        .delete(parents)
+                        .where(eq(parents.user_id, generated_public_id))
+                    await tx
+                        .delete(cadres)
+                        .where(eq(cadres.user_id, generated_public_id))
+                    await tx
+                        .delete(midwifes)
+                        .where(eq(midwifes.user_id, generated_public_id))
+                    await tx
+                        .delete(accounts)
+                        .where(eq(accounts.user_id, generated_public_id))
+                    await tx
+                        .delete(users)
+                        .where(eq(users.id, generated_public_id))
+                })
+            } catch (cleanupError) {
+                logger.error(
+                    cleanupError,
+                    'Critical: Registration cleanup failed'
+                )
+            }
+
             if (error instanceof ApiError) {
                 throw error
             }

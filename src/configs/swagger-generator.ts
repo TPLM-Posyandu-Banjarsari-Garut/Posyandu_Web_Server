@@ -41,23 +41,13 @@ registry.registerComponent('securitySchemes', 'BearerAuth', {
     name: 'Authorization'
 })
 
-// auth (Better Auth)
 registerAuthRoutes(registry)
-
-// trash
 registerTrashRoutes(registry)
-
-// users
 registerUsersRoutes(registry)
-
 registerParentsRoutes(registry)
 registerCadresRoutes(registry)
 registerMidwifesRoutes(registry)
-
-// health-facility
 registerPosyandusRoutes(registry)
-
-// children
 registerChildrenRoutes(registry)
 registerVitaminsRoutes(registry)
 registerImmunizationRecordsRoutes(registry)
@@ -66,30 +56,14 @@ registerVaccinesRoutes(registry)
 registerKipiDetailsRoutes(registry)
 registerNutritionRecordsRoutes(registry)
 registerInventoriesRoutes(registry)
-
-// education
 registerEducationCategoriesRoutes(registry)
 registerEducationsRoutes(registry)
-
-// consultations
 registerConsultationsRoutes(registry)
-
-// medias
 registerMediasRoutes(registry)
-
-// notifications
 registerNotificationsRoutes(registry)
-
-// health-check
 registerHealthRoutes(registry)
-
-// cron-jobs
 registerCronRoutes(registry)
-
-// pregnancy-records
 registerPregnancyRecordsRoutes(registry)
-
-// examinations
 registerExaminationsRoutes(registry)
 registerExaminationSchedulesRoutes(registry)
 registerExaminationRecordsRoutes(registry)
