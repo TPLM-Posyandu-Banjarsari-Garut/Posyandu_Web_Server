@@ -8,6 +8,13 @@ import {
     handleGetByIdRequest,
     handleRestoreRequest
 } from '@/utils/controller-handlers'
+import {
+    registerParentSchema,
+    registerCadreSchema,
+    registerMidwifeSchema
+} from '@/validations/registration-validation'
+import { ApiError } from '@/utils/api-error'
+import { CreateUserInput } from '@/validations/users-validation'
 
 export class UserController {
     constructor(private readonly user_service: UserService) {}
@@ -15,7 +22,21 @@ export class UserController {
     createUser = async (req: Request, res: Response) => {
         logger.info({ body: req.body }, 'Incoming request: Create User')
 
-        const user = await this.user_service.createUser(req.body)
+        const { role } = req.body
+        let validatedData
+        if (role === 'parent') {
+            validatedData = registerParentSchema.parse(req.body)
+        } else if (role === 'cadre') {
+            validatedData = registerCadreSchema.parse(req.body)
+        } else if (role === 'midwife') {
+            validatedData = registerMidwifeSchema.parse(req.body)
+        } else {
+            throw ApiError.badRequest(`Invalid role: ${role}`)
+        }
+
+        const user = await this.user_service.createUser(
+            validatedData as CreateUserInput
+        )
 
         logger.info({ userId: user.id }, 'User created successfully')
         return ApiResponse.created(res, 'User created successfully', user)
@@ -40,12 +61,17 @@ export class UserController {
 
     updateUser = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
+        const currentUser = res.locals.user
         logger.info(
             { public_id, body: req.body },
             'Incoming request: Update User'
         )
 
-        const user = await this.user_service.updateUser(public_id, req.body)
+        const user = await this.user_service.updateUser(
+            public_id,
+            req.body,
+            currentUser
+        )
         return ApiResponse.ok(res, 'User updated successfully', user)
     }
 

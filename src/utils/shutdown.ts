@@ -14,7 +14,6 @@ export const configureGracefulShutdown = (
             if (err) logger.error(err, '❌ Error closing HTTP server')
 
             try {
-                // 2. Putus koneksi DB / resource eksternal
                 if (onCleanup) await onCleanup()
 
                 logger.info('👋 Server shut down cleanly.')

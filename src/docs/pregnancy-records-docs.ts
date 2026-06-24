@@ -17,7 +17,8 @@ export const registerPregnancyRecordsRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/pregnancy-records',
         tags: TAG,
-        summary: 'Create a new pregnancy record [Roles: admin, midwife, cadre]',
+        summary:
+            'Create a new pregnancy record [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             body: {
                 content: {
@@ -36,7 +37,7 @@ export const registerPregnancyRecordsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/pregnancy-records',
         tags: TAG,
         summary:
-            'Get list of pregnancy records [Roles: admin, midwife, cadre, parent]',
+            'Get list of pregnancy records [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { query: getPregnancyRecordsQuerySchema },
         responses: {
             200: { description: 'Success retrieve list of pregnancy records' }
@@ -48,7 +49,7 @@ export const registerPregnancyRecordsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/pregnancy-records/{public_id}',
         tags: TAG,
         summary:
-            'Get pregnancy record by public ID [Roles: admin, midwife, cadre, parent]',
+            'Get pregnancy record by public ID [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { params: pregnancyRecordParamsSchema },
         responses: {
             200: { description: 'Success get pregnancy record detail' },
@@ -60,7 +61,8 @@ export const registerPregnancyRecordsRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/pregnancy-records/{public_id}',
         tags: TAG,
-        summary: 'Update pregnancy record [Roles: admin, midwife, cadre]',
+        summary:
+            'Update pregnancy record [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: pregnancyRecordParamsSchema,
             body: {
@@ -80,7 +82,8 @@ export const registerPregnancyRecordsRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/pregnancy-records/{public_id}',
         tags: TAG,
-        summary: 'Delete pregnancy record [Roles: admin, midwife, cadre]',
+        summary:
+            'Delete pregnancy record [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: pregnancyRecordParamsSchema,
             query: deletePregnancyRecordQuerySchema
@@ -96,7 +99,7 @@ export const registerPregnancyRecordsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/pregnancy-records/{public_id}/restore',
         tags: TAG,
         summary:
-            'Restore soft-deleted pregnancy record [Roles: admin, midwife, cadre]',
+            'Restore soft-deleted pregnancy record [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { params: pregnancyRecordParamsSchema },
         responses: {
             200: { description: 'Pregnancy record restored successfully' },

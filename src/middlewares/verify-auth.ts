@@ -26,22 +26,9 @@ export const verifyAuth = async (
         }
 
         if (!currentUser.email_verified) {
-            const [socialAccount] = await db
-                .select({ id: accounts.id })
-                .from(accounts)
-                .where(
-                    and(
-                        eq(accounts.user_id, currentUser.id),
-                        ne(accounts.provider_id, 'credential')
-                    )
-                )
-                .limit(1)
-
-            if (!socialAccount) {
-                throw ApiError.forbidden(
-                    'Email address must be verified before accessing this resource'
-                )
-            }
+            throw ApiError.forbidden(
+                'Email address must be verified before accessing this resource'
+            )
         }
 
         res.locals.user = currentUser

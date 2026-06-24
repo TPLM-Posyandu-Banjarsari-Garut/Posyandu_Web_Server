@@ -17,7 +17,8 @@ export const registerNutritionRecordsRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/nutrition-records',
         tags: NUT_TAG,
-        summary: 'Create a new nutrition record [Roles: admin, midwife, cadre]',
+        summary:
+            'Create a new nutrition record [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             body: {
                 content: {
@@ -38,7 +39,7 @@ export const registerNutritionRecordsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/nutrition-records',
         tags: NUT_TAG,
         summary:
-            'Get list of nutrition records [Roles: admin, midwife, cadre, parent]',
+            'Get list of nutrition records [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { query: getNutritionRecordsQuerySchema },
         responses: {
             200: { description: 'Success get list of nutrition records' }
@@ -50,7 +51,7 @@ export const registerNutritionRecordsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/nutrition-records/{public_id}',
         tags: NUT_TAG,
         summary:
-            'Get nutrition record by public ID [Roles: admin, midwife, cadre, parent]',
+            'Get nutrition record by public ID [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { params: nutritionRecordParamsSchema },
         responses: {
             200: { description: 'Success get nutrition record detail' },
@@ -62,7 +63,8 @@ export const registerNutritionRecordsRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/nutrition-records/{public_id}',
         tags: NUT_TAG,
-        summary: 'Update nutrition record data [Roles: admin, midwife, cadre]',
+        summary:
+            'Update nutrition record data [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: nutritionRecordParamsSchema,
             body: {
@@ -84,7 +86,8 @@ export const registerNutritionRecordsRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/nutrition-records/{public_id}',
         tags: NUT_TAG,
-        summary: 'Delete nutrition record [Roles: admin, midwife, cadre]',
+        summary:
+            'Delete nutrition record [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: nutritionRecordParamsSchema,
             query: deleteNutritionRecordQuerySchema
@@ -100,7 +103,7 @@ export const registerNutritionRecordsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/nutrition-records/{public_id}/restore',
         tags: NUT_TAG,
         summary:
-            'Restore soft-deleted nutrition record [Roles: admin, midwife, cadre]',
+            'Restore soft-deleted nutrition record [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { params: nutritionRecordParamsSchema },
         responses: {
             200: { description: 'Nutrition record restored successfully' },

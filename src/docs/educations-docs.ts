@@ -18,7 +18,7 @@ export const registerEducationsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/educations',
         tags: EDU_TAG,
         summary:
-            'Create a new education article [Roles: admin, midwife, cadre]',
+            'Create a new education article [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             body: {
                 content: {
@@ -37,7 +37,7 @@ export const registerEducationsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/educations',
         tags: EDU_TAG,
         summary:
-            'Get list of education articles [Roles: admin, midwife, cadre, parent]',
+            'Get list of education articles [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { query: getEducationsQuerySchema },
         responses: {
             200: { description: 'Success get list of education articles' }
@@ -49,7 +49,7 @@ export const registerEducationsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/educations/{public_id}',
         tags: EDU_TAG,
         summary:
-            'Get education article by public ID [Roles: admin, midwife, cadre, parent]',
+            'Get education article by public ID [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { params: educationParamsSchema },
         responses: {
             200: { description: 'Success get education article detail' },
@@ -61,7 +61,8 @@ export const registerEducationsRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/educations/{public_id}',
         tags: EDU_TAG,
-        summary: 'Update education article data [Roles: admin, midwife, cadre]',
+        summary:
+            'Update education article data [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: educationParamsSchema,
             body: {
@@ -81,7 +82,8 @@ export const registerEducationsRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/educations/{public_id}',
         tags: EDU_TAG,
-        summary: 'Delete education article [Roles: admin, midwife, cadre]',
+        summary:
+            'Delete education article [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: educationParamsSchema,
             query: deleteEducationQuerySchema
@@ -97,7 +99,7 @@ export const registerEducationsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/educations/{public_id}/restore',
         tags: EDU_TAG,
         summary:
-            'Restore soft-deleted education article [Roles: admin, midwife, cadre]',
+            'Restore soft-deleted education article [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { params: educationParamsSchema },
         responses: {
             200: { description: 'Education article restored successfully' },

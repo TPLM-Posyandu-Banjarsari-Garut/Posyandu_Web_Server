@@ -46,12 +46,21 @@ export const errorHandler = (
         `Error: ${message} | Status: ${statusCode} | Path: ${req.method} ${req.originalUrl}`
     )
 
+    const isProduction = env.NODE_ENV === 'production'
+
+    if (isProduction && !(err instanceof ApiError)) {
+        statusCode = 500
+        message = 'Internal server error'
+        errors = undefined
+    } else if (isProduction && err instanceof ApiError) {
+        errors = undefined
+    }
+
     res.status(statusCode).json({
         success: false,
         message,
         statusCode,
         ...(errors !== undefined && { errors }),
-        ...(env.NODE_ENV === 'development' &&
-            err instanceof Error && { stack: err.stack })
+        ...(!isProduction && err instanceof Error && { stack: err.stack })
     })
 }

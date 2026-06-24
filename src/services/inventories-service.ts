@@ -1,3 +1,4 @@
+import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewInventory, Inventory } from '@/db'
 import {
@@ -25,7 +26,7 @@ export class InventoryService {
 
     async getInventoryById(public_id: string): Promise<Inventory> {
         const inventory = await this.inventory_repository.findById(public_id)
-        if (!inventory) throw new Error('Inventory not found')
+        if (!inventory) throw ApiError.notFound('Inventory not found')
         return inventory
     }
 
@@ -39,7 +40,7 @@ export class InventoryService {
             public_id,
             inventory_payload
         )
-        if (!updated) throw new Error('Failed to update inventory')
+        if (!updated) throw ApiError.badRequest('Failed to update inventory')
         return updated
     }
 
@@ -53,13 +54,13 @@ export class InventoryService {
             ? await this.inventory_repository.hardDelete(public_id)
             : await this.inventory_repository.softDelete(public_id)
 
-        if (!deleted) throw new Error('Failed to delete inventory')
+        if (!deleted) throw ApiError.badRequest('Failed to delete inventory')
         return deleted
     }
 
     async restoreInventory(public_id: string): Promise<Inventory> {
         const restored = await this.inventory_repository.restore(public_id)
-        if (!restored) throw new Error('Failed to restore inventory')
+        if (!restored) throw ApiError.badRequest('Failed to restore inventory')
         return restored
     }
 }

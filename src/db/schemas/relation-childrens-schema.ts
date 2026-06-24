@@ -24,7 +24,11 @@ export const relationChildrens = pgTable(
     table => [
         index('relation_childrens_parent_id_idx').on(table.parent_id),
         index('relation_childrens_children_id_idx').on(table.children_id),
-        index('relation_childrens_is_deleted_idx').on(table.is_deleted)
+        index('relation_childrens_is_deleted_idx').on(table.is_deleted),
+        index('relation_childrens_parent_idx').on(
+            table.parent_id,
+            table.children_id
+        )
     ]
 )
 

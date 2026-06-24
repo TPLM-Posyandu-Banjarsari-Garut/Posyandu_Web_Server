@@ -18,7 +18,8 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/childrens',
         tags: CHILD_TAG,
-        summary: 'Create a new child [Roles: admin, parent, cadre, midwife]',
+        summary:
+            'Create a new child [Roles: posyandu_admin, village_admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
         request: {
             body: {
@@ -37,7 +38,8 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/childrens',
         tags: CHILD_TAG,
-        summary: 'Get list of children [Roles: admin, parent, cadre, midwife]',
+        summary:
+            'Get list of children [Roles: posyandu_admin, village_admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
         request: { query: getChildrenQuerySchema },
         responses: {
@@ -52,7 +54,7 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/childrens/{public_id}',
         tags: CHILD_TAG,
         summary:
-            'Get child by public ID [Roles: admin, parent, cadre, midwife]',
+            'Get child by public ID [Roles: posyandu_admin, village_admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
         request: { params: childParamsSchema },
         responses: {
@@ -67,7 +69,8 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/childrens/{public_id}',
         tags: CHILD_TAG,
-        summary: 'Update child data [Roles: admin, parent, cadre, midwife]',
+        summary:
+            'Update child data [Roles: posyandu_admin, village_admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
         request: {
             params: childParamsSchema,
@@ -88,7 +91,8 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/childrens/{public_id}',
         tags: CHILD_TAG,
-        summary: 'Delete child [Roles: admin, parent, cadre, midwife]',
+        summary:
+            'Delete child [Roles: posyandu_admin, village_admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
         request: { params: childParamsSchema, query: deleteChildQuerySchema },
         responses: {
@@ -104,7 +108,7 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/childrens/{public_id}/restore',
         tags: CHILD_TAG,
         summary:
-            'Restore soft-deleted child [Roles: admin, parent, cadre, midwife]',
+            'Restore soft-deleted child [Roles: posyandu_admin, village_admin, parent, cadre, midwife]',
         security: SECURITY_AUTH,
         request: { params: childParamsSchema },
         responses: {

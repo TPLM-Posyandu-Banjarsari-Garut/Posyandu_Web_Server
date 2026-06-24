@@ -44,7 +44,16 @@ export const childrens = pgTable(
     },
     table => [
         index('childrens_posyandu_id_idx').on(table.posyandu_id),
-        index('childrens_is_deleted_idx').on(table.is_deleted)
+        index('childrens_is_deleted_idx').on(table.is_deleted),
+        index('childrens_posyandu_deleted_idx').on(
+            table.posyandu_id,
+            table.deleted_at
+        ),
+        index('childrens_gender_category_idx').on(
+            table.gender,
+            table.child_category,
+            table.deleted_at
+        )
     ]
 )
 

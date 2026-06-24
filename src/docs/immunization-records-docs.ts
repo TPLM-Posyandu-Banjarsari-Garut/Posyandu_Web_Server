@@ -26,7 +26,7 @@ export const registerImmunizationRecordsRoutes = (
         path: '/api/immunization-records',
         tags: IMM_TAG,
         summary:
-            'Create a new immunization record [Roles: admin, midwife, cadre]',
+            'Create a new immunization record [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             body: {
                 content: {
@@ -47,7 +47,7 @@ export const registerImmunizationRecordsRoutes = (
         path: '/api/immunization-records',
         tags: IMM_TAG,
         summary:
-            'Get list of immunization records [Roles: admin, midwife, cadre, parent]',
+            'Get list of immunization records [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { query: getImmunizationRecordsQuerySchema },
         responses: {
             200: { description: 'Success get list of immunization records' }
@@ -59,7 +59,7 @@ export const registerImmunizationRecordsRoutes = (
         path: '/api/immunization-records/{public_id}',
         tags: IMM_TAG,
         summary:
-            'Get immunization record by public ID [Roles: admin, midwife, cadre, parent]',
+            'Get immunization record by public ID [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { params: immunizationRecordParamsSchema },
         responses: {
             200: { description: 'Success get immunization record detail' },
@@ -72,7 +72,7 @@ export const registerImmunizationRecordsRoutes = (
         path: '/api/immunization-records/{public_id}',
         tags: IMM_TAG,
         summary:
-            'Update immunization record data [Roles: admin, midwife, cadre]',
+            'Update immunization record data [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: immunizationRecordParamsSchema,
             body: {
@@ -94,7 +94,8 @@ export const registerImmunizationRecordsRoutes = (
         method: 'delete',
         path: '/api/immunization-records/{public_id}',
         tags: IMM_TAG,
-        summary: 'Delete immunization record [Roles: admin, midwife, cadre]',
+        summary:
+            'Delete immunization record [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: immunizationRecordParamsSchema,
             query: deleteImmunizationRecordQuerySchema
@@ -110,7 +111,7 @@ export const registerImmunizationRecordsRoutes = (
         path: '/api/immunization-records/{public_id}/restore',
         tags: IMM_TAG,
         summary:
-            'Restore soft-deleted immunization record [Roles: admin, midwife, cadre]',
+            'Restore soft-deleted immunization record [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { params: immunizationRecordParamsSchema },
         responses: {
             200: { description: 'Immunization record restored successfully' },

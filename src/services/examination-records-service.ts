@@ -133,7 +133,6 @@ export class ExaminationRecordsService {
             throw ApiError.server('Failed to delete examination record')
 
         if (record.schedule_id) {
-            // Decrement schedule participants count
             await this.schedules_repository.decrementParticipants(
                 record.schedule_id
             )
@@ -148,7 +147,6 @@ export class ExaminationRecordsService {
             throw ApiError.server('Failed to restore examination record')
 
         if (restored.schedule_id) {
-            // Re-increment schedule participants count
             await this.schedules_repository.incrementParticipants(
                 restored.schedule_id
             )

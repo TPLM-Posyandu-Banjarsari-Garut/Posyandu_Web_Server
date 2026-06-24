@@ -8,13 +8,7 @@ export interface RegisterMultiRolePayload {
     name: string
     phone_number?: string | null
     avatar_url?: string | null
-    role:
-        | 'admin'
-        | 'posyandu_admin'
-        | 'village_admin'
-        | 'midwife'
-        | 'cadre'
-        | 'parent'
+    role: 'posyandu_admin' | 'village_admin' | 'midwife' | 'cadre' | 'parent'
     midwife_data?: Omit<CreateMidwifeInput, 'user_id' | 'status'>
     cadre_data?: Omit<CreateCadreInput, 'user_id' | 'status'>
     parent_data?: Omit<CreateParentInput, 'user_id' | 'status'>

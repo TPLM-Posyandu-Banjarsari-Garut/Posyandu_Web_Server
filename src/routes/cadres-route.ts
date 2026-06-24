@@ -24,7 +24,7 @@ const cadre_controller = new CadreController(cadre_service)
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'cadre'),
     validateRequest({ body: createCadreSchema }),
     AsyncHandler(cadre_controller.createCadre)
 )
@@ -32,7 +32,7 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'cadre'),
     validateRequest({ query: getCadresQuerySchema }),
     AsyncHandler(cadre_controller.getCadres)
 )
@@ -40,7 +40,7 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'cadre'),
     validateRequest({ params: cadreParamsSchema }),
     AsyncHandler(cadre_controller.getCadreById)
 )
@@ -48,7 +48,7 @@ router.get(
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'cadre'),
     validateRequest({ params: cadreParamsSchema, body: updateCadreSchema }),
     AsyncHandler(cadre_controller.updateCadre)
 )
@@ -56,7 +56,7 @@ router.put(
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'cadre'),
     validateRequest({
         params: cadreParamsSchema,
         query: deleteCadreQuerySchema
@@ -67,7 +67,7 @@ router.delete(
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'cadre'),
     validateRequest({ params: cadreParamsSchema }),
     AsyncHandler(cadre_controller.restoreCadre)
 )

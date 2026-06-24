@@ -17,10 +17,22 @@ export default {
     ],
     coverageThreshold: {
         global: {
-            statements: 20,
-            branches: 8,
-            functions: 10,
-            lines: 20
+            statements: 80,
+            branches: 70,
+            functions: 75,
+            lines: 80
+        },
+        './src/services/': {
+            statements: 90,
+            branches: 85,
+            functions: 90,
+            lines: 90
+        },
+        './src/repositories/': {
+            statements: 85,
+            branches: 80,
+            functions: 85,
+            lines: 85
         }
     },
     coverageDirectory: 'coverage',

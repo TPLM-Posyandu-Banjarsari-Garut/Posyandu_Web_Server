@@ -24,7 +24,7 @@ const parent_controller = new ParentController(parent_service)
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'parent'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'parent'),
     validateRequest({ body: createParentSchema }),
     AsyncHandler(parent_controller.createParent)
 )
@@ -32,7 +32,7 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'midwife', 'cadre'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ query: getParentsQuerySchema }),
     AsyncHandler(parent_controller.getParents)
 )
@@ -40,7 +40,7 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'parent'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'parent'),
     validateRequest({ params: parentParamsSchema }),
     AsyncHandler(parent_controller.getParentById)
 )
@@ -48,7 +48,7 @@ router.get(
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'parent'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'parent'),
     validateRequest({ params: parentParamsSchema, body: updateParentSchema }),
     AsyncHandler(parent_controller.updateParent)
 )
@@ -56,7 +56,7 @@ router.put(
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'parent'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'parent'),
     validateRequest({
         params: parentParamsSchema,
         query: deleteParentQuerySchema
@@ -67,7 +67,7 @@ router.delete(
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin', 'parent'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'parent'),
     validateRequest({ params: parentParamsSchema }),
     AsyncHandler(parent_controller.restoreParent)
 )

@@ -17,7 +17,8 @@ export const registerParentsRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/parents',
         tags: PARENT_TAG,
-        summary: 'Create a new parent [Roles: admin, parent]',
+        summary:
+            'Create a new parent [Roles: posyandu_admin, village_admin, parent]',
         request: {
             body: {
                 content: { 'application/json': { schema: createParentSchema } }
@@ -33,7 +34,8 @@ export const registerParentsRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/parents',
         tags: PARENT_TAG,
-        summary: 'Get list of parents [Roles: admin, midwife, cadre]',
+        summary:
+            'Get list of parents [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { query: getParentsQuerySchema },
         responses: {
             200: { description: 'Success get list of parents' }
@@ -44,7 +46,8 @@ export const registerParentsRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/parents/{public_id}',
         tags: PARENT_TAG,
-        summary: 'Get parent by public ID [Roles: admin, parent]',
+        summary:
+            'Get parent by public ID [Roles: posyandu_admin, village_admin, parent]',
         request: { params: parentParamsSchema },
         responses: {
             200: { description: 'Success get parent detail' },
@@ -56,7 +59,8 @@ export const registerParentsRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/parents/{public_id}',
         tags: PARENT_TAG,
-        summary: 'Update parent data [Roles: admin, parent]',
+        summary:
+            'Update parent data [Roles: posyandu_admin, village_admin, parent]',
         request: {
             params: parentParamsSchema,
             body: {
@@ -74,7 +78,7 @@ export const registerParentsRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/parents/{public_id}',
         tags: PARENT_TAG,
-        summary: 'Delete parent [Roles: admin, parent]',
+        summary: 'Delete parent [Roles: posyandu_admin, village_admin, parent]',
         request: { params: parentParamsSchema, query: deleteParentQuerySchema },
         responses: {
             200: { description: 'Parent deleted successfully' },
@@ -86,7 +90,8 @@ export const registerParentsRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/parents/{public_id}/restore',
         tags: PARENT_TAG,
-        summary: 'Restore soft-deleted parent [Roles: admin, parent]',
+        summary:
+            'Restore soft-deleted parent [Roles: posyandu_admin, village_admin, parent]',
         request: { params: parentParamsSchema },
         responses: {
             200: { description: 'Parent restored successfully' },

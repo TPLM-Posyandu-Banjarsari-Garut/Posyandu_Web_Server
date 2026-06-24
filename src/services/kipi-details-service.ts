@@ -1,3 +1,4 @@
+import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewKipiDetail, KipiDetail } from '@/db'
 import {
@@ -16,7 +17,7 @@ export class KipiDetailService {
                 kipi_payload.immunization_record_id
             )
         if (isExists) {
-            throw new Error(
+            throw ApiError.conflict(
                 'KIPI detail for this immunization record already exists'
             )
         }
@@ -37,7 +38,7 @@ export class KipiDetailService {
 
     async getKipiDetailById(public_id: string): Promise<KipiDetail> {
         const kipi = await this.kipi_detail_repository.findById(public_id)
-        if (!kipi) throw new Error('KIPI detail not found')
+        if (!kipi) throw ApiError.notFound('KIPI detail not found')
         return kipi
     }
 
@@ -57,7 +58,7 @@ export class KipiDetailService {
                     kipi_payload.immunization_record_id
                 )
             if (isExists) {
-                throw new Error(
+                throw ApiError.conflict(
                     'KIPI detail for this immunization record already exists'
                 )
             }
@@ -67,7 +68,7 @@ export class KipiDetailService {
             public_id,
             kipi_payload
         )
-        if (!updated) throw new Error('Failed to update KIPI detail')
+        if (!updated) throw ApiError.badRequest('Failed to update KIPI detail')
         return updated
     }
 
@@ -81,13 +82,14 @@ export class KipiDetailService {
             ? await this.kipi_detail_repository.hardDelete(public_id)
             : await this.kipi_detail_repository.softDelete(public_id)
 
-        if (!deleted) throw new Error('Failed to delete KIPI detail')
+        if (!deleted) throw ApiError.badRequest('Failed to delete KIPI detail')
         return deleted
     }
 
     async restoreKipiDetail(public_id: string): Promise<KipiDetail> {
         const restored = await this.kipi_detail_repository.restore(public_id)
-        if (!restored) throw new Error('Failed to restore KIPI detail')
+        if (!restored)
+            throw ApiError.badRequest('Failed to restore KIPI detail')
         return restored
     }
 }

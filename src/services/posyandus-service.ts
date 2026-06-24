@@ -1,3 +1,4 @@
+import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewPosyandu, Posyandu } from '@/db'
 import {
@@ -13,7 +14,7 @@ export class PosyanduService {
             name: posyandu_payload.name || undefined
         })
         if (checks.nameExists) {
-            throw new Error('Posyandu name is already registered')
+            throw ApiError.conflict('Posyandu name is already registered')
         }
 
         return this.posyandu_repository.create(posyandu_payload)
@@ -32,7 +33,7 @@ export class PosyanduService {
 
     async getPosyanduById(public_id: string): Promise<Posyandu> {
         const posyandu = await this.posyandu_repository.findById(public_id)
-        if (!posyandu) throw new Error('Posyandu not found')
+        if (!posyandu) throw ApiError.notFound('Posyandu not found')
         return posyandu
     }
 
@@ -51,7 +52,7 @@ export class PosyanduService {
         })
 
         if (checks.nameExists) {
-            throw new Error(
+            throw ApiError.conflict(
                 'Posyandu name is already registered by another posyandu'
             )
         }
@@ -60,7 +61,7 @@ export class PosyanduService {
             public_id,
             posyandu_payload
         )
-        if (!updated) throw new Error('Failed to update posyandu')
+        if (!updated) throw ApiError.badRequest('Failed to update posyandu')
         return updated
     }
 
@@ -72,7 +73,7 @@ export class PosyanduService {
             public_id,
             true
         )
-        if (!existing) throw new Error('Posyandu not found')
+        if (!existing) throw ApiError.notFound('Posyandu not found')
 
         if (!is_permanent && existing.status === 'inactive') {
             return existing
@@ -82,13 +83,13 @@ export class PosyanduService {
             ? await this.posyandu_repository.hardDelete(public_id)
             : await this.posyandu_repository.softDelete(public_id)
 
-        if (!deleted) throw new Error('Failed to delete posyandu')
+        if (!deleted) throw ApiError.badRequest('Failed to delete posyandu')
         return deleted
     }
 
     async restorePosyandu(public_id: string): Promise<Posyandu> {
         const restored = await this.posyandu_repository.restore(public_id)
-        if (!restored) throw new Error('Failed to restore posyandu')
+        if (!restored) throw ApiError.badRequest('Failed to restore posyandu')
         return restored
     }
 }

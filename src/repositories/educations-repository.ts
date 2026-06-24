@@ -1,4 +1,6 @@
 import { NewEducation, Education, educations } from '@/db'
+import { BaseRepository } from '@/repositories/base-repository'
+import { sanitizeSearchTerm } from '@/utils/sanitize'
 import {
     and,
     eq,
@@ -23,15 +25,13 @@ export interface EducationQueryFilters {
     order?: 'asc' | 'desc'
 }
 
-export class EducationRepository {
-    constructor(private readonly db: NodePgDatabase) {}
-
-    async create(newEducation: NewEducation): Promise<Education> {
-        const [education] = await this.db
-            .insert(educations)
-            .values(newEducation)
-            .returning()
-        return education
+export class EducationRepository extends BaseRepository<
+    typeof educations,
+    Education,
+    NewEducation
+> {
+    constructor(db: NodePgDatabase<Record<string, never>>) {
+        super(db, educations)
     }
 
     async getEducations(filters?: EducationQueryFilters) {
@@ -49,9 +49,7 @@ export class EducationRepository {
         const safePage = Math.max(1, page)
         const safeLimit = Math.min(Math.max(1, limit), 100)
 
-        const escapedSearch = search
-            ? search.replace(/[%_\\]/g, '\\$&')
-            : undefined
+        const escapedSearch = search ? sanitizeSearchTerm(search) : undefined
 
         const conditions = []
 
@@ -143,70 +141,19 @@ export class EducationRepository {
         return education
     }
 
-    async update(
-        public_id: string,
-        updatedEducation: Partial<NewEducation>
-    ): Promise<Education | undefined> {
-        const [education] = await this.db
-            .update(educations)
-            .set(updatedEducation)
-            .where(eq(educations.id, public_id))
-            .returning()
-        return education
-    }
-    private async findByCondition(
-        condition: SQL | undefined
-    ): Promise<Education | undefined> {
-        const [row] = await this.db
-            .select()
-            .from(educations)
-            .where(condition)
-            .limit(1)
-        return row
-    }
-
-    private async updateStatus(
-        public_id: string,
-        status: 'active' | 'inactive'
-    ): Promise<Education | undefined> {
-        const [row] = await this.db
-            .update(educations)
-            .set({ status })
-            .where(eq(educations.id, public_id))
-            .returning()
-        return row
-    }
-
-    private async checkExists(condition: SQL | undefined): Promise<boolean> {
-        const [row] = await this.db
-            .select({ id: educations.id })
-            .from(educations)
-            .where(condition)
-            .limit(1)
-        return !!row
-    }
-
     async softDelete(public_id: string): Promise<Education | undefined> {
         const [row] = await this.db
             .update(educations)
-            .set({ status: 'inactive', deleted_at: sql`now()` })
+            .set({ deleted_at: new Date(), is_deleted: true })
             .where(eq(educations.id, public_id))
             .returning()
         return row
-    }
-
-    async hardDelete(public_id: string): Promise<Education | undefined> {
-        const [education] = await this.db
-            .delete(educations)
-            .where(eq(educations.id, public_id))
-            .returning()
-        return education
     }
 
     async restore(public_id: string): Promise<Education | undefined> {
         const [row] = await this.db
             .update(educations)
-            .set({ status: 'active', deleted_at: null })
+            .set({ deleted_at: null, is_deleted: false })
             .where(eq(educations.id, public_id))
             .returning()
         return row

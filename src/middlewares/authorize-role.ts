@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express'
 import { ApiError } from '@/utils/api-error'
 
 export type Role =
-    | 'admin'
     | 'posyandu_admin'
     | 'village_admin'
     | 'midwife'
@@ -20,16 +19,7 @@ export const authorizeRoles = (...allowedRoles: Role[]) => {
         }
 
         const userRole = user.role as Role
-        const hasPermission = allowedRoles.some(role => {
-            if (role === 'admin') {
-                return (
-                    userRole === 'admin' ||
-                    userRole === 'posyandu_admin' ||
-                    userRole === 'village_admin'
-                )
-            }
-            return role === userRole
-        })
+        const hasPermission = allowedRoles.includes(userRole)
 
         if (!userRole || !hasPermission) {
             return next(

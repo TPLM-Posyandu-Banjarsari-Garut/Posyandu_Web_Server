@@ -1,3 +1,4 @@
+import { ApiError } from '@/utils/api-error'
 import { NewParent, Parent } from '@/db'
 import {
     ParentRepository,
@@ -15,10 +16,12 @@ export class ParentService {
         })
 
         if (checks.userExists) {
-            throw new Error('User already has a parent profile')
+            throw ApiError.conflict('User already has a parent profile')
         }
         if (checks.identityExists) {
-            throw new Error('Identity number (NIK) is already registered')
+            throw ApiError.badRequest(
+                'Identity number (NIK) is already registered'
+            )
         }
 
         return this.parent_repository.create(parent_payload)
@@ -37,7 +40,7 @@ export class ParentService {
 
     async getParentById(public_id: string): Promise<Parent> {
         const parent = await this.parent_repository.findById(public_id)
-        if (!parent) throw new Error('Parent profile not found')
+        if (!parent) throw ApiError.notFound('Parent profile not found')
         return parent
     }
 
@@ -62,19 +65,22 @@ export class ParentService {
         })
 
         if (checks.identityExists) {
-            throw new Error(
+            throw ApiError.badRequest(
                 'Identity number (NIK) is already registered by another parent'
             )
         }
         if (checks.userExists) {
-            throw new Error('The target user already has a parent profile')
+            throw ApiError.conflict(
+                'The target user already has a parent profile'
+            )
         }
 
         const updated = await this.parent_repository.update(
             public_id,
             parent_payload
         )
-        if (!updated) throw new Error('Failed to update parent profile')
+        if (!updated)
+            throw ApiError.badRequest('Failed to update parent profile')
         return updated
     }
 
@@ -83,7 +89,7 @@ export class ParentService {
         is_permanent: boolean = false
     ): Promise<Parent> {
         const existing = await this.parent_repository.findById(public_id, true)
-        if (!existing) throw new Error('Parent profile not found')
+        if (!existing) throw ApiError.notFound('Parent profile not found')
 
         if (!is_permanent && existing.status === 'inactive') {
             return existing
@@ -93,13 +99,15 @@ export class ParentService {
             ? await this.parent_repository.hardDelete(public_id)
             : await this.parent_repository.softDelete(public_id)
 
-        if (!deleted) throw new Error('Failed to delete parent profile')
+        if (!deleted)
+            throw ApiError.badRequest('Failed to delete parent profile')
         return deleted
     }
 
     async restoreParent(public_id: string): Promise<Parent> {
         const restored = await this.parent_repository.restore(public_id)
-        if (!restored) throw new Error('Failed to restore parent profile')
+        if (!restored)
+            throw ApiError.badRequest('Failed to restore parent profile')
         return restored
     }
 }

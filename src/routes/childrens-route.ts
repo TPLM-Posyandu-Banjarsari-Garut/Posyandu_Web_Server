@@ -5,6 +5,7 @@ import { ChildrenController } from '@/controllers/childrens-controller'
 import { ChildrenService } from '@/services/childrens-service'
 import { ChildrenRepository } from '@/repositories/childrens-repository'
 import { ParentRepository } from '@/repositories/parents-repository'
+import { AuthorizationService } from '@/services/authorization-service'
 import { AsyncHandler } from '@/utils/async-handler'
 import { validateRequest } from '@/middlewares/validate-request'
 import {
@@ -20,16 +21,24 @@ const router = Router()
 
 const children_repository = new ChildrenRepository(db)
 const parent_repository = new ParentRepository(db)
+const authorization_service = new AuthorizationService()
 const children_service = new ChildrenService(
     children_repository,
-    parent_repository
+    parent_repository,
+    authorization_service
 )
 const children_controller = new ChildrenController(children_service)
 
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'parent', 'cadre', 'midwife'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'parent',
+        'cadre',
+        'midwife'
+    ),
     validateRequest({ body: createChildSchema }),
     AsyncHandler(children_controller.createChildren)
 )
@@ -37,7 +46,13 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin', 'parent', 'cadre', 'midwife'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'parent',
+        'cadre',
+        'midwife'
+    ),
     validateRequest({ query: getChildrenQuerySchema }),
     AsyncHandler(children_controller.getChildrens)
 )
@@ -45,7 +60,13 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'parent', 'cadre', 'midwife'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'parent',
+        'cadre',
+        'midwife'
+    ),
     validateRequest({ params: childParamsSchema }),
     AsyncHandler(children_controller.getChildrenById)
 )
@@ -53,7 +74,13 @@ router.get(
 router.put(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'parent', 'cadre', 'midwife'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'parent',
+        'cadre',
+        'midwife'
+    ),
     validateRequest({
         params: childParamsSchema,
         body: updateChildSchema
@@ -64,7 +91,13 @@ router.put(
 router.delete(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('admin', 'parent', 'cadre', 'midwife'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'parent',
+        'cadre',
+        'midwife'
+    ),
     validateRequest({
         params: childParamsSchema,
         query: deleteChildQuerySchema
@@ -75,7 +108,13 @@ router.delete(
 router.post(
     '/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin', 'parent', 'cadre', 'midwife'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'parent',
+        'cadre',
+        'midwife'
+    ),
     validateRequest({ params: childParamsSchema }),
     AsyncHandler(children_controller.restoreChildren)
 )

@@ -17,7 +17,8 @@ export const registerVaccinesRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/vaccines',
         tags: VAC_TAG,
-        summary: 'Create a new vaccine [Roles: admin, midwife, cadre]',
+        summary:
+            'Create a new vaccine [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             body: {
                 content: {
@@ -35,7 +36,8 @@ export const registerVaccinesRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/vaccines',
         tags: VAC_TAG,
-        summary: 'Get list of vaccines [Roles: admin, midwife, cadre, parent]',
+        summary:
+            'Get list of vaccines [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { query: getVaccinesQuerySchema },
         responses: {
             200: { description: 'Success get list of vaccines' }
@@ -47,7 +49,7 @@ export const registerVaccinesRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/vaccines/{public_id}',
         tags: VAC_TAG,
         summary:
-            'Get vaccine by public ID [Roles: admin, midwife, cadre, parent]',
+            'Get vaccine by public ID [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { params: vaccineParamsSchema },
         responses: {
             200: { description: 'Success get vaccine detail' },
@@ -59,7 +61,8 @@ export const registerVaccinesRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/vaccines/{public_id}',
         tags: VAC_TAG,
-        summary: 'Update vaccine data [Roles: admin, midwife, cadre]',
+        summary:
+            'Update vaccine data [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: vaccineParamsSchema,
             body: {
@@ -79,7 +82,8 @@ export const registerVaccinesRoutes = (registry: OpenAPIRegistry) => {
         method: 'delete',
         path: '/api/vaccines/{public_id}',
         tags: VAC_TAG,
-        summary: 'Delete vaccine [Roles: admin, midwife, cadre]',
+        summary:
+            'Delete vaccine [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: vaccineParamsSchema,
             query: deleteVaccineQuerySchema
@@ -94,7 +98,8 @@ export const registerVaccinesRoutes = (registry: OpenAPIRegistry) => {
         method: 'post',
         path: '/api/vaccines/{public_id}/restore',
         tags: VAC_TAG,
-        summary: 'Restore soft-deleted vaccine [Roles: admin, midwife, cadre]',
+        summary:
+            'Restore soft-deleted vaccine [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { params: vaccineParamsSchema },
         responses: {
             200: { description: 'Vaccine restored successfully' },

@@ -20,7 +20,8 @@ export const sessions = pgTable(
     },
     table => [
         index('sessions_user_id_idx').on(table.user_id),
-        index('sessions_is_deleted_idx').on(table.is_deleted)
+        index('sessions_is_deleted_idx').on(table.is_deleted),
+        index('sessions_expires_at_idx').on(table.expires_at)
     ]
 )
 

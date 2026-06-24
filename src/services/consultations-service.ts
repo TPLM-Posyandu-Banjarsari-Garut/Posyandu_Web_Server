@@ -449,7 +449,7 @@ export class ConsultationsService {
 
         if (redis) {
             try {
-                await redis.set(cacheKey, result, { ex: 30 }) // cache for 30s
+                await redis.set(cacheKey, result, { ex: 30 })
             } catch (err) {
                 logger.error(err, 'Redis set error')
             }
@@ -645,11 +645,11 @@ export class ConsultationsService {
                 dbErr.constraint === 'consultations_parent_schedule_unique_idx'
             ) {
                 throw ApiError.conflict(
-                    'Anda sudah memiliki jadwal booking lain pada waktu yang sama.'
+                    'You already have another booking at the same time.'
                 )
             }
             throw ApiError.conflict(
-                'Slot jadwal ini sudah dibooking oleh pasien lain.'
+                'This schedule slot is already booked by another patient.'
             )
         }
         throw error

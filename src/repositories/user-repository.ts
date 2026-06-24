@@ -1,4 +1,19 @@
-import { NewUser, User, users, parents, midwifes, cadres, sessions } from '@/db'
+import {
+    NewUser,
+    User,
+    users,
+    parents,
+    midwifes,
+    cadres,
+    sessions,
+    relationChildrens,
+    consultations,
+    examinationSchedules,
+    notifications
+} from '@/db'
+import { ApiError } from '@/utils/api-error'
+import { BaseRepository } from '@/repositories/base-repository'
+import { sanitizeSearchTerm } from '@/utils/sanitize'
 import {
     and,
     eq,
@@ -8,7 +23,8 @@ import {
     SQL,
     asc,
     desc,
-    getTableColumns
+    getTableColumns,
+    inArray
 } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
@@ -22,18 +38,26 @@ export interface UserQueryFilters {
     order?: 'asc' | 'desc'
 }
 
+export interface UserWithProfile extends User {
+    parent_id?: string | null
+    midwife_id?: string | null
+    cadre_id?: string | null
+    posyandu_id?: string | null
+}
+
 const roleTableMap = {
     parent: parents,
     midwife: midwifes,
     cadre: cadres
 } as const
 
-export class UserRepository {
-    constructor(private readonly db: NodePgDatabase) {}
-
-    async create(new_user: NewUser): Promise<User> {
-        const [user] = await this.db.insert(users).values(new_user).returning()
-        return user
+export class UserRepository extends BaseRepository<
+    typeof users,
+    User,
+    NewUser
+> {
+    constructor(db: NodePgDatabase<Record<string, never>>) {
+        super(db, users)
     }
 
     async findAll(): Promise<User[]> {
@@ -54,9 +78,7 @@ export class UserRepository {
         const safePage = Math.max(1, page)
         const safeLimit = Math.min(Math.max(1, limit), 100)
 
-        const escapedSearch = search
-            ? search.replace(/[%_\\]/g, '\\$&')
-            : undefined
+        const escapedSearch = search ? sanitizeSearchTerm(search) : undefined
 
         let statusCondition = undefined
         if (status) {
@@ -76,11 +98,8 @@ export class UserRepository {
             statusCondition
         )
 
-        const dataWithCount = await this.db
-            .select({
-                ...getTableColumns(users),
-                total_count: sql<number>`count(*) over()`.mapWith(Number)
-            })
+        const data = await this.db
+            .select(getTableColumns(users))
             .from(users)
             .where(whereClause)
             .orderBy(
@@ -90,34 +109,14 @@ export class UserRepository {
             .offset((safePage - 1) * safeLimit)
 
         let totalItems = 0
-        if (dataWithCount.length > 0) {
-            totalItems = dataWithCount[0].total_count
-        } else {
-            // Out of bounds page fallback: count the items separately
-            const countResult = await this.db
-                .select({ count: sql<number>`count(*)` })
-                .from(users)
-                .where(whereClause)
-            totalItems = Number(countResult[0]?.count || 0)
+        if (data.length > 0) {
+            totalItems = await this.exactCount(whereClause)
         }
-
-        const data = dataWithCount.map(({ total_count, ...user }) => user)
 
         return {
             data,
             totalItems
         }
-    }
-
-    private async findByCondition(
-        condition: SQL | undefined
-    ): Promise<User | undefined> {
-        const [user] = await this.db
-            .select()
-            .from(users)
-            .where(condition)
-            .limit(1)
-        return user
     }
 
     async findById(public_id: string): Promise<User | undefined> {
@@ -131,7 +130,7 @@ export class UserRepository {
     }
 
     async findByPublicIdWithTransaction(
-        trx: typeof this.db,
+        trx: NodePgDatabase<Record<string, never>>,
         public_id: string
     ): Promise<User | undefined> {
         const [user] = await trx
@@ -140,6 +139,26 @@ export class UserRepository {
             .where(eq(users.id, public_id))
             .limit(1)
         return user
+    }
+
+    async findByIdWithProfile(
+        public_id: string
+    ): Promise<UserWithProfile | undefined> {
+        const [result] = await this.db
+            .select({
+                ...getTableColumns(users),
+                parent_id: parents.id,
+                midwife_id: midwifes.id,
+                cadre_id: cadres.id,
+                posyandu_id: sql<string>`COALESCE(${midwifes.posyandu_id}, ${cadres.posyandu_id})`
+            })
+            .from(users)
+            .leftJoin(parents, eq(users.id, parents.user_id))
+            .leftJoin(midwifes, eq(users.id, midwifes.user_id))
+            .leftJoin(cadres, eq(users.id, cadres.user_id))
+            .where(and(eq(users.id, public_id), eq(users.status, 'active')))
+            .limit(1)
+        return result
     }
 
     async findByName(name: string): Promise<User[]> {
@@ -166,27 +185,45 @@ export class UserRepository {
         )
     }
 
-    async update(
+    override async update(
         public_id: string,
         updated_user: Partial<NewUser>
     ): Promise<User | undefined> {
-        const [user] = await this.db
-            .update(users)
-            .set(updated_user)
-            .where(eq(users.id, public_id))
-            .returning()
-        return user
+        return this.db.transaction(async tx => {
+            const [user] = await tx
+                .update(users)
+                .set(updated_user)
+                .where(eq(users.id, public_id))
+                .returning()
+            if (!user) return undefined
+
+            const criticalFields: (keyof NewUser)[] = [
+                'role',
+                'status',
+                'email',
+                'phone_number'
+            ]
+            const hasCriticalChange = Object.keys(updated_user).some(key =>
+                criticalFields.includes(key as keyof NewUser)
+            )
+
+            if (hasCriticalChange) {
+                await tx.delete(sessions).where(eq(sessions.user_id, public_id))
+            }
+
+            return user
+        })
     }
 
     async updateWithTransaction(
-        trx: typeof this.db,
+        trx: NodePgDatabase<Record<string, never>>,
         public_id: string,
         user_data: Partial<Omit<User, 'id'>>
     ): Promise<void> {
         await trx.update(users).set(user_data).where(eq(users.id, public_id))
     }
 
-    private async updateStatus(
+    async updateStatus(
         public_id: string,
         status: 'active' | 'inactive'
     ): Promise<User | undefined> {
@@ -207,17 +244,92 @@ export class UserRepository {
                 .returning()
             if (!user) return undefined
 
-            // Delete sessions to immediately log out the soft-deleted user
             await tx.delete(sessions).where(eq(sessions.user_id, public_id))
 
             const targetTable =
                 roleTableMap[user.role as keyof typeof roleTableMap]
             if (targetTable) {
-                await tx
+                const res = await tx
                     .update(targetTable)
                     .set({ status: 'inactive' })
                     .where(eq(targetTable.user_id, public_id))
+                    .returning()
+                if (res.length === 0) {
+                    throw ApiError.notFound(
+                        `Profile not found for user role: ${user.role}`
+                    )
+                }
             }
+
+            if (user.role === 'parent') {
+                const [parent] = await tx
+                    .select()
+                    .from(parents)
+                    .where(eq(parents.user_id, public_id))
+                    .limit(1)
+                if (parent) {
+                    await tx
+                        .update(relationChildrens)
+                        .set({ deleted_at: new Date(), is_deleted: true })
+                        .where(eq(relationChildrens.parent_id, parent.id))
+                    await tx
+                        .update(consultations)
+                        .set({ status: 'cancelled' })
+                        .where(
+                            and(
+                                eq(consultations.parent_id, parent.id),
+                                inArray(consultations.status, [
+                                    'pending',
+                                    'confirmed'
+                                ])
+                            )
+                        )
+                }
+            } else if (user.role === 'cadre') {
+                const [cadre] = await tx
+                    .select()
+                    .from(cadres)
+                    .where(eq(cadres.user_id, public_id))
+                    .limit(1)
+                if (cadre) {
+                    await tx
+                        .update(examinationSchedules)
+                        .set({ status: 'cancelled' })
+                        .where(
+                            and(
+                                eq(examinationSchedules.cadre_id, cadre.id),
+                                eq(examinationSchedules.status, 'pending')
+                            )
+                        )
+                }
+            } else if (user.role === 'midwife') {
+                const [midwife] = await tx
+                    .select()
+                    .from(midwifes)
+                    .where(eq(midwifes.user_id, public_id))
+                    .limit(1)
+                if (midwife) {
+                    await tx
+                        .update(examinationSchedules)
+                        .set({ status: 'cancelled' })
+                        .where(
+                            and(
+                                eq(examinationSchedules.midwife_id, midwife.id),
+                                eq(examinationSchedules.status, 'pending')
+                            )
+                        )
+                }
+            }
+
+            await tx
+                .update(notifications)
+                .set({ status: 'read', read_at: new Date() })
+                .where(
+                    and(
+                        eq(notifications.user_id, public_id),
+                        eq(notifications.status, 'unread')
+                    )
+                )
 
             return user
         })
@@ -260,23 +372,20 @@ export class UserRepository {
             const targetTable =
                 roleTableMap[user.role as keyof typeof roleTableMap]
             if (targetTable) {
-                await tx
+                const res = await tx
                     .update(targetTable)
                     .set({ status: 'active' })
                     .where(eq(targetTable.user_id, public_id))
+                    .returning()
+                if (res.length === 0) {
+                    throw ApiError.notFound(
+                        `Profile not found for user role: ${user.role}`
+                    )
+                }
             }
 
             return user
         })
-    }
-
-    private async checkExists(condition: SQL | undefined): Promise<boolean> {
-        const [user] = await this.db
-            .select({ id: users.id })
-            .from(users)
-            .where(condition)
-            .limit(1)
-        return !!user
     }
 
     async existsByEmail(email: string): Promise<boolean> {

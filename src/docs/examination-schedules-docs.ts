@@ -26,7 +26,7 @@ export const registerExaminationSchedulesRoutes = (
         path: '/api/examination-schedules',
         tags: TAG,
         summary:
-            'Create a new examination schedule [Roles: admin, midwife, cadre]',
+            'Create a new examination schedule [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             body: {
                 content: {
@@ -47,7 +47,7 @@ export const registerExaminationSchedulesRoutes = (
         path: '/api/examination-schedules',
         tags: TAG,
         summary:
-            'Get list of examination schedules [Roles: admin, midwife, cadre, parent]',
+            'Get list of examination schedules [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { query: getExaminationSchedulesQuerySchema },
         responses: {
             200: {
@@ -61,7 +61,7 @@ export const registerExaminationSchedulesRoutes = (
         path: '/api/examination-schedules/{public_id}',
         tags: TAG,
         summary:
-            'Get examination schedule by ID [Roles: admin, midwife, cadre, parent]',
+            'Get examination schedule by ID [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { params: examinationScheduleParamsSchema },
         responses: {
             200: { description: 'Success get examination schedule detail' },
@@ -73,7 +73,8 @@ export const registerExaminationSchedulesRoutes = (
         method: 'put',
         path: '/api/examination-schedules/{public_id}',
         tags: TAG,
-        summary: 'Update examination schedule [Roles: admin, midwife, cadre]',
+        summary:
+            'Update examination schedule [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: examinationScheduleParamsSchema,
             body: {
@@ -95,7 +96,8 @@ export const registerExaminationSchedulesRoutes = (
         method: 'delete',
         path: '/api/examination-schedules/{public_id}',
         tags: TAG,
-        summary: 'Delete examination schedule [Roles: admin, midwife, cadre]',
+        summary:
+            'Delete examination schedule [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: {
             params: examinationScheduleParamsSchema,
             query: deleteExaminationScheduleQuerySchema
@@ -111,7 +113,7 @@ export const registerExaminationSchedulesRoutes = (
         path: '/api/examination-schedules/{public_id}/restore',
         tags: TAG,
         summary:
-            'Restore soft-deleted examination schedule [Roles: admin, midwife, cadre]',
+            'Restore soft-deleted examination schedule [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { params: examinationScheduleParamsSchema },
         responses: {
             200: { description: 'Examination schedule restored successfully' },

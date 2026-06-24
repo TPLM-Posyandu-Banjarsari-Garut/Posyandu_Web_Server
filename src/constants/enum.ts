@@ -10,6 +10,7 @@ export const ACCOUNT_STATUS_VALUES = [
 ] as const
 
 export const ACCOUNT_ROLE_VALUES = [
+    'admin',
     'posyandu_admin',
     'village_admin',
     'parent',
@@ -302,7 +303,6 @@ export const consultationTypeEnum = pgEnum(
 
 export const pregnancyRiskEnum = pgEnum('pregnancy_risk', PREGNANCY_RISK_VALUES)
 
-/** All pgEnum definitions for Drizzle schema & migrations */
 export const pgEnums = {
     status: statusEnum,
     account_status: accountStatusEnum,

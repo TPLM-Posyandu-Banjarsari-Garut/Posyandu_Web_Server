@@ -145,7 +145,3 @@ export const mediaUploadRateLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false
 })
-
-/**
- * Make sure global error handler is set up to handle ApiError
- */

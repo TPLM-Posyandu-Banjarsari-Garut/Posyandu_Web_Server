@@ -21,7 +21,7 @@ const trashController = new TrashController(trashService)
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('admin'),
+    authorizeRoles('posyandu_admin', 'village_admin'),
     validateRequest({ query: getTrashQuerySchema }),
     AsyncHandler(trashController.getTrash)
 )
@@ -29,7 +29,7 @@ router.get(
 router.post(
     '/:type/:public_id/restore',
     verifyAuth,
-    authorizeRoles('admin'),
+    authorizeRoles('posyandu_admin', 'village_admin'),
     validateRequest({ params: restoreParamsSchema }),
     AsyncHandler(trashController.restoreItem)
 )

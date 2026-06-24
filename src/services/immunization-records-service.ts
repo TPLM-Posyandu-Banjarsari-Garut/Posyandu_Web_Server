@@ -1,3 +1,4 @@
+import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewImmunizationRecord, ImmunizationRecord } from '@/db'
 import {
@@ -20,7 +21,7 @@ export class ImmunizationRecordService {
                 record_payload.dose_number
             )
         if (isDuplicate) {
-            throw new Error(
+            throw ApiError.conflict(
                 'Immunization record for this child, vaccine, and dose already exists'
             )
         }
@@ -56,7 +57,7 @@ export class ImmunizationRecordService {
     ): Promise<ImmunizationRecord> {
         const record =
             await this.immunization_record_repository.findById(public_id)
-        if (!record) throw new Error('Immunization record not found')
+        if (!record) throw ApiError.notFound('Immunization record not found')
 
         if (currentUser?.role === 'parent') {
             const isOwned =
@@ -65,7 +66,7 @@ export class ImmunizationRecordService {
                     record.children_id
                 )
             if (!isOwned) {
-                throw new Error('Immunization record not found')
+                throw ApiError.notFound('Immunization record not found')
             }
         }
 
@@ -95,7 +96,7 @@ export class ImmunizationRecordService {
                     doseNumber
                 )
             if (isDuplicate) {
-                throw new Error(
+                throw ApiError.conflict(
                     'Immunization record with the same child, vaccine, and dose already exists'
                 )
             }
@@ -105,7 +106,8 @@ export class ImmunizationRecordService {
             public_id,
             record_payload
         )
-        if (!updated) throw new Error('Failed to update immunization record')
+        if (!updated)
+            throw ApiError.badRequest('Failed to update immunization record')
         return updated
     }
 
@@ -119,7 +121,8 @@ export class ImmunizationRecordService {
             ? await this.immunization_record_repository.hardDelete(public_id)
             : await this.immunization_record_repository.softDelete(public_id)
 
-        if (!deleted) throw new Error('Failed to delete immunization record')
+        if (!deleted)
+            throw ApiError.badRequest('Failed to delete immunization record')
         return deleted
     }
 
@@ -128,7 +131,8 @@ export class ImmunizationRecordService {
     ): Promise<ImmunizationRecord> {
         const restored =
             await this.immunization_record_repository.restore(public_id)
-        if (!restored) throw new Error('Failed to restore immunization record')
+        if (!restored)
+            throw ApiError.badRequest('Failed to restore immunization record')
         return restored
     }
 }
