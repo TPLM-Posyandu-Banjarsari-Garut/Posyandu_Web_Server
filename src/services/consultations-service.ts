@@ -159,8 +159,9 @@ export class ConsultationsService {
         const uniqueCombos = new Map<
             string,
             {
-                posyandu_id: string
-                consultation_type: ConsultationType
+                posyandu_id?: string
+                consultation_type?: ConsultationType
+                midwife_id?: string | null
                 startOfDay: Date
                 endOfDay: Date
             }
@@ -189,31 +190,51 @@ export class ConsultationsService {
                     999
                 )
             )
-            const key = `${item.posyandu_id}_${item.consultation_type}_${startOfDay.toISOString()}`
-            if (!uniqueCombos.has(key)) {
-                uniqueCombos.set(key, {
-                    posyandu_id: item.posyandu_id,
-                    consultation_type: item.consultation_type,
-                    startOfDay,
-                    endOfDay
-                })
+            if (item.midwife_id) {
+                const key = `midwife_${item.midwife_id}_${startOfDay.toISOString()}`
+                if (!uniqueCombos.has(key)) {
+                    uniqueCombos.set(key, {
+                        midwife_id: item.midwife_id,
+                        startOfDay,
+                        endOfDay
+                    })
+                }
+            } else {
+                const key = `posyandu_${item.posyandu_id}_${item.consultation_type}_${startOfDay.toISOString()}`
+                if (!uniqueCombos.has(key)) {
+                    uniqueCombos.set(key, {
+                        posyandu_id: item.posyandu_id,
+                        consultation_type: item.consultation_type,
+                        startOfDay,
+                        endOfDay
+                    })
+                }
             }
         }
 
-        const orConditions = Array.from(uniqueCombos.values()).map(combo =>
-            and(
-                eq(consultations.posyandu_id, combo.posyandu_id),
-                eq(consultations.consultation_type, combo.consultation_type),
-                gte(consultations.scheduled_at, combo.startOfDay),
-                lte(consultations.scheduled_at, combo.endOfDay)
-            )
-        )
+        const orConditions = Array.from(uniqueCombos.values()).map(combo => {
+            if (combo.midwife_id) {
+                return and(
+                    eq(consultations.midwife_id, combo.midwife_id),
+                    gte(consultations.scheduled_at, combo.startOfDay),
+                    lte(consultations.scheduled_at, combo.endOfDay)
+                )
+            } else {
+                return and(
+                    eq(consultations.posyandu_id, combo.posyandu_id!),
+                    eq(consultations.consultation_type, combo.consultation_type!),
+                    gte(consultations.scheduled_at, combo.startOfDay),
+                    lte(consultations.scheduled_at, combo.endOfDay)
+                )
+            }
+        })
 
         const allMatchingBookings = await this.dbInstance
             .select({
                 id: consultations.id,
                 posyandu_id: consultations.posyandu_id,
                 consultation_type: consultations.consultation_type,
+                midwife_id: consultations.midwife_id,
                 scheduled_at: consultations.scheduled_at,
                 created_at: consultations.created_at
             })
@@ -238,14 +259,34 @@ export class ConsultationsService {
 
         return consultationItems.map(item => {
             const itemDate = new Date(item.scheduled_at)
-            const matches = allMatchingBookings.filter(
-                booking =>
-                    booking.posyandu_id === item.posyandu_id &&
-                    booking.consultation_type === item.consultation_type &&
-                    isSameUTCDay(new Date(booking.scheduled_at), itemDate) &&
-                    new Date(booking.created_at).getTime() <=
-                        new Date(item.created_at).getTime()
-            )
+            let matches: {
+                id: string
+                posyandu_id: string
+                consultation_type: ConsultationType
+                midwife_id: string | null
+                scheduled_at: Date
+                created_at: Date
+            }[] = []
+
+            if (item.midwife_id) {
+                matches = allMatchingBookings.filter(
+                    booking =>
+                        booking.midwife_id === item.midwife_id &&
+                        isSameUTCDay(booking.scheduled_at, itemDate) &&
+                        booking.created_at.getTime() <=
+                            new Date(item.created_at).getTime()
+                )
+            } else {
+                matches = allMatchingBookings.filter(
+                    booking =>
+                        booking.posyandu_id === item.posyandu_id &&
+                        booking.consultation_type === item.consultation_type &&
+                        isSameUTCDay(booking.scheduled_at, itemDate) &&
+                        booking.created_at.getTime() <=
+                            new Date(item.created_at).getTime()
+                )
+            }
+
             return {
                 ...item,
                 queue_number: matches.length || 1
