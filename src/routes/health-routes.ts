@@ -7,8 +7,8 @@ import {
 
 const router = Router()
 
-router.get('/health/live', healthCheck)
-router.get('/health/ready', readyHealthCheck)
-router.get('/health', detailedHealthCheck)
+router.get('/live', healthCheck)
+router.get('/ready', readyHealthCheck)
+router.get('/', detailedHealthCheck)
 
 export default router
