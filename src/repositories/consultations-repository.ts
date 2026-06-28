@@ -1,6 +1,16 @@
-import { NewConsultation, Consultation, consultations } from '@/db'
+import {
+    NewConsultation,
+    Consultation,
+    consultations,
+    posyandus,
+    parents,
+    users,
+    childrens,
+    midwifes
+} from '@/db'
 import {
     and,
+    or,
     eq,
     ilike,
     sql,
@@ -9,6 +19,7 @@ import {
     desc,
     getTableColumns
 } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ConsultationsQueryFilters {
@@ -54,6 +65,9 @@ export class ConsultationsRepository {
             includeDeleted = false,
             order = 'desc'
         } = filters || {}
+
+        const parentUsers = alias(users, 'parent_users')
+        const midwifeUsers = alias(users, 'midwife_users')
 
         const safePage = Math.max(1, page)
         const safeLimit = Math.min(Math.max(1, limit), 100)
@@ -105,7 +119,13 @@ export class ConsultationsRepository {
         }
 
         if (escapedSearch) {
-            conditions.push(ilike(consultations.notes, `%${escapedSearch}%`))
+            conditions.push(
+                or(
+                    ilike(consultations.notes, `%${escapedSearch}%`),
+                    ilike(parentUsers.name, `%${escapedSearch}%`),
+                    ilike(childrens.name, `%${escapedSearch}%`)
+                )
+            )
         }
 
         const whereClause = and(...conditions)
@@ -113,9 +133,19 @@ export class ConsultationsRepository {
         const dataWithCount = await this.db
             .select({
                 ...getTableColumns(consultations),
+                posyandu_name: posyandus.name,
+                parent_name: parentUsers.name,
+                children_name: childrens.name,
+                midwife_name: midwifeUsers.name,
                 total_count: sql<number>`count(*) over()`.mapWith(Number)
             })
             .from(consultations)
+            .leftJoin(posyandus, eq(consultations.posyandu_id, posyandus.id))
+            .leftJoin(parents, eq(consultations.parent_id, parents.id))
+            .leftJoin(parentUsers, eq(parents.user_id, parentUsers.id))
+            .leftJoin(childrens, eq(consultations.children_id, childrens.id))
+            .leftJoin(midwifes, eq(consultations.midwife_id, midwifes.id))
+            .leftJoin(midwifeUsers, eq(midwifes.user_id, midwifeUsers.id))
             .where(whereClause)
             .orderBy(
                 order === 'asc'

@@ -32,7 +32,7 @@ router.post(
 router.get(
     '/',
     verifyAuth,
-    authorizeRoles('posyandu_admin', 'village_admin', 'midwife'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'parent'),
     validateRequest({ query: getMidwifesQuerySchema }),
     AsyncHandler(midwife_controller.getmidwifes)
 )
@@ -40,7 +40,7 @@ router.get(
 router.get(
     '/:public_id',
     verifyAuth,
-    authorizeRoles('posyandu_admin', 'village_admin', 'midwife'),
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'parent'),
     validateRequest({ params: midwifeParamsSchema }),
     AsyncHandler(midwife_controller.getMidwifeById)
 )

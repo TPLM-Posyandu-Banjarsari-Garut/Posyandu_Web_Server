@@ -16,10 +16,11 @@ export class MidwifeService {
             let uniqueNik = ''
             let isUsed = true
             while (isUsed) {
-                uniqueNik = randomInt(
-                    1000000000000000,
-                    10000000000000000
-                ).toString()
+                // FIX: randomInt tidak boleh melebihi Number.MAX_SAFE_INTEGER atau range > 2^48.
+                // Solusi: gabungkan dua bilangan 8-digit yang aman secara kriptografis → NIK 16-digit.
+                const part1 = randomInt(10_000_000, 99_999_999).toString() // 8 digit
+                const part2 = randomInt(10_000_000, 99_999_999).toString() // 8 digit
+                uniqueNik = part1 + part2                                  // 16 digit total
                 isUsed =
                     await this.midwife_repository.existsByIdentityNumber(
                         uniqueNik
