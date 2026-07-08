@@ -20,7 +20,7 @@ export class MidwifeService {
                 // Solusi: gabungkan dua bilangan 8-digit yang aman secara kriptografis → NIK 16-digit.
                 const part1 = randomInt(10_000_000, 99_999_999).toString() // 8 digit
                 const part2 = randomInt(10_000_000, 99_999_999).toString() // 8 digit
-                uniqueNik = part1 + part2                                  // 16 digit total
+                uniqueNik = part1 + part2 // 16 digit total
                 isUsed =
                     await this.midwife_repository.existsByIdentityNumber(
                         uniqueNik
