@@ -44,6 +44,11 @@ export const getMidwifesQuerySchema = z
     .object({
         ...paginationQuerySchema,
 
+        posyandu_id: z
+            .string()
+            .optional()
+            .openapi({ example: 'posyandu-uuid' }),
+
         str_number: z
             .string()
             .optional()

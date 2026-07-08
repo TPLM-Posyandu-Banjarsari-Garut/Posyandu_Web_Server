@@ -71,6 +71,12 @@ export const createConsultationSchema = createInsertSchema(consultations, {
         .nullable()
         .openapi({ example: 'Routine checkup for trimester 2' }),
 
+    midwife_id: z
+        .string()
+        .optional()
+        .nullable()
+        .openapi({ example: 'midwife-uuid' }),
+
     status: z.enum(consultationStatusEnum.enumValues).default('pending')
 })
     .omit({
@@ -81,7 +87,6 @@ export const createConsultationSchema = createInsertSchema(consultations, {
         follow_up_required: true,
         follow_up_date: true,
         cancellation_reason: true,
-        midwife_id: true,
         cadre_id: true,
         created_at: true,
         updated_at: true,
@@ -252,7 +257,12 @@ export const getAvailableSlotsQuerySchema = z
             .regex(/^\d{4}-\d{2}-\d{2}$/, {
                 message: 'Date must be in YYYY-MM-DD format'
             })
-            .openapi({ example: '2026-06-20' })
+            .openapi({ example: '2026-06-20' }),
+        midwife_id: z
+            .string()
+            .optional()
+            .nullable()
+            .openapi({ example: 'midwife-uuid' })
     })
     .openapi('GetAvailableSlotsQuery')
 

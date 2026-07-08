@@ -7,10 +7,19 @@ import db from '@/configs/db'
 import env from '@/configs/env'
 import { EmailService } from '@/services/email-service'
 
+const trustedOrigins = [env.CORS_ORIGIN, ...env.TRUSTED_ORIGINS]
+if (
+    env.NODE_ENV === 'development' ||
+    env.CORS_ORIGIN.includes('localhost') ||
+    env.CORS_ORIGIN.includes('127.0.0.1')
+) {
+    trustedOrigins.push('http://localhost:3001')
+}
+
 export const auth = betterAuth({
     appName: 'Sampurasun Web Server',
     baseURL: env.BETTER_AUTH_URL,
-    trustedOrigins: [env.CORS_ORIGIN, ...env.TRUSTED_ORIGINS],
+    trustedOrigins: trustedOrigins,
     database: drizzleAdapter(db, {
         provider: 'pg',
         schema: {

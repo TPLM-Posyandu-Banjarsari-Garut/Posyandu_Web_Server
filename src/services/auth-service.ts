@@ -182,6 +182,23 @@ export class AuthService {
             )
         }
 
+        if (current_user.role === 'parent' && !current_user.parent_id) {
+            await db
+                .insert(parents)
+                .values({
+                    user_id: active_session.user.id,
+                    status: 'active'
+                })
+                .onConflictDoNothing()
+
+            const updated_user = await this.user_repository.findByIdWithProfile(
+                active_session.user.id
+            )
+            if (updated_user) {
+                return updated_user
+            }
+        }
+
         return current_user
     }
 

@@ -15,17 +15,18 @@ export class ConsultationsController {
     constructor(private readonly consultations_service: ConsultationsService) {}
 
     getAvailableSlots = async (req: Request, res: Response) => {
-        const { posyandu_id, consultation_type, date } =
+        const { posyandu_id, consultation_type, date, midwife_id } =
             req.query as unknown as GetAvailableSlotsQueryInput
         logger.info(
-            { posyandu_id, consultation_type, date },
+            { posyandu_id, consultation_type, date, midwife_id },
             'Incoming request: Get Available Slots'
         )
 
         const slots = await this.consultations_service.getAvailableSlots(
             posyandu_id,
             consultation_type,
-            date
+            date,
+            midwife_id
         )
 
         return ApiResponse.ok(

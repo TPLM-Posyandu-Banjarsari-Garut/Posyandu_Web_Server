@@ -1,4 +1,4 @@
-import { NewMidwife, Midwife, midwifes } from '@/db'
+import { NewMidwife, Midwife, midwifes, users } from '@/db'
 import {
     and,
     eq,
@@ -14,6 +14,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface MidwifeQueryFilters {
     search?: string
+    posyandu_id?: string
     str_number?: string
     status?: Midwife['status']
     page?: number
@@ -43,6 +44,7 @@ export class MidwifeRepository {
     async getMidwifes(filters?: MidwifeQueryFilters) {
         const {
             search,
+            posyandu_id,
             str_number,
             status,
             page = 1,
@@ -72,6 +74,7 @@ export class MidwifeRepository {
                       ilike(midwifes.license_number, `%${escapedSearch}%`)
                   )
                 : undefined,
+            posyandu_id ? eq(midwifes.posyandu_id, posyandu_id) : undefined,
             str_number ? eq(midwifes.license_number, str_number) : undefined,
             statusCondition
         )
@@ -79,9 +82,12 @@ export class MidwifeRepository {
         const dataWithCount = await this.db
             .select({
                 ...getTableColumns(midwifes),
+                name: users.name,
+                email: users.email,
                 total_count: sql<number>`count(*) over()`.mapWith(Number)
             })
             .from(midwifes)
+            .innerJoin(users, eq(midwifes.user_id, users.id))
             .where(whereClause)
             .orderBy(
                 order === 'asc'
@@ -98,6 +104,7 @@ export class MidwifeRepository {
             const countResult = await this.db
                 .select({ count: sql<number>`count(*)` })
                 .from(midwifes)
+                .innerJoin(users, eq(midwifes.user_id, users.id))
                 .where(whereClause)
             totalItems = Number(countResult[0]?.count || 0)
         }
