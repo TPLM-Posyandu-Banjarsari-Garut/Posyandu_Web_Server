@@ -61,7 +61,10 @@ export class ChildrenService {
         public_id: string,
         currentUser?: User
     ): Promise<
-        Exclude<Awaited<ReturnType<ChildrenRepository['findById']>>, undefined>
+        Exclude<
+            Awaited<ReturnType<ChildrenRepository['findByIdWithEnrichment']>>,
+            undefined
+        >
     > {
         if (currentUser) {
             const canAccess = await this.authorization_service.canAccessChild(
@@ -74,7 +77,8 @@ export class ChildrenService {
                 )
             }
         }
-        const child = await this.children_repository.findById(public_id)
+        const child =
+            await this.children_repository.findByIdWithEnrichment(public_id)
         if (!child) throw ApiError.notFound('Children not found')
         return child
     }
