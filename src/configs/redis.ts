@@ -21,17 +21,19 @@ const CIRCUIT = {
     RESET_AFTER_MS: 30_000
 }
 
+import { logger } from '@/utils/logger'
+
 function recordFailure() {
     CIRCUIT.failures++
     if (CIRCUIT.failures >= CIRCUIT.FAILURE_THRESHOLD && !CIRCUIT.open) {
         CIRCUIT.open = true
-        console.warn(
+        logger.warn(
             '[Redis] Circuit breaker OPEN — Redis unreachable, using fallback'
         )
         setTimeout(() => {
             CIRCUIT.open = false
             CIRCUIT.failures = 0
-            console.info('[Redis] Circuit breaker CLOSED — retrying Redis')
+            logger.info('[Redis] Circuit breaker CLOSED — retrying Redis')
         }, CIRCUIT.RESET_AFTER_MS)
     }
 }
@@ -40,7 +42,7 @@ function recordSuccess() {
     CIRCUIT.failures = 0
     if (CIRCUIT.open) {
         CIRCUIT.open = false
-        console.info('[Redis] Circuit breaker CLOSED — Redis recovered')
+        logger.info('[Redis] Circuit breaker CLOSED — Redis recovered')
     }
 }
 

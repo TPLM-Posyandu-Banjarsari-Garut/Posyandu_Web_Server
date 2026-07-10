@@ -103,7 +103,9 @@ export type Env = z.infer<typeof envSchema>
 const result = envSchema.safeParse(process.env)
 
 if (!result.success) {
+    // eslint-disable-next-line no-console
     console.error('❌ [Config Error] Invalid environment configuration:')
+    // eslint-disable-next-line no-console
     console.error(z.prettifyError(result.error))
     process.exit(1)
 }

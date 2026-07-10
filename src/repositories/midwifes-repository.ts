@@ -84,6 +84,7 @@ export class MidwifeRepository {
                 ...getTableColumns(midwifes),
                 name: users.name,
                 email: users.email,
+                image: users.avatar_url,
                 total_count: sql<number>`count(*) over()`.mapWith(Number)
             })
             .from(midwifes)
