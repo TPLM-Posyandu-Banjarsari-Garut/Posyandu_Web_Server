@@ -1,7 +1,10 @@
 import {
     NewExaminationSchedule,
     ExaminationSchedule,
-    examinationSchedules
+    examinationSchedules,
+    parents,
+    relationChildrens,
+    childrens
 } from '@/db'
 import { and, eq, sql, asc, desc, getTableColumns } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
@@ -201,5 +204,28 @@ export class ExaminationSchedulesRepository {
             .where(eq(examinationSchedules.id, id))
             .returning()
         return record
+    }
+
+    async getParentUserIdsByPosyanduId(posyandu_id: string): Promise<string[]> {
+        const rows = await this.db
+            .selectDistinct({ user_id: parents.user_id })
+            .from(parents)
+            .innerJoin(
+                relationChildrens,
+                eq(relationChildrens.parent_id, parents.id)
+            )
+            .innerJoin(
+                childrens,
+                eq(relationChildrens.children_id, childrens.id)
+            )
+            .where(
+                and(
+                    eq(childrens.posyandu_id, posyandu_id),
+                    sql`${childrens.deleted_at} IS NULL`,
+                    sql`${relationChildrens.deleted_at} IS NULL`,
+                    sql`${parents.deleted_at} IS NULL`
+                )
+            )
+        return rows.map(r => r.user_id)
     }
 }

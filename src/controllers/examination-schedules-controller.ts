@@ -150,4 +150,31 @@ export class ExaminationSchedulesController {
             }
         )
     }
+
+    broadcastScheduleNotification = async (req: Request, res: Response) => {
+        const user = res.locals.user
+        const public_id = (req.params.public_id || req.params.id) as string
+        logger.info(
+            { public_id, body: req.body },
+            'Incoming request: Broadcast Schedule Notification'
+        )
+
+        const existing = await this.service.getScheduleById(public_id)
+        if (user?.posyandu_id && existing.posyandu_id !== user.posyandu_id) {
+            throw ApiError.forbidden(
+                'Access denied. Schedule belongs to a different Posyandu.'
+            )
+        }
+
+        const result = await this.service.broadcastScheduleNotification(
+            public_id,
+            req.body?.custom_message
+        )
+
+        return ApiResponse.ok(
+            res,
+            `Notifikasi berhasil diluncurkan ke ${result.recipient_count} orang tua.`,
+            result
+        )
+    }
 }

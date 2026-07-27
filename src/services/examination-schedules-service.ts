@@ -1,10 +1,30 @@
 import { createPaginationMeta } from '@/utils/pagination'
-import { NewExaminationSchedule, ExaminationSchedule } from '@/db'
+import {
+    NewExaminationSchedule,
+    ExaminationSchedule,
+    posyandus,
+    examinations
+} from '@/db'
 import {
     ExaminationSchedulesRepository,
     ExaminationSchedulesQueryFilters
 } from '@/repositories/examination-schedules-repository'
 import { ApiError } from '@/utils/api-error'
+import db from '@/configs/db'
+import { eq } from 'drizzle-orm'
+import { NotificationsRepository } from '@/repositories/notifications-repository'
+import { NotificationsService } from '@/services/notifications-service'
+
+import { PushSubscriptionsRepository } from '@/repositories/push-subscriptions-repository'
+import { PushSubscriptionsService } from '@/services/push-subscriptions-service'
+import { logger } from '@/utils/logger'
+
+const notificationsRepository = new NotificationsRepository(db)
+const notificationsService = new NotificationsService(notificationsRepository)
+const pushSubscriptionsRepository = new PushSubscriptionsRepository(db)
+const pushSubscriptionsService = new PushSubscriptionsService(
+    pushSubscriptionsRepository
+)
 
 export class ExaminationSchedulesService {
     constructor(
@@ -75,5 +95,101 @@ export class ExaminationSchedulesService {
         if (!restored)
             throw ApiError.server('Failed to restore examination schedule')
         return restored
+    }
+
+    async broadcastScheduleNotification(
+        id: string,
+        custom_message?: string
+    ): Promise<{ recipient_count: number; title: string; body: string }> {
+        const schedule = await this.getScheduleById(id)
+
+        const [posyanduRow] = await db
+            .select({ name: posyandus.name })
+            .from(posyandus)
+            .where(eq(posyandus.id, schedule.posyandu_id))
+            .limit(1)
+
+        const [examRow] = await db
+            .select({ name: examinations.name })
+            .from(examinations)
+            .where(eq(examinations.id, schedule.examination_id))
+            .limit(1)
+
+        const posyanduName = posyanduRow?.name || 'Posyandu'
+        const examName = examRow?.name || 'Pemeriksaan Posyandu'
+        const scheduledDateStr = schedule.scheduled_date
+            ? new Date(schedule.scheduled_date).toLocaleDateString('id-ID', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+              })
+            : ''
+        const timeStr =
+            schedule.start_time && schedule.end_time
+                ? ` (pukul ${schedule.start_time} - ${schedule.end_time})`
+                : ''
+
+        const title = `📢 Pengingat Jadwal Posyandu ${posyanduName}`
+        const body =
+            custom_message && custom_message.trim().length > 0
+                ? custom_message
+                : `Jadwal ${examName} akan dilaksanakan pada ${scheduledDateStr}${timeStr}. Mohon hadir tepat waktu!`
+
+        const parentUserIds =
+            await this.schedules_repository.getParentUserIdsByPosyanduId(
+                schedule.posyandu_id
+            )
+
+        if (parentUserIds.length === 0) {
+            return {
+                recipient_count: 0,
+                title,
+                body
+            }
+        }
+
+        for (const user_id of parentUserIds) {
+            await notificationsService.createNotification({
+                user_id,
+                type: 'examination',
+                status: 'unread',
+                title,
+                body,
+                data: {
+                    consultation_id: schedule.id,
+                    posyandu_name: posyanduName,
+                    scheduled_at: schedule.scheduled_date
+                        ? new Date(schedule.scheduled_date).toISOString()
+                        : undefined
+                }
+            })
+
+            // Trigger Web Push Notification for offline browser delivery
+            pushSubscriptionsService
+                .sendPushNotification(user_id, {
+                    title,
+                    body,
+                    icon: '/icon-192x192.png',
+                    badge: '/icon-192x192.png',
+                    data: {
+                        consultation_id: schedule.id,
+                        posyandu_name: posyanduName
+                    }
+                })
+                .catch(err => {
+                    // Log and continue, do not block the loop
+                    logger.warn(
+                        { err, userId: user_id },
+                        '[WebPush] Failed to send push to user'
+                    )
+                })
+        }
+
+        return {
+            recipient_count: parentUserIds.length,
+            title,
+            body
+        }
     }
 }

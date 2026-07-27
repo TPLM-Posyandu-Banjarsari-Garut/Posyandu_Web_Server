@@ -11,7 +11,8 @@ import {
     updateExaminationScheduleSchema,
     getExaminationSchedulesQuerySchema,
     examinationScheduleParamsSchema,
-    deleteExaminationScheduleQuerySchema
+    deleteExaminationScheduleQuerySchema,
+    broadcastScheduleNotificationSchema
 } from '@/validations/examination-schedules-validation'
 import db from '@/configs/db'
 
@@ -85,6 +86,17 @@ router.post(
     authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
     validateRequest({ params: examinationScheduleParamsSchema }),
     AsyncHandler(controller.restoreSchedule)
+)
+
+router.post(
+    '/:public_id/broadcast-notification',
+    verifyAuth,
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
+    validateRequest({
+        params: examinationScheduleParamsSchema,
+        body: broadcastScheduleNotificationSchema
+    }),
+    AsyncHandler(controller.broadcastScheduleNotification)
 )
 
 export default router

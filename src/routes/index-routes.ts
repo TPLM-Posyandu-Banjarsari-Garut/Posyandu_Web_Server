@@ -25,6 +25,7 @@ import examinationSchedulesRoute from '@/routes/examination-schedules-route'
 import examinationRecordsRoute from '@/routes/examination-records-route'
 import trashRoutes from '@/routes/trash-routes'
 import cronRoutes from '@/routes/cron-routes'
+import pushSubscriptionsRoute from '@/routes/push-subscriptions-route'
 
 import { rateLimiter } from '@/middlewares/rate-limiter'
 
@@ -49,6 +50,7 @@ router.use('/api/education-categories', educationCategoryRoutes)
 router.use('/api/educations', educationRoutes)
 router.use('/api/consultations', consultationRoutes)
 router.use('/api/notifications', notificationRoutes)
+router.use('/api/push-subscriptions', pushSubscriptionsRoute)
 router.use('/api/medias', mediasRoute)
 router.use('/api/pregnancy-records', pregnancyRecordsRoute)
 router.use('/api/examinations', examinationsRoute)
