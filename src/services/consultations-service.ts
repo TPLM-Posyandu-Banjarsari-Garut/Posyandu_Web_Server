@@ -1262,4 +1262,45 @@ export class ConsultationsService {
 
         return enriched
     }
+
+    async broadcastConsultationNotification(
+        public_id: string,
+        custom_message?: string
+    ): Promise<{ recipient_count: number; title: string; body: string }> {
+        const consultation = await this.getConsultationById(public_id)
+        const detail = await this.getBookingDetails(consultation.id)
+
+        if (!detail) {
+            throw ApiError.notFound('Consultation details not found')
+        }
+
+        const typeLabel = labelConsultationType(consultation.consultation_type)
+        const dateStr = formatDateId(consultation.scheduled_at)
+        const enriched = await this.enrichWithQueueNumber(consultation)
+
+        const title = `📢 Pengingat Konsultasi Posyandu ${detail.posyandu_name}`
+        const body =
+            custom_message && custom_message.trim().length > 0
+                ? custom_message
+                : `Halo ${detail.parent_name}, pengingat untuk janji konsultasi ${typeLabel} Anda pada ${dateStr} di ${detail.posyandu_name}. Mohon hadir tepat waktu! (Antrean: #${enriched.queue_number || '-'})`
+
+        await this.notifications_service.createNotification({
+            user_id: detail.parent_user_id,
+            type: 'consultation',
+            status: 'unread',
+            title,
+            body,
+            data: {
+                consultation_id: consultation.id,
+                queue_number: enriched.queue_number,
+                posyandu_name: detail.posyandu_name
+            }
+        })
+
+        return {
+            recipient_count: 1,
+            title,
+            body
+        }
+    }
 }

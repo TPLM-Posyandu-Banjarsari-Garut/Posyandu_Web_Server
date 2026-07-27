@@ -122,4 +122,12 @@ router.post(
     AsyncHandler(consultations_controller.restoreBooking)
 )
 
+router.post(
+    '/:public_id/broadcast-notification',
+    verifyAuth,
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
+    validateRequest({ params: consultationParamsSchema }),
+    AsyncHandler(consultations_controller.broadcastConsultationNotification)
+)
+
 export default router
