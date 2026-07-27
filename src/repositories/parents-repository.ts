@@ -81,6 +81,9 @@ export class ParentRepository {
         const dataWithCount = await this.db
             .select({
                 ...getTableColumns(parents),
+                name: users.name,
+                email: users.email,
+                phone_number: users.phone_number,
                 total_count: sql<number>`count(*) over()`.mapWith(Number)
             })
             .from(parents)

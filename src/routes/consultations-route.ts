@@ -28,7 +28,13 @@ const consultations_controller = new ConsultationsController(
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('posyandu_admin', 'village_admin', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ body: createConsultationSchema }),
     AsyncHandler(consultations_controller.createBooking)
 )
