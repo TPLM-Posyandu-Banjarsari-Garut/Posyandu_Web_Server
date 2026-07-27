@@ -13,7 +13,8 @@ import {
     getConsultationsQuerySchema,
     consultationParamsSchema,
     deleteConsultationQuerySchema,
-    getAvailableSlotsQuerySchema
+    getAvailableSlotsQuerySchema,
+    broadcastConsultationNotificationSchema
 } from '@/validations/consultations-validation'
 import db from '@/configs/db'
 
@@ -132,7 +133,10 @@ router.post(
     '/:public_id/broadcast-notification',
     verifyAuth,
     authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
-    validateRequest({ params: consultationParamsSchema }),
+    validateRequest({
+        params: consultationParamsSchema,
+        body: broadcastConsultationNotificationSchema
+    }),
     AsyncHandler(consultations_controller.broadcastConsultationNotification)
 )
 

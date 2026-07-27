@@ -232,17 +232,16 @@ export class ConsultationsController {
     broadcastConsultationNotification = async (req: Request, res: Response) => {
         const user = res.locals.user
         const public_id = req.params.public_id as string
-        const { custom_message } = req.body || {}
 
         logger.info(
-            { userId: user?.id, public_id, custom_message },
+            { userId: user?.id, public_id, body: req.body },
             'Incoming request: Broadcast Consultation Notification'
         )
 
         const result =
             await this.consultations_service.broadcastConsultationNotification(
                 public_id,
-                custom_message
+                req.body
             )
 
         return ApiResponse.ok(

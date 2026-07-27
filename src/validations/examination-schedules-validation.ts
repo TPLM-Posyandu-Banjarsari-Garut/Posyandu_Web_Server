@@ -128,7 +128,12 @@ export const broadcastScheduleNotificationSchema = z
             .string()
             .optional()
             .nullable()
-            .openapi({ example: 'Mohon membawa buku KIA' })
+            .openapi({ example: 'Mohon membawa buku KIA' }),
+        scheduled_push_at: z
+            .string()
+            .optional()
+            .nullable()
+            .openapi({ example: '2026-07-27T20:30:00.000Z' })
     })
     .openapi('BroadcastScheduleNotificationInput')
 

@@ -266,6 +266,21 @@ export const getAvailableSlotsQuerySchema = z
     })
     .openapi('GetAvailableSlotsQuery')
 
+export const broadcastConsultationNotificationSchema = z
+    .object({
+        custom_message: z
+            .string()
+            .optional()
+            .nullable()
+            .openapi({ example: 'Mohon membawa buku KIA' }),
+        scheduled_push_at: z
+            .string()
+            .optional()
+            .nullable()
+            .openapi({ example: '2026-07-27T20:30:00.000Z' })
+    })
+    .openapi('BroadcastConsultationNotificationInput')
+
 export type CreateConsultationInput = z.infer<typeof createConsultationSchema>
 export type UpdateConsultationInput = z.infer<typeof updateConsultationSchema>
 export type GetAvailableSlotsQueryInput = z.infer<
@@ -280,4 +295,7 @@ export type GetConsultationsQueryInput = z.infer<
 export type ConsultationParamInput = z.infer<typeof consultationParamsSchema>
 export type DeleteConsultationQueryInput = z.infer<
     typeof deleteConsultationQuerySchema
+>
+export type BroadcastConsultationNotificationInput = z.infer<
+    typeof broadcastConsultationNotificationSchema
 >

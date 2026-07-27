@@ -99,9 +99,20 @@ export class ExaminationSchedulesService {
 
     async broadcastScheduleNotification(
         id: string,
-        custom_message?: string
-    ): Promise<{ recipient_count: number; title: string; body: string }> {
-        const schedule = await this.getScheduleById(id)
+        payload?: { custom_message?: string; scheduled_push_at?: string }
+    ): Promise<{
+        recipient_count: number
+        title: string
+        body: string
+        is_scheduled?: boolean
+        scheduled_push_at?: string
+    }> {
+        const custom_message = payload?.custom_message
+        const scheduled_push_at = payload?.scheduled_push_at
+        const schedule = await this.schedules_repository.findById(id)
+        if (!schedule) {
+            throw ApiError.notFound('Examination schedule not found')
+        }
 
         const [posyanduRow] = await db
             .select({ name: posyandus.name })
@@ -149,47 +160,85 @@ export class ExaminationSchedulesService {
             }
         }
 
-        for (const user_id of parentUserIds) {
-            await notificationsService.createNotification({
-                user_id,
-                type: 'examination',
-                status: 'unread',
-                title,
-                body,
-                data: {
-                    consultation_id: schedule.id,
-                    posyandu_name: posyanduName,
-                    scheduled_at: schedule.scheduled_date
-                        ? new Date(schedule.scheduled_date).toISOString()
-                        : undefined
-                }
-            })
-
-            // Trigger Web Push Notification for offline browser delivery
-            pushSubscriptionsService
-                .sendPushNotification(user_id, {
+        const performSend = async () => {
+            for (const user_id of parentUserIds) {
+                await notificationsService.createNotification({
+                    user_id,
+                    type: 'examination',
+                    status: 'unread',
                     title,
                     body,
-                    icon: '/icon-192x192.png',
-                    badge: '/icon-192x192.png',
                     data: {
                         consultation_id: schedule.id,
-                        posyandu_name: posyanduName
+                        posyandu_name: posyanduName,
+                        scheduled_at: schedule.scheduled_date
+                            ? new Date(schedule.scheduled_date).toISOString()
+                            : undefined
                     }
                 })
-                .catch(err => {
-                    // Log and continue, do not block the loop
-                    logger.warn(
-                        { err, userId: user_id },
-                        '[WebPush] Failed to send push to user'
-                    )
-                })
+
+                // Trigger Web Push Notification for offline browser delivery
+                pushSubscriptionsService
+                    .sendPushNotification(user_id, {
+                        title,
+                        body,
+                        icon: '/icon-192x192.png',
+                        badge: '/icon-192x192.png',
+                        data: {
+                            consultation_id: schedule.id,
+                            posyandu_name: posyanduName
+                        }
+                    })
+                    .catch(err => {
+                        // Log and continue, do not block the loop
+                        logger.warn(
+                            { err, userId: user_id },
+                            '[WebPush] Failed to send push to user'
+                        )
+                    })
+            }
         }
+
+        if (scheduled_push_at) {
+            const pushTime = new Date(scheduled_push_at).getTime()
+            const now = Date.now()
+            const delayMs = pushTime - now
+
+            if (delayMs > 0) {
+                logger.info(
+                    { delayMs, scheduled_push_at },
+                    'Scheduling delayed broadcast notification for examination schedule'
+                )
+                setTimeout(() => {
+                    performSend().catch(err =>
+                        logger.error(
+                            { err },
+                            'Failed to execute delayed broadcast push'
+                        )
+                    )
+                }, delayMs)
+
+                return {
+                    recipient_count: parentUserIds.length,
+                    title,
+                    body,
+                    is_scheduled: true,
+                    scheduled_push_at
+                }
+            } else {
+                throw ApiError.badRequest(
+                    'Waktu notifikasi kustom harus lebih besar dari waktu saat ini'
+                )
+            }
+        }
+
+        await performSend()
 
         return {
             recipient_count: parentUserIds.length,
             title,
-            body
+            body,
+            is_scheduled: false
         }
     }
 }

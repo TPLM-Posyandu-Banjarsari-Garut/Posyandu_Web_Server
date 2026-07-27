@@ -1265,8 +1265,16 @@ export class ConsultationsService {
 
     async broadcastConsultationNotification(
         public_id: string,
-        custom_message?: string
-    ): Promise<{ recipient_count: number; title: string; body: string }> {
+        payload?: { custom_message?: string; scheduled_push_at?: string }
+    ): Promise<{
+        recipient_count: number
+        title: string
+        body: string
+        is_scheduled?: boolean
+        scheduled_push_at?: string
+    }> {
+        const custom_message = payload?.custom_message
+        const scheduled_push_at = payload?.scheduled_push_at
         const consultation = await this.getConsultationById(public_id)
         const detail = await this.getBookingDetails(consultation.id)
 
@@ -1284,23 +1292,61 @@ export class ConsultationsService {
                 ? custom_message
                 : `Halo ${detail.parent_name}, pengingat untuk janji konsultasi ${typeLabel} Anda pada ${dateStr} di ${detail.posyandu_name}. Mohon hadir tepat waktu! (Antrean: #${enriched.queue_number || '-'})`
 
-        await this.notifications_service.createNotification({
-            user_id: detail.parent_user_id,
-            type: 'consultation',
-            status: 'unread',
-            title,
-            body,
-            data: {
-                consultation_id: consultation.id,
-                queue_number: enriched.queue_number,
-                posyandu_name: detail.posyandu_name
+        const performSend = async () => {
+            await this.notifications_service.createNotification({
+                user_id: detail.parent_user_id,
+                type: 'consultation',
+                status: 'unread',
+                title,
+                body,
+                data: {
+                    consultation_id: consultation.id,
+                    queue_number: enriched.queue_number,
+                    posyandu_name: detail.posyandu_name
+                }
+            })
+        }
+
+        if (scheduled_push_at) {
+            const pushTime = new Date(scheduled_push_at).getTime()
+            const now = Date.now()
+            const delayMs = pushTime - now
+
+            if (delayMs > 0) {
+                logger.info(
+                    { delayMs, scheduled_push_at },
+                    'Scheduling delayed broadcast notification for consultation'
+                )
+                setTimeout(() => {
+                    performSend().catch(err =>
+                        logger.error(
+                            { err },
+                            'Failed to execute delayed consultation push'
+                        )
+                    )
+                }, delayMs)
+
+                return {
+                    recipient_count: 1,
+                    title,
+                    body,
+                    is_scheduled: true,
+                    scheduled_push_at
+                }
+            } else {
+                throw ApiError.badRequest(
+                    'Waktu notifikasi kustom harus lebih besar dari waktu saat ini'
+                )
             }
-        })
+        }
+
+        await performSend()
 
         return {
             recipient_count: 1,
             title,
-            body
+            body,
+            is_scheduled: false
         }
     }
 }

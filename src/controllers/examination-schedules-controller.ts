@@ -168,7 +168,7 @@ export class ExaminationSchedulesController {
 
         const result = await this.service.broadcastScheduleNotification(
             public_id,
-            req.body?.custom_message
+            req.body
         )
 
         return ApiResponse.ok(
