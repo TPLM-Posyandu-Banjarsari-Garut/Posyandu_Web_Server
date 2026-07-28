@@ -25,6 +25,7 @@ export const notifications = pgTable(
             queue_number?: number
             consultation_type?: string
             posyandu_name?: string
+            url?: string
         }>(),
 
         read_at: timestamp('read_at', { withTimezone: true, mode: 'date' }),

@@ -1302,7 +1302,8 @@ export class ConsultationsService {
                 data: {
                     consultation_id: consultation.id,
                     queue_number: enriched.queue_number,
-                    posyandu_name: detail.posyandu_name
+                    posyandu_name: detail.posyandu_name,
+                    url: '/orangtua/lihat-antrean'
                 }
             })
         }

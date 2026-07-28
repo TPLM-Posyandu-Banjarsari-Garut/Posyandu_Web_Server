@@ -173,7 +173,8 @@ export class ExaminationSchedulesService {
                         posyandu_name: posyanduName,
                         scheduled_at: schedule.scheduled_date
                             ? new Date(schedule.scheduled_date).toISOString()
-                            : undefined
+                            : undefined,
+                        url: '/orangtua/jadwal-posyandu'
                     }
                 })
 
@@ -186,7 +187,8 @@ export class ExaminationSchedulesService {
                         badge: '/icon-192x192.png',
                         data: {
                             consultation_id: schedule.id,
-                            posyandu_name: posyanduName
+                            posyandu_name: posyanduName,
+                            url: '/orangtua/jadwal-posyandu'
                         }
                     })
                     .catch(err => {
