@@ -5,6 +5,7 @@ import {
     parents,
     midwifes,
     cadres,
+    posyandus,
     sessions,
     relationChildrens,
     consultations,
@@ -26,6 +27,7 @@ import {
     getTableColumns,
     inArray
 } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface UserQueryFilters {
@@ -43,6 +45,7 @@ export interface UserWithProfile extends User {
     midwife_id?: string | null
     cadre_id?: string | null
     posyandu_id?: string | null
+    posyandu_name?: string | null
 }
 
 const roleTableMap = {
@@ -98,9 +101,36 @@ export class UserRepository extends BaseRepository<
             statusCondition
         )
 
+        const midwifePosyandus = alias(posyandus, 'midwife_posyandus')
+        const cadrePosyandus = alias(posyandus, 'cadre_posyandus')
+
         const data = await this.db
-            .select(getTableColumns(users))
+            .select({
+                ...getTableColumns(users),
+                posyandu_name: sql<
+                    string | null
+                >`COALESCE(${midwifePosyandus.name}, ${cadrePosyandus.name})`,
+                posyandu_id: sql<
+                    string | null
+                >`COALESCE(${midwifes.posyandu_id}, ${cadres.posyandu_id})`
+            })
             .from(users)
+            .leftJoin(
+                midwifes,
+                and(
+                    eq(users.id, midwifes.user_id),
+                    eq(midwifes.is_deleted, false)
+                )
+            )
+            .leftJoin(
+                midwifePosyandus,
+                eq(midwifes.posyandu_id, midwifePosyandus.id)
+            )
+            .leftJoin(
+                cadres,
+                and(eq(users.id, cadres.user_id), eq(cadres.is_deleted, false))
+            )
+            .leftJoin(cadrePosyandus, eq(cadres.posyandu_id, cadrePosyandus.id))
             .where(whereClause)
             .orderBy(
                 order === 'asc' ? asc(users.created_at) : desc(users.created_at)
