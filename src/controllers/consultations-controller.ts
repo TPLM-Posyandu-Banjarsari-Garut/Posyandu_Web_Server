@@ -228,4 +228,26 @@ export class ConsultationsController {
             return this.consultations_service.restoreBooking(id)
         })
     }
+
+    broadcastConsultationNotification = async (req: Request, res: Response) => {
+        const user = res.locals.user
+        const public_id = req.params.public_id as string
+
+        logger.info(
+            { userId: user?.id, public_id, body: req.body },
+            'Incoming request: Broadcast Consultation Notification'
+        )
+
+        const result =
+            await this.consultations_service.broadcastConsultationNotification(
+                public_id,
+                req.body
+            )
+
+        return ApiResponse.ok(
+            res,
+            'Consultation notification broadcasted successfully',
+            result
+        )
+    }
 }

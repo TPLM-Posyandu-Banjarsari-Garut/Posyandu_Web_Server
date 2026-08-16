@@ -122,9 +122,27 @@ export const updateScheduleStatusSchema = z
     })
     .openapi('UpdateScheduleStatusInput')
 
+export const broadcastScheduleNotificationSchema = z
+    .object({
+        custom_message: z
+            .string()
+            .optional()
+            .nullable()
+            .openapi({ example: 'Mohon membawa buku KIA' }),
+        scheduled_push_at: z
+            .string()
+            .optional()
+            .nullable()
+            .openapi({ example: '2026-07-27T20:30:00.000Z' })
+    })
+    .openapi('BroadcastScheduleNotificationInput')
+
 export type CreateExaminationScheduleInput = z.infer<
     typeof createExaminationScheduleSchema
 >
 export type UpdateExaminationScheduleInput = z.infer<
     typeof updateExaminationScheduleSchema
+>
+export type BroadcastScheduleNotificationInput = z.infer<
+    typeof broadcastScheduleNotificationSchema
 >

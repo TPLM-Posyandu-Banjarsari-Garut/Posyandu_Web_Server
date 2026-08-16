@@ -5,6 +5,13 @@ import {
 import { NewNotification, Notification } from '@/db'
 import { ApiError } from '@/utils/api-error'
 import { WsManager } from '@/utils/ws-manager'
+import { PushSubscriptionsRepository } from '@/repositories/push-subscriptions-repository'
+import { PushSubscriptionsService } from '@/services/push-subscriptions-service'
+import db from '@/configs/db'
+import { logger } from '@/utils/logger'
+
+const pushRepo = new PushSubscriptionsRepository(db)
+const pushService = new PushSubscriptionsService(pushRepo)
 
 export class NotificationsService {
     constructor(
@@ -23,6 +30,21 @@ export class NotificationsService {
             type: 'notification',
             payload: notification
         })
+
+        pushService
+            .sendPushNotification(data.user_id, {
+                title: data.title,
+                body: data.body,
+                icon: '/icon-192x192.png',
+                badge: '/icon-192x192.png',
+                data: (data.data as Record<string, unknown>) || {}
+            })
+            .catch(err => {
+                logger.warn(
+                    { err, userId: data.user_id },
+                    '[WebPush] Failed to send push notification'
+                )
+            })
 
         return notification
     }

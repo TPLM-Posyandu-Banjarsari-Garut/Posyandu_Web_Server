@@ -91,11 +91,34 @@ export const envSchema = z.object({
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     UPSTASH_REDIS_URL: z.string().optional(),
 
+    TURNSTILE_SECRET_KEY: z.string().optional().default('skip'), // Set to actual secret in production; 'skip' disables server-side verify (dev only)
+
+    CSRF_SECRET: z
+        .string()
+        .min(32, 'CSRF_SECRET must be at least 32 characters')
+        .optional()
+        .default('dev-csrf-secret-change-in-production-32chars'),
+
     CRON_SECRET: z.string().min(1, 'CRON_SECRET is required'),
     SESSION_EXPIRES_IN: numeric,
     SESSION_UPDATE_AGE: numeric,
     SESSION_COOKIE_CACHE_ENABLED: z.string().transform(val => val === 'true'),
-    SESSION_COOKIE_CACHE_MAX_AGE: numeric
+    SESSION_COOKIE_CACHE_MAX_AGE: numeric,
+
+    VAPID_PUBLIC_KEY: z
+        .string()
+        .optional()
+        .default(
+            'BLWBCiQ87BQp75V-V9L3g4meoFG6rC-HiwrPphYBEeZhEdxkN7kFyMoQcrG6mngEY0JWmm-ukxDjKzrYCBaHx70'
+        ),
+    VAPID_PRIVATE_KEY: z
+        .string()
+        .optional()
+        .default('Hwnbtx_xE_Gk82-HE1lDsGLPMYP3tVNuWtEmCO3RVVk'),
+    VAPID_SUBJECT: z
+        .string()
+        .optional()
+        .default('mailto:admin@posyandubanjarsari.my.id')
 })
 
 export type Env = z.infer<typeof envSchema>

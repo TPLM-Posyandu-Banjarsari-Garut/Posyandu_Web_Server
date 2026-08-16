@@ -13,7 +13,8 @@ import {
     getConsultationsQuerySchema,
     consultationParamsSchema,
     deleteConsultationQuerySchema,
-    getAvailableSlotsQuerySchema
+    getAvailableSlotsQuerySchema,
+    broadcastConsultationNotificationSchema
 } from '@/validations/consultations-validation'
 import db from '@/configs/db'
 
@@ -28,7 +29,13 @@ const consultations_controller = new ConsultationsController(
 router.post(
     '/',
     verifyAuth,
-    authorizeRoles('posyandu_admin', 'village_admin', 'parent'),
+    authorizeRoles(
+        'posyandu_admin',
+        'village_admin',
+        'midwife',
+        'cadre',
+        'parent'
+    ),
     validateRequest({ body: createConsultationSchema }),
     AsyncHandler(consultations_controller.createBooking)
 )
@@ -120,6 +127,17 @@ router.post(
     authorizeRoles('posyandu_admin', 'village_admin', 'parent'),
     validateRequest({ params: consultationParamsSchema }),
     AsyncHandler(consultations_controller.restoreBooking)
+)
+
+router.post(
+    '/:public_id/broadcast-notification',
+    verifyAuth,
+    authorizeRoles('posyandu_admin', 'village_admin', 'midwife', 'cadre'),
+    validateRequest({
+        params: consultationParamsSchema,
+        body: broadcastConsultationNotificationSchema
+    }),
+    AsyncHandler(consultations_controller.broadcastConsultationNotification)
 )
 
 export default router

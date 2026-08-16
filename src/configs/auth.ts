@@ -35,7 +35,8 @@ export const auth = betterAuth({
             sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
             secure: env.NODE_ENV === 'production',
             httpOnly: true,
-            path: '/'
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7 // 7 days — persistent cookie survives browser restart
         }
     },
     plugins: [
