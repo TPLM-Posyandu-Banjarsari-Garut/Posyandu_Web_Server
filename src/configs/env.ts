@@ -91,6 +91,14 @@ export const envSchema = z.object({
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     UPSTASH_REDIS_URL: z.string().optional(),
 
+    TURNSTILE_SECRET_KEY: z.string().optional().default('skip'), // Set to actual secret in production; 'skip' disables server-side verify (dev only)
+
+    CSRF_SECRET: z
+        .string()
+        .min(32, 'CSRF_SECRET must be at least 32 characters')
+        .optional()
+        .default('dev-csrf-secret-change-in-production-32chars'),
+
     CRON_SECRET: z.string().min(1, 'CRON_SECRET is required'),
     SESSION_EXPIRES_IN: numeric,
     SESSION_UPDATE_AGE: numeric,

@@ -21,13 +21,13 @@ export const signUpSchema = z
 
         password: z
             .string()
-            .min(8, 'Password must be at least 8 characters')
+            .min(12, 'Password must be at least 12 characters')
             .max(100, 'Password cannot exceed 100 characters')
             .regex(
-                /^(?=.*[a-zA-Z])(?=.*\d).+$/,
-                'Password must contain at least one letter and one number'
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).+$/,
+                'Password must contain uppercase, lowercase, number, and special character'
             )
-            .openapi({ example: 'P@ssword123' }),
+            .openapi({ example: 'P@ssw0rd!Secure' }),
 
         phone_number: z
             .string()
@@ -66,13 +66,13 @@ export const resetPasswordSchema = z
     .object({
         newPassword: z
             .string()
-            .min(8, 'New password must be at least 8 characters')
+            .min(12, 'New password must be at least 12 characters')
             .max(100, 'New password cannot exceed 100 characters')
             .regex(
-                /^(?=.*[a-zA-Z])(?=.*\d).+$/,
-                'New password must contain at least one letter and one number'
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).+$/,
+                'New password must contain uppercase, lowercase, number, and special character'
             )
-            .openapi({ example: 'NewP@ssword123' }),
+            .openapi({ example: 'NewP@ssw0rd!Secure' }),
 
         token: z.string().optional().openapi({ example: 'abc123tokenXYZ' })
     })
@@ -132,13 +132,13 @@ export const resetPasswordOTPSchema = z
         otp: z.string().openapi({ example: '123456' }),
         password: z
             .string()
-            .min(8, 'Password must be at least 8 characters')
+            .min(12, 'Password must be at least 12 characters')
             .max(100, 'Password cannot exceed 100 characters')
             .regex(
-                /^(?=.*[a-zA-Z])(?=.*\d).+$/,
-                'Password must contain at least one letter and one number'
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).+$/,
+                'Password must contain uppercase, lowercase, number, and special character'
             )
-            .openapi({ example: 'NewP@ssword123' })
+            .openapi({ example: 'NewP@ssw0rd!Secure' })
     })
     .openapi('ResetPasswordOTPInput')
 
