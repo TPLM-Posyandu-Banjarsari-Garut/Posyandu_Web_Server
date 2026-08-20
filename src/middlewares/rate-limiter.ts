@@ -24,6 +24,7 @@ export const rateLimiter = rateLimit({
     max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_GLOBAL_MAX,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req: Request) => req.method === 'OPTIONS',
     store: createRateLimitStore('rl:global:'),
     handler: rateLimitHandler(
         'Terlalu banyak permintaan dari IP ini. Coba lagi setelah 15 menit.'
