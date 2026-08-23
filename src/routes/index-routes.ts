@@ -31,8 +31,10 @@ import { rateLimiter } from '@/middlewares/rate-limiter'
 
 const router = Router()
 
-router.use(rateLimiter)
+// Health check endpoint tidak dikenakan rate limit
 router.use('/api/health', healthRoutes)
+
+router.use(rateLimiter)
 router.use('/api/users', userRoutes)
 router.use('/api/cadres', cadreRoutes)
 router.use('/api/midwifes', midwifeRoutes)
