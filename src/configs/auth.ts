@@ -6,6 +6,7 @@ import * as schema from '@/db'
 import db from '@/configs/db'
 import env from '@/configs/env'
 import { EmailService } from '@/services/email-service'
+// triger redeploy
 
 const trustedOrigins = [env.CORS_ORIGIN, ...env.TRUSTED_ORIGINS]
 if (
