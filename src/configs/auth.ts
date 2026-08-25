@@ -7,7 +7,6 @@ import db from '@/configs/db'
 import env from '@/configs/env'
 import { EmailService } from '@/services/email-service'
 
-
 const trustedOrigins = [env.CORS_ORIGIN, ...env.TRUSTED_ORIGINS]
 if (
     env.NODE_ENV === 'development' ||
