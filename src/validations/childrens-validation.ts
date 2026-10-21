@@ -139,7 +139,7 @@ export const getNewbornReportQuerySchema = z
             .string()
             .optional()
             .transform(val =>
-                val ? parseInt(val, 10) : new Date().getMonth() + 1
+                val ? Number.parseInt(val, 10) : new Date().getMonth() + 1
             )
             .pipe(z.number().int().min(1).max(12))
             .openapi({ example: 10, description: 'Month of birth (1-12)' }),
@@ -147,7 +147,7 @@ export const getNewbornReportQuerySchema = z
             .string()
             .optional()
             .transform(val =>
-                val ? parseInt(val, 10) : new Date().getFullYear()
+                val ? Number.parseInt(val, 10) : new Date().getFullYear()
             )
             .pipe(z.number().int().min(2000).max(2100))
             .openapi({ example: 2026, description: 'Year of birth' }),

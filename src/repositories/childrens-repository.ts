@@ -280,26 +280,8 @@ export class ChildrenRepository extends BaseRepository<
     }
 
     async findByParentId(parent_id: string): Promise<Children[]> {
-        return this.db
-            .select({
-                id: childrens.id,
-                posyandu_id: childrens.posyandu_id,
-                name: childrens.name,
-                identity_number: childrens.identity_number,
-                gender: childrens.gender,
-                child_category: childrens.child_category,
-                place_of_birth: childrens.place_of_birth,
-                birth_date: childrens.birth_date,
-                birth_order: childrens.birth_order,
-                blood_type: childrens.blood_type,
-                birth_weight: childrens.birth_weight,
-                birth_length: childrens.birth_length,
-                birth_head_circumference: childrens.birth_head_circumference,
-                created_at: childrens.created_at,
-                updated_at: childrens.updated_at,
-                deleted_at: childrens.deleted_at,
-                is_deleted: childrens.is_deleted
-            })
+        return await this.db
+            .select(getTableColumns(childrens))
             .from(childrens)
             .innerJoin(
                 relationChildrens,
@@ -406,8 +388,7 @@ export class ChildrenRepository extends BaseRepository<
             conditions.push(
                 or(
                     ilike(childrens.name, `%${escapedSearch}%`),
-                    ilike(childrens.identity_number, `%${escapedSearch}%`),
-                    ilike(users.name, `%${escapedSearch}%`)
+                    ilike(childrens.identity_number, `%${escapedSearch}%`)
                 )!
             )
         }
@@ -417,16 +398,13 @@ export class ChildrenRepository extends BaseRepository<
         // Single aggregation query for month statistics (0 N+1)
         const [summaryResult] = await this.db
             .select({
-                total_newborns:
-                    sql<number>`count(distinct ${childrens.id})`.mapWith(
-                        Number
-                    ),
+                total_newborns: sql<number>`count(*)`.mapWith(Number),
                 male_count:
-                    sql<number>`count(distinct case when ${childrens.gender} = 'male' then ${childrens.id} end)`.mapWith(
+                    sql<number>`count(*) filter (where ${childrens.gender} = 'male')`.mapWith(
                         Number
                     ),
                 female_count:
-                    sql<number>`count(distinct case when ${childrens.gender} = 'female' then ${childrens.id} end)`.mapWith(
+                    sql<number>`count(*) filter (where ${childrens.gender} = 'female')`.mapWith(
                         Number
                     ),
                 total_posyandus:
@@ -435,16 +413,6 @@ export class ChildrenRepository extends BaseRepository<
                     )
             })
             .from(childrens)
-            .leftJoin(posyandus, eq(posyandus.id, childrens.posyandu_id))
-            .leftJoin(
-                relationChildrens,
-                and(
-                    eq(relationChildrens.children_id, childrens.id),
-                    eq(relationChildrens.relation, 'mother')
-                )
-            )
-            .leftJoin(parents, eq(parents.id, relationChildrens.parent_id))
-            .leftJoin(users, eq(users.id, parents.user_id))
             .where(whereClause)
 
         const summary: NewbornReportSummary = {
@@ -457,24 +425,8 @@ export class ChildrenRepository extends BaseRepository<
         // Single paginated join query with window function count (0 N+1)
         const paginatedList = await this.db
             .select({
-                id: childrens.id,
-                name: childrens.name,
-                identity_number: childrens.identity_number,
-                gender: childrens.gender,
-                child_category: childrens.child_category,
-                place_of_birth: childrens.place_of_birth,
-                birth_date: childrens.birth_date,
-                birth_order: childrens.birth_order,
-                blood_type: childrens.blood_type,
-                birth_weight: childrens.birth_weight,
-                birth_length: childrens.birth_length,
-                birth_head_circumference: childrens.birth_head_circumference,
-                created_at: childrens.created_at,
-                posyandu_id: childrens.posyandu_id,
-                posyandu_name: posyandus.name,
-                posyandu_village: posyandus.village_name,
-                posyandu_rt: posyandus.rt,
-                posyandu_rw: posyandus.rw,
+                child: childrens,
+                posyandu: posyandus,
                 mother_name: users.name,
                 mother_nik: parents.identity_number,
                 mother_phone: users.phone_number,
@@ -505,24 +457,24 @@ export class ChildrenRepository extends BaseRepository<
                 : (summaryResult?.total_newborns ?? 0)
 
         const data: NewbornReportItem[] = paginatedList.map(row => ({
-            id: row.id,
-            name: row.name,
-            identity_number: row.identity_number,
-            gender: row.gender,
-            child_category: row.child_category,
-            place_of_birth: row.place_of_birth,
-            birth_date: row.birth_date,
-            birth_order: row.birth_order,
-            blood_type: row.blood_type,
-            birth_weight: row.birth_weight,
-            birth_length: row.birth_length,
-            birth_head_circumference: row.birth_head_circumference,
-            created_at: row.created_at,
-            posyandu_id: row.posyandu_id,
-            posyandu_name: row.posyandu_name,
-            posyandu_village: row.posyandu_village,
-            posyandu_rt: row.posyandu_rt,
-            posyandu_rw: row.posyandu_rw,
+            id: row.child.id,
+            name: row.child.name,
+            identity_number: row.child.identity_number,
+            gender: row.child.gender,
+            child_category: row.child.child_category,
+            place_of_birth: row.child.place_of_birth,
+            birth_date: row.child.birth_date,
+            birth_order: row.child.birth_order,
+            blood_type: row.child.blood_type,
+            birth_weight: row.child.birth_weight,
+            birth_length: row.child.birth_length,
+            birth_head_circumference: row.child.birth_head_circumference,
+            created_at: row.child.created_at,
+            posyandu_id: row.child.posyandu_id,
+            posyandu_name: row.posyandu?.name ?? null,
+            posyandu_village: row.posyandu?.village_name ?? null,
+            posyandu_rt: row.posyandu?.rt ?? null,
+            posyandu_rw: row.posyandu?.rw ?? null,
             mother_name: row.mother_name,
             mother_nik: row.mother_nik,
             mother_phone: row.mother_phone,
