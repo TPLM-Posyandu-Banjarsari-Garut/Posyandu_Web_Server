@@ -32,12 +32,19 @@ export const rateLimiter = rateLimit({
 })
 
 // ─── 2. Auth Endpoint Rate Limiter ────────────────────────────────────────────
-// Melindungi seluruh /api/auth/* dari abuse
+// Melindungi seluruh /api/auth/* dari abuse (kecuali sign-out/session query)
 export const authRateLimiter = rateLimit({
     windowMs: env.RATE_LIMIT_AUTH_WINDOW_MINUTES * 60 * 1000,
     max: env.NODE_ENV === 'development' ? 99999 : env.RATE_LIMIT_AUTH_MAX,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req: Request) =>
+        req.method === 'OPTIONS' ||
+        req.path.endsWith('/sign-out') ||
+        req.path.endsWith('/logout') ||
+        req.path.endsWith('/get-session') ||
+        req.path.endsWith('/me') ||
+        req.path.endsWith('/csrf'),
     store: createRateLimitStore('rl:auth:'),
     handler: rateLimitHandler(
         'Terlalu banyak percobaan autentikasi. Coba lagi setelah satu jam.'
