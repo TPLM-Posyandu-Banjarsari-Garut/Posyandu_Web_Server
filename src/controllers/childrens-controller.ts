@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { ChildrenService } from '@/services/childrens-service'
 import { ChildrenQueryFilters } from '@/repositories/childrens-repository'
+import { GetNewbornReportQueryInput } from '@/validations/childrens-validation'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
 import {
@@ -48,6 +49,32 @@ export class ChildrenController {
 
         const result = await this.children_service.getChildrens(query)
         return ApiResponse.ok(res, 'Childrens retrieved successfully', result)
+    }
+
+    getNewbornReport = async (req: Request, res: Response) => {
+        const user = res.locals.user
+        const query = req.query as unknown as GetNewbornReportQueryInput
+
+        logger.info(
+            { userId: user?.id, query },
+            'Incoming request: Get Newborn Report'
+        )
+
+        if (
+            (user?.role === 'cadre' ||
+                user?.role === 'midwife' ||
+                user?.role === 'posyandu_admin') &&
+            user.posyandu_id
+        ) {
+            query.posyandu_id = user.posyandu_id
+        }
+
+        const result = await this.children_service.getNewbornReport(query)
+        return ApiResponse.ok(
+            res,
+            'Newborn report retrieved successfully',
+            result
+        )
     }
 
     getChildrenById = async (req: Request, res: Response) => {

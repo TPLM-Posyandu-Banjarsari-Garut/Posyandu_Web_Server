@@ -9,7 +9,11 @@ export class AuthorizationService {
             return true
         }
 
-        if (['admin', 'posyandu_admin'].includes(currentUser.role)) {
+        if (
+            ['admin', 'posyandu_admin', 'village_admin'].includes(
+                currentUser.role
+            )
+        ) {
             return true
         }
 
@@ -21,9 +25,13 @@ export class AuthorizationService {
         childId: string
     ): Promise<boolean> {
         if (
-            ['admin', 'posyandu_admin', 'midwife', 'cadre'].includes(
-                currentUser.role
-            )
+            [
+                'admin',
+                'posyandu_admin',
+                'village_admin',
+                'midwife',
+                'cadre'
+            ].includes(currentUser.role)
         ) {
             const child = await db
                 .select()

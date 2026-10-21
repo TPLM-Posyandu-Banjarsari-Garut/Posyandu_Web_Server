@@ -11,7 +11,8 @@ import {
 import {
     registerParentSchema,
     registerCadreSchema,
-    registerMidwifeSchema
+    registerMidwifeSchema,
+    registerAdminSchema
 } from '@/validations/registration-validation'
 import { ApiError } from '@/utils/api-error'
 import { CreateUserInput } from '@/validations/users-validation'
@@ -30,6 +31,8 @@ export class UserController {
             validatedData = registerCadreSchema.parse(req.body)
         } else if (role === 'midwife') {
             validatedData = registerMidwifeSchema.parse(req.body)
+        } else if (role === 'village_admin' || role === 'posyandu_admin') {
+            validatedData = registerAdminSchema.parse(req.body)
         } else {
             throw ApiError.badRequest(`Invalid role: ${role}`)
         }

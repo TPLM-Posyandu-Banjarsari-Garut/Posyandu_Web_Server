@@ -118,6 +118,13 @@ export const registerMidwifeSchema = baseUserSchema
     })
     .openapi('RegisterMidwifeInput')
 
+export const registerAdminSchema = baseUserSchema
+    .extend({
+        role: z.enum(['village_admin', 'posyandu_admin'])
+    })
+    .openapi('RegisterAdminInput')
+
 export type RegisterParentInput = z.infer<typeof registerParentSchema>
 export type RegisterCadreInput = z.infer<typeof registerCadreSchema>
 export type RegisterMidwifeInput = z.infer<typeof registerMidwifeSchema>
+export type RegisterAdminInput = z.infer<typeof registerAdminSchema>

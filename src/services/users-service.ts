@@ -93,7 +93,12 @@ export class UserService {
                     'You do not have permission to update this user'
                 )
             }
-            if (user_payload.role && currentUser.role !== 'admin') {
+            if (
+                user_payload.role &&
+                !['admin', 'posyandu_admin', 'village_admin'].includes(
+                    currentUser.role
+                )
+            ) {
                 throw ApiError.forbidden('Only admin can change user roles')
             }
         }

@@ -3,7 +3,8 @@ import { createPaginationMeta } from '@/utils/pagination'
 import { NewChildren, Children, User } from '@/db'
 import {
     ChildrenRepository,
-    ChildrenQueryFilters
+    ChildrenQueryFilters,
+    NewbornReportFilters
 } from '@/repositories/childrens-repository'
 import { ParentRepository } from '@/repositories/parents-repository'
 import { AuthorizationService } from '@/services/authorization-service'
@@ -52,6 +53,18 @@ export class ChildrenService {
             await this.children_repository.getChildrens(query_filters)
 
         return {
+            data,
+            meta: createPaginationMeta(page, limit, totalItems)
+        }
+    }
+
+    async getNewbornReport(filters: NewbornReportFilters) {
+        const { page = 1, limit = 10 } = filters
+        const { summary, data, totalItems } =
+            await this.children_repository.getNewbornReport(filters)
+
+        return {
+            summary,
             data,
             meta: createPaginationMeta(page, limit, totalItems)
         }
