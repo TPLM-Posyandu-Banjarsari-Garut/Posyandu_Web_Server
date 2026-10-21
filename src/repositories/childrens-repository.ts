@@ -22,7 +22,28 @@ import {
     getTableColumns,
     or
 } from 'drizzle-orm'
+import type {
+    AnyPgSelectQueryBuilder,
+    PgSelectDynamic
+} from 'drizzle-orm/pg-core'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
+
+function applyMotherJoins<T extends AnyPgSelectQueryBuilder>(
+    qb: T
+): PgSelectDynamic<T> {
+    return qb
+        .$dynamic()
+        .leftJoin(posyandus, eq(posyandus.id, childrens.posyandu_id))
+        .leftJoin(
+            relationChildrens,
+            and(
+                eq(relationChildrens.children_id, childrens.id),
+                eq(relationChildrens.relation, 'mother')
+            )
+        )
+        .leftJoin(parents, eq(parents.id, relationChildrens.parent_id))
+        .leftJoin(users, eq(users.id, parents.user_id))
+}
 
 export interface ChildrenQueryFilters {
     search?: string
@@ -138,25 +159,17 @@ export class ChildrenRepository extends BaseRepository<
 
         const whereClause = and(...conditions)
 
-        const dataWithCount = await this.db
-            .select({
-                child: childrens,
-                posyandu: posyandus,
-                mother_name: users.name,
-                parent_user_id: parents.user_id,
-                total_count: sql<number>`count(*) over()`.mapWith(Number)
-            })
-            .from(childrens)
-            .leftJoin(posyandus, eq(posyandus.id, childrens.posyandu_id))
-            .leftJoin(
-                relationChildrens,
-                and(
-                    eq(relationChildrens.children_id, childrens.id),
-                    eq(relationChildrens.relation, 'mother')
-                )
-            )
-            .leftJoin(parents, eq(parents.id, relationChildrens.parent_id))
-            .leftJoin(users, eq(users.id, parents.user_id))
+        const dataWithCount = await applyMotherJoins(
+            this.db
+                .select({
+                    child: childrens,
+                    posyandu: posyandus,
+                    mother_name: users.name,
+                    parent_user_id: parents.user_id,
+                    total_count: sql<number>`count(*) over()`.mapWith(Number)
+                })
+                .from(childrens)
+        )
             .where(whereClause)
             .orderBy(
                 order === 'asc'
@@ -216,24 +229,16 @@ export class ChildrenRepository extends BaseRepository<
                   sql`${childrens.deleted_at} IS NULL`
               )
 
-        const [row] = await this.db
-            .select({
-                child: childrens,
-                mother_name: users.name,
-                parent_user_id: parents.user_id,
-                posyandu: posyandus
-            })
-            .from(childrens)
-            .leftJoin(posyandus, eq(posyandus.id, childrens.posyandu_id))
-            .leftJoin(
-                relationChildrens,
-                and(
-                    eq(relationChildrens.children_id, childrens.id),
-                    eq(relationChildrens.relation, 'mother')
-                )
-            )
-            .leftJoin(parents, eq(parents.id, relationChildrens.parent_id))
-            .leftJoin(users, eq(users.id, parents.user_id))
+        const [row] = await applyMotherJoins(
+            this.db
+                .select({
+                    child: childrens,
+                    mother_name: users.name,
+                    parent_user_id: parents.user_id,
+                    posyandu: posyandus
+                })
+                .from(childrens)
+        )
             .where(condition)
             .limit(1)
 
@@ -423,29 +428,24 @@ export class ChildrenRepository extends BaseRepository<
         }
 
         // Single paginated join query with window function count (0 N+1)
-        const paginatedList = await this.db
-            .select({
-                child: childrens,
-                posyandu: posyandus,
-                mother_name: users.name,
-                mother_nik: parents.identity_number,
-                mother_phone: users.phone_number,
-                mother_address: parents.address_line,
-                mother_rt: parents.rt,
-                mother_rw: parents.rw,
-                total_count: sql<number>`count(*) over()`.mapWith(Number)
-            })
-            .from(childrens)
-            .leftJoin(posyandus, eq(posyandus.id, childrens.posyandu_id))
-            .leftJoin(
-                relationChildrens,
-                and(
-                    eq(relationChildrens.children_id, childrens.id),
-                    eq(relationChildrens.relation, 'mother')
-                )
-            )
-            .leftJoin(parents, eq(parents.id, relationChildrens.parent_id))
-            .leftJoin(users, eq(users.id, parents.user_id))
+        const paginatedList = await applyMotherJoins(
+            this.db
+                .select({
+                    child: childrens,
+                    posyandu_name: posyandus.name,
+                    posyandu_village: posyandus.village_name,
+                    posyandu_rt: posyandus.rt,
+                    posyandu_rw: posyandus.rw,
+                    mother_name: users.name,
+                    mother_nik: parents.identity_number,
+                    mother_phone: users.phone_number,
+                    mother_address: parents.address_line,
+                    mother_rt: parents.rt,
+                    mother_rw: parents.rw,
+                    total_count: sql<number>`count(*) over()`.mapWith(Number)
+                })
+                .from(childrens)
+        )
             .where(whereClause)
             .orderBy(desc(childrens.birth_date), desc(childrens.created_at))
             .limit(safeLimit)
@@ -471,10 +471,10 @@ export class ChildrenRepository extends BaseRepository<
             birth_head_circumference: row.child.birth_head_circumference,
             created_at: row.child.created_at,
             posyandu_id: row.child.posyandu_id,
-            posyandu_name: row.posyandu?.name ?? null,
-            posyandu_village: row.posyandu?.village_name ?? null,
-            posyandu_rt: row.posyandu?.rt ?? null,
-            posyandu_rw: row.posyandu?.rw ?? null,
+            posyandu_name: row.posyandu_name ?? null,
+            posyandu_village: row.posyandu_village ?? null,
+            posyandu_rt: row.posyandu_rt ?? null,
+            posyandu_rw: row.posyandu_rw ?? null,
             mother_name: row.mother_name,
             mother_nik: row.mother_nik,
             mother_phone: row.mother_phone,
