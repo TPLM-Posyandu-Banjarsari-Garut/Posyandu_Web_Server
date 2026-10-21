@@ -12,6 +12,7 @@ import {
     createChildSchema,
     updateChildSchema,
     getChildrenQuerySchema,
+    getNewbornReportQuerySchema,
     childParamsSchema,
     deleteChildQuerySchema
 } from '@/validations/childrens-validation'
@@ -55,6 +56,14 @@ router.get(
     ),
     validateRequest({ query: getChildrenQuerySchema }),
     AsyncHandler(children_controller.getChildrens)
+)
+
+router.get(
+    '/reports/newborns',
+    verifyAuth,
+    authorizeRoles('posyandu_admin', 'village_admin', 'cadre', 'midwife'),
+    validateRequest({ query: getNewbornReportQuerySchema }),
+    AsyncHandler(children_controller.getNewbornReport)
 )
 
 router.get(

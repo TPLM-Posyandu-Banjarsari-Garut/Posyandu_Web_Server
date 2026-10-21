@@ -132,6 +132,30 @@ export const getChildrenQuerySchema = z
     })
     .openapi('GetChildrenQuery')
 
+export const getNewbornReportQuerySchema = z
+    .object({
+        ...paginationQuerySchema,
+        month: z
+            .string()
+            .optional()
+            .transform(val =>
+                val ? parseInt(val, 10) : new Date().getMonth() + 1
+            )
+            .pipe(z.number().int().min(1).max(12))
+            .openapi({ example: 10, description: 'Month of birth (1-12)' }),
+        year: z
+            .string()
+            .optional()
+            .transform(val =>
+                val ? parseInt(val, 10) : new Date().getFullYear()
+            )
+            .pipe(z.number().int().min(2000).max(2100))
+            .openapi({ example: 2026, description: 'Year of birth' }),
+        posyandu_id: z.string().optional(),
+        search: z.string().optional()
+    })
+    .openapi('GetNewbornReportQuery')
+
 export const childParamsSchema = z
     .object({
         public_id: z
@@ -150,5 +174,8 @@ export const updateChildSchema = createChildSchema
 export type CreateChildInput = z.infer<typeof createChildSchema>
 export type UpdateChildInput = z.infer<typeof updateChildSchema>
 export type GetChildrenQueryInput = z.infer<typeof getChildrenQuerySchema>
+export type GetNewbornReportQueryInput = z.infer<
+    typeof getNewbornReportQuerySchema
+>
 export type ChildParamInput = z.infer<typeof childParamsSchema>
 export type DeleteChildQueryInput = z.infer<typeof deleteChildQuerySchema>

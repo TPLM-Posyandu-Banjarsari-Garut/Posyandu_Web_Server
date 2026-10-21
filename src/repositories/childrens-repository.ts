@@ -19,7 +19,8 @@ import {
     inArray,
     asc,
     desc,
-    getTableColumns
+    getTableColumns,
+    or
 } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
@@ -33,6 +34,49 @@ export interface ChildrenQueryFilters {
     limit?: number
     includeDeleted?: boolean
     order?: 'asc' | 'desc'
+}
+
+export interface NewbornReportFilters {
+    month: number
+    year: number
+    posyandu_id?: string
+    search?: string
+    page?: number
+    limit?: number
+}
+
+export interface NewbornReportSummary {
+    total_newborns: number
+    male_count: number
+    female_count: number
+    total_posyandus: number
+}
+
+export interface NewbornReportItem {
+    id: string
+    name: string
+    identity_number: string
+    gender: 'male' | 'female'
+    child_category: string | null
+    place_of_birth: string | null
+    birth_date: Date | string | null
+    birth_order: number | null
+    blood_type: string | null
+    birth_weight: string | null
+    birth_length: string | null
+    birth_head_circumference: string | null
+    created_at: Date | string | null
+    posyandu_id: string
+    posyandu_name: string | null
+    posyandu_village: string | null
+    posyandu_rt: string | null
+    posyandu_rw: string | null
+    mother_name: string | null
+    mother_nik: string | null
+    mother_phone: string | null
+    mother_address: string | null
+    mother_rt: string | null
+    mother_rw: string | null
 }
 
 export class ChildrenRepository extends BaseRepository<
@@ -321,5 +365,176 @@ export class ChildrenRepository extends BaseRepository<
         await this.db
             .delete(relationChildrens)
             .where(eq(relationChildrens.children_id, children_id))
+    }
+
+    async getNewbornReport(filters: NewbornReportFilters): Promise<{
+        summary: NewbornReportSummary
+        data: NewbornReportItem[]
+        totalItems: number
+    }> {
+        const {
+            month,
+            year,
+            posyandu_id,
+            search,
+            page = 1,
+            limit = 10
+        } = filters
+
+        const safePage = Math.max(1, page)
+        const safeLimit = Math.max(1, Math.min(100, limit))
+
+        const startMonthStr = String(month).padStart(2, '0')
+        const lastDay = new Date(year, month, 0).getDate()
+        const lastDayStr = String(lastDay).padStart(2, '0')
+
+        const startDateStr = `${year}-${startMonthStr}-01`
+        const endDateStr = `${year}-${startMonthStr}-${lastDayStr}`
+
+        const conditions = [
+            sql`${childrens.deleted_at} IS NULL`,
+            sql`${childrens.birth_date} >= ${startDateStr}::date`,
+            sql`${childrens.birth_date} <= ${endDateStr}::date`
+        ]
+
+        if (posyandu_id) {
+            conditions.push(eq(childrens.posyandu_id, posyandu_id))
+        }
+
+        const escapedSearch = search ? sanitizeSearchTerm(search) : undefined
+        if (escapedSearch) {
+            conditions.push(
+                or(
+                    ilike(childrens.name, `%${escapedSearch}%`),
+                    ilike(childrens.identity_number, `%${escapedSearch}%`),
+                    ilike(users.name, `%${escapedSearch}%`)
+                )!
+            )
+        }
+
+        const whereClause = and(...conditions)
+
+        // Single aggregation query for month statistics (0 N+1)
+        const [summaryResult] = await this.db
+            .select({
+                total_newborns:
+                    sql<number>`count(distinct ${childrens.id})`.mapWith(
+                        Number
+                    ),
+                male_count:
+                    sql<number>`count(distinct case when ${childrens.gender} = 'male' then ${childrens.id} end)`.mapWith(
+                        Number
+                    ),
+                female_count:
+                    sql<number>`count(distinct case when ${childrens.gender} = 'female' then ${childrens.id} end)`.mapWith(
+                        Number
+                    ),
+                total_posyandus:
+                    sql<number>`count(distinct ${childrens.posyandu_id})`.mapWith(
+                        Number
+                    )
+            })
+            .from(childrens)
+            .leftJoin(posyandus, eq(posyandus.id, childrens.posyandu_id))
+            .leftJoin(
+                relationChildrens,
+                and(
+                    eq(relationChildrens.children_id, childrens.id),
+                    eq(relationChildrens.relation, 'mother')
+                )
+            )
+            .leftJoin(parents, eq(parents.id, relationChildrens.parent_id))
+            .leftJoin(users, eq(users.id, parents.user_id))
+            .where(whereClause)
+
+        const summary: NewbornReportSummary = {
+            total_newborns: summaryResult?.total_newborns ?? 0,
+            male_count: summaryResult?.male_count ?? 0,
+            female_count: summaryResult?.female_count ?? 0,
+            total_posyandus: summaryResult?.total_posyandus ?? 0
+        }
+
+        // Single paginated join query with window function count (0 N+1)
+        const paginatedList = await this.db
+            .select({
+                id: childrens.id,
+                name: childrens.name,
+                identity_number: childrens.identity_number,
+                gender: childrens.gender,
+                child_category: childrens.child_category,
+                place_of_birth: childrens.place_of_birth,
+                birth_date: childrens.birth_date,
+                birth_order: childrens.birth_order,
+                blood_type: childrens.blood_type,
+                birth_weight: childrens.birth_weight,
+                birth_length: childrens.birth_length,
+                birth_head_circumference: childrens.birth_head_circumference,
+                created_at: childrens.created_at,
+                posyandu_id: childrens.posyandu_id,
+                posyandu_name: posyandus.name,
+                posyandu_village: posyandus.village_name,
+                posyandu_rt: posyandus.rt,
+                posyandu_rw: posyandus.rw,
+                mother_name: users.name,
+                mother_nik: parents.identity_number,
+                mother_phone: users.phone_number,
+                mother_address: parents.address_line,
+                mother_rt: parents.rt,
+                mother_rw: parents.rw,
+                total_count: sql<number>`count(*) over()`.mapWith(Number)
+            })
+            .from(childrens)
+            .leftJoin(posyandus, eq(posyandus.id, childrens.posyandu_id))
+            .leftJoin(
+                relationChildrens,
+                and(
+                    eq(relationChildrens.children_id, childrens.id),
+                    eq(relationChildrens.relation, 'mother')
+                )
+            )
+            .leftJoin(parents, eq(parents.id, relationChildrens.parent_id))
+            .leftJoin(users, eq(users.id, parents.user_id))
+            .where(whereClause)
+            .orderBy(desc(childrens.birth_date), desc(childrens.created_at))
+            .limit(safeLimit)
+            .offset((safePage - 1) * safeLimit)
+
+        const totalItems =
+            paginatedList.length > 0
+                ? paginatedList[0].total_count
+                : (summaryResult?.total_newborns ?? 0)
+
+        const data: NewbornReportItem[] = paginatedList.map(row => ({
+            id: row.id,
+            name: row.name,
+            identity_number: row.identity_number,
+            gender: row.gender,
+            child_category: row.child_category,
+            place_of_birth: row.place_of_birth,
+            birth_date: row.birth_date,
+            birth_order: row.birth_order,
+            blood_type: row.blood_type,
+            birth_weight: row.birth_weight,
+            birth_length: row.birth_length,
+            birth_head_circumference: row.birth_head_circumference,
+            created_at: row.created_at,
+            posyandu_id: row.posyandu_id,
+            posyandu_name: row.posyandu_name,
+            posyandu_village: row.posyandu_village,
+            posyandu_rt: row.posyandu_rt,
+            posyandu_rw: row.posyandu_rw,
+            mother_name: row.mother_name,
+            mother_nik: row.mother_nik,
+            mother_phone: row.mother_phone,
+            mother_address: row.mother_address,
+            mother_rt: row.mother_rt,
+            mother_rw: row.mother_rw
+        }))
+
+        return {
+            summary,
+            data,
+            totalItems
+        }
     }
 }
