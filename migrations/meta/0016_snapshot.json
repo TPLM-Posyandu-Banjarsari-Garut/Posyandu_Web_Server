@@ -191,16 +191,12 @@
                 "users_email_unique": {
                     "name": "users_email_unique",
                     "nullsNotDistinct": false,
-                    "columns": [
-                        "email"
-                    ]
+                    "columns": ["email"]
                 },
                 "users_phone_number_unique": {
                     "name": "users_phone_number_unique",
                     "nullsNotDistinct": false,
-                    "columns": [
-                        "phone_number"
-                    ]
+                    "columns": ["phone_number"]
                 }
             },
             "policies": {},
@@ -327,12 +323,8 @@
                     "name": "sessions_user_id_users_id_fk",
                     "tableFrom": "sessions",
                     "tableTo": "users",
-                    "columnsFrom": [
-                        "user_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 }
@@ -342,9 +334,7 @@
                 "sessions_token_unique": {
                     "name": "sessions_token_unique",
                     "nullsNotDistinct": false,
-                    "columns": [
-                        "token"
-                    ]
+                    "columns": ["token"]
                 }
             },
             "policies": {},
@@ -486,12 +476,8 @@
                     "name": "accounts_user_id_users_id_fk",
                     "tableFrom": "accounts",
                     "tableTo": "users",
-                    "columnsFrom": [
-                        "user_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 }
@@ -765,12 +751,8 @@
                     "name": "parents_user_id_users_id_fk",
                     "tableFrom": "parents",
                     "tableTo": "users",
-                    "columnsFrom": [
-                        "user_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 }
@@ -780,16 +762,12 @@
                 "parents_user_id_unique": {
                     "name": "parents_user_id_unique",
                     "nullsNotDistinct": false,
-                    "columns": [
-                        "user_id"
-                    ]
+                    "columns": ["user_id"]
                 },
                 "parents_identity_number_unique": {
                     "name": "parents_identity_number_unique",
                     "nullsNotDistinct": false,
-                    "columns": [
-                        "identity_number"
-                    ]
+                    "columns": ["identity_number"]
                 }
             },
             "policies": {},
@@ -955,12 +933,8 @@
                     "name": "cadres_user_id_users_id_fk",
                     "tableFrom": "cadres",
                     "tableTo": "users",
-                    "columnsFrom": [
-                        "user_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 },
@@ -968,12 +942,8 @@
                     "name": "cadres_posyandu_id_posyandus_id_fk",
                     "tableFrom": "cadres",
                     "tableTo": "posyandus",
-                    "columnsFrom": [
-                        "posyandu_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 }
@@ -1206,12 +1176,8 @@
                     "name": "midwifes_user_id_users_id_fk",
                     "tableFrom": "midwifes",
                     "tableTo": "users",
-                    "columnsFrom": [
-                        "user_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 },
@@ -1219,12 +1185,8 @@
                     "name": "midwifes_posyandu_id_posyandus_id_fk",
                     "tableFrom": "midwifes",
                     "tableTo": "posyandus",
-                    "columnsFrom": [
-                        "posyandu_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 }
@@ -1341,9 +1303,7 @@
                 "posyandus_name_unique": {
                     "name": "posyandus_name_unique",
                     "nullsNotDistinct": false,
-                    "columns": [
-                        "name"
-                    ]
+                    "columns": ["name"]
                 }
             },
             "policies": {},
@@ -1564,12 +1524,8 @@
                     "name": "childrens_posyandu_id_posyandus_id_fk",
                     "tableFrom": "childrens",
                     "tableTo": "posyandus",
-                    "columnsFrom": [
-                        "posyandu_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 }
@@ -1579,9 +1535,7 @@
                 "childrens_identity_number_unique": {
                     "name": "childrens_identity_number_unique",
                     "nullsNotDistinct": false,
-                    "columns": [
-                        "identity_number"
-                    ]
+                    "columns": ["identity_number"]
                 }
             },
             "policies": {},
@@ -1718,12 +1672,8 @@
                     "name": "relation_childrens_parent_id_parents_id_fk",
                     "tableFrom": "relation_childrens",
                     "tableTo": "parents",
-                    "columnsFrom": [
-                        "parent_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["parent_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 },
@@ -1731,12 +1681,8 @@
                     "name": "relation_childrens_children_id_childrens_id_fk",
                     "tableFrom": "relation_childrens",
                     "tableTo": "childrens",
-                    "columnsFrom": [
-                        "children_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["children_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 }
@@ -1851,16 +1797,12 @@
                 "vaccines_code_unique": {
                     "name": "vaccines_code_unique",
                     "nullsNotDistinct": false,
-                    "columns": [
-                        "code"
-                    ]
+                    "columns": ["code"]
                 },
                 "vaccines_name_unique": {
                     "name": "vaccines_name_unique",
                     "nullsNotDistinct": false,
-                    "columns": [
-                        "name"
-                    ]
+                    "columns": ["name"]
                 }
             },
             "policies": {},
@@ -1977,9 +1919,7 @@
                 "vitamins_name_unique": {
                     "name": "vitamins_name_unique",
                     "nullsNotDistinct": false,
-                    "columns": [
-                        "name"
-                    ]
+                    "columns": ["name"]
                 }
             },
             "policies": {},
@@ -2267,12 +2207,8 @@
                     "name": "immunization_records_children_id_childrens_id_fk",
                     "tableFrom": "immunization_records",
                     "tableTo": "childrens",
-                    "columnsFrom": [
-                        "children_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["children_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -2280,12 +2216,8 @@
                     "name": "immunization_records_vaccine_id_vaccines_id_fk",
                     "tableFrom": "immunization_records",
                     "tableTo": "vaccines",
-                    "columnsFrom": [
-                        "vaccine_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["vaccine_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -2293,12 +2225,8 @@
                     "name": "immunization_records_cadre_id_cadres_id_fk",
                     "tableFrom": "immunization_records",
                     "tableTo": "cadres",
-                    "columnsFrom": [
-                        "cadre_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["cadre_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -2306,12 +2234,8 @@
                     "name": "immunization_records_midwife_id_midwifes_id_fk",
                     "tableFrom": "immunization_records",
                     "tableTo": "midwifes",
-                    "columnsFrom": [
-                        "midwife_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["midwife_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -2319,12 +2243,8 @@
                     "name": "immunization_records_posyandu_id_posyandus_id_fk",
                     "tableFrom": "immunization_records",
                     "tableTo": "posyandus",
-                    "columnsFrom": [
-                        "posyandu_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -2332,12 +2252,8 @@
                     "name": "immunization_records_inventory_id_inventories_id_fk",
                     "tableFrom": "immunization_records",
                     "tableTo": "inventories",
-                    "columnsFrom": [
-                        "inventory_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["inventory_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 }
@@ -2347,11 +2263,7 @@
                 "immunization_records_child_vaccine_dose_unique": {
                     "name": "immunization_records_child_vaccine_dose_unique",
                     "nullsNotDistinct": false,
-                    "columns": [
-                        "children_id",
-                        "vaccine_id",
-                        "dose_number"
-                    ]
+                    "columns": ["children_id", "vaccine_id", "dose_number"]
                 }
             },
             "policies": {},
@@ -2603,12 +2515,8 @@
                     "name": "vitamin_records_children_id_childrens_id_fk",
                     "tableFrom": "vitamin_records",
                     "tableTo": "childrens",
-                    "columnsFrom": [
-                        "children_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["children_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -2616,12 +2524,8 @@
                     "name": "vitamin_records_vitamin_id_vitamins_id_fk",
                     "tableFrom": "vitamin_records",
                     "tableTo": "vitamins",
-                    "columnsFrom": [
-                        "vitamin_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["vitamin_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -2629,12 +2533,8 @@
                     "name": "vitamin_records_cadre_id_cadres_id_fk",
                     "tableFrom": "vitamin_records",
                     "tableTo": "cadres",
-                    "columnsFrom": [
-                        "cadre_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["cadre_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -2642,12 +2542,8 @@
                     "name": "vitamin_records_midwife_id_midwifes_id_fk",
                     "tableFrom": "vitamin_records",
                     "tableTo": "midwifes",
-                    "columnsFrom": [
-                        "midwife_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["midwife_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -2655,12 +2551,8 @@
                     "name": "vitamin_records_posyandu_id_posyandus_id_fk",
                     "tableFrom": "vitamin_records",
                     "tableTo": "posyandus",
-                    "columnsFrom": [
-                        "posyandu_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 }
@@ -2788,12 +2680,8 @@
                     "name": "kipi_details_immunization_record_id_immunization_records_id_fk",
                     "tableFrom": "kipi_details",
                     "tableTo": "immunization_records",
-                    "columnsFrom": [
-                        "immunization_record_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["immunization_record_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 }
@@ -2803,9 +2691,7 @@
                 "kipi_details_immunization_record_id_unique": {
                     "name": "kipi_details_immunization_record_id_unique",
                     "nullsNotDistinct": false,
-                    "columns": [
-                        "immunization_record_id"
-                    ]
+                    "columns": ["immunization_record_id"]
                 }
             },
             "policies": {},
@@ -2978,12 +2864,8 @@
                     "name": "nutrition_records_children_id_childrens_id_fk",
                     "tableFrom": "nutrition_records",
                     "tableTo": "childrens",
-                    "columnsFrom": [
-                        "children_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["children_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -2991,12 +2873,8 @@
                     "name": "nutrition_records_cadre_id_cadres_id_fk",
                     "tableFrom": "nutrition_records",
                     "tableTo": "cadres",
-                    "columnsFrom": [
-                        "cadre_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["cadre_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -3004,12 +2882,8 @@
                     "name": "nutrition_records_midwife_id_midwifes_id_fk",
                     "tableFrom": "nutrition_records",
                     "tableTo": "midwifes",
-                    "columnsFrom": [
-                        "midwife_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["midwife_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 }
@@ -3202,12 +3076,8 @@
                     "name": "pregnancy_records_parent_id_parents_id_fk",
                     "tableFrom": "pregnancy_records",
                     "tableTo": "parents",
-                    "columnsFrom": [
-                        "parent_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["parent_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -3215,12 +3085,8 @@
                     "name": "pregnancy_records_posyandu_id_posyandus_id_fk",
                     "tableFrom": "pregnancy_records",
                     "tableTo": "posyandus",
-                    "columnsFrom": [
-                        "posyandu_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -3228,12 +3094,8 @@
                     "name": "pregnancy_records_midwife_id_midwifes_id_fk",
                     "tableFrom": "pregnancy_records",
                     "tableTo": "midwifes",
-                    "columnsFrom": [
-                        "midwife_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["midwife_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 }
@@ -3539,12 +3401,8 @@
                     "name": "consultations_parent_id_parents_id_fk",
                     "tableFrom": "consultations",
                     "tableTo": "parents",
-                    "columnsFrom": [
-                        "parent_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["parent_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -3552,12 +3410,8 @@
                     "name": "consultations_pregnancy_record_id_pregnancy_records_id_fk",
                     "tableFrom": "consultations",
                     "tableTo": "pregnancy_records",
-                    "columnsFrom": [
-                        "pregnancy_record_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["pregnancy_record_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -3565,12 +3419,8 @@
                     "name": "consultations_children_id_childrens_id_fk",
                     "tableFrom": "consultations",
                     "tableTo": "childrens",
-                    "columnsFrom": [
-                        "children_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["children_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -3578,12 +3428,8 @@
                     "name": "consultations_midwife_id_midwifes_id_fk",
                     "tableFrom": "consultations",
                     "tableTo": "midwifes",
-                    "columnsFrom": [
-                        "midwife_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["midwife_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -3591,12 +3437,8 @@
                     "name": "consultations_cadre_id_cadres_id_fk",
                     "tableFrom": "consultations",
                     "tableTo": "cadres",
-                    "columnsFrom": [
-                        "cadre_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["cadre_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -3604,12 +3446,8 @@
                     "name": "consultations_posyandu_id_posyandus_id_fk",
                     "tableFrom": "consultations",
                     "tableTo": "posyandus",
-                    "columnsFrom": [
-                        "posyandu_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 }
@@ -3782,12 +3620,8 @@
                     "name": "notifications_user_id_users_id_fk",
                     "tableFrom": "notifications",
                     "tableTo": "users",
-                    "columnsFrom": [
-                        "user_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 }
@@ -3929,12 +3763,8 @@
                     "name": "examinations_posyandu_id_posyandus_id_fk",
                     "tableFrom": "examinations",
                     "tableTo": "posyandus",
-                    "columnsFrom": [
-                        "posyandu_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 }
@@ -4141,12 +3971,8 @@
                     "name": "examination_schedules_examination_id_examinations_id_fk",
                     "tableFrom": "examination_schedules",
                     "tableTo": "examinations",
-                    "columnsFrom": [
-                        "examination_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["examination_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -4154,12 +3980,8 @@
                     "name": "examination_schedules_posyandu_id_posyandus_id_fk",
                     "tableFrom": "examination_schedules",
                     "tableTo": "posyandus",
-                    "columnsFrom": [
-                        "posyandu_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -4167,12 +3989,8 @@
                     "name": "examination_schedules_midwife_id_midwifes_id_fk",
                     "tableFrom": "examination_schedules",
                     "tableTo": "midwifes",
-                    "columnsFrom": [
-                        "midwife_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["midwife_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -4180,12 +3998,8 @@
                     "name": "examination_schedules_cadre_id_cadres_id_fk",
                     "tableFrom": "examination_schedules",
                     "tableTo": "cadres",
-                    "columnsFrom": [
-                        "cadre_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["cadre_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 }
@@ -4456,12 +4270,8 @@
                     "name": "examination_records_examination_id_examinations_id_fk",
                     "tableFrom": "examination_records",
                     "tableTo": "examinations",
-                    "columnsFrom": [
-                        "examination_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["examination_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -4469,12 +4279,8 @@
                     "name": "examination_records_schedule_id_examination_schedules_id_fk",
                     "tableFrom": "examination_records",
                     "tableTo": "examination_schedules",
-                    "columnsFrom": [
-                        "schedule_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["schedule_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -4482,12 +4288,8 @@
                     "name": "examination_records_posyandu_id_posyandus_id_fk",
                     "tableFrom": "examination_records",
                     "tableTo": "posyandus",
-                    "columnsFrom": [
-                        "posyandu_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -4495,12 +4297,8 @@
                     "name": "examination_records_children_id_childrens_id_fk",
                     "tableFrom": "examination_records",
                     "tableTo": "childrens",
-                    "columnsFrom": [
-                        "children_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["children_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -4508,12 +4306,8 @@
                     "name": "examination_records_parent_id_parents_id_fk",
                     "tableFrom": "examination_records",
                     "tableTo": "parents",
-                    "columnsFrom": [
-                        "parent_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["parent_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -4521,12 +4315,8 @@
                     "name": "examination_records_cadre_id_cadres_id_fk",
                     "tableFrom": "examination_records",
                     "tableTo": "cadres",
-                    "columnsFrom": [
-                        "cadre_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["cadre_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -4534,12 +4324,8 @@
                     "name": "examination_records_midwife_id_midwifes_id_fk",
                     "tableFrom": "examination_records",
                     "tableTo": "midwifes",
-                    "columnsFrom": [
-                        "midwife_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["midwife_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -4547,12 +4333,8 @@
                     "name": "examination_records_medically_validated_by_midwife_id_midwifes_id_fk",
                     "tableFrom": "examination_records",
                     "tableTo": "midwifes",
-                    "columnsFrom": [
-                        "medically_validated_by_midwife_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["medically_validated_by_midwife_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 }
@@ -4737,12 +4519,8 @@
                     "name": "educations_category_id_education_categories_id_fk",
                     "tableFrom": "educations",
                     "tableTo": "education_categories",
-                    "columnsFrom": [
-                        "category_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["category_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -4750,12 +4528,8 @@
                     "name": "educations_posyandu_id_posyandus_id_fk",
                     "tableFrom": "educations",
                     "tableTo": "posyandus",
-                    "columnsFrom": [
-                        "posyandu_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -4763,12 +4537,8 @@
                     "name": "educations_created_by_user_id_users_id_fk",
                     "tableFrom": "educations",
                     "tableTo": "users",
-                    "columnsFrom": [
-                        "created_by_user_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["created_by_user_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 }
@@ -4866,16 +4636,12 @@
                 "education_categories_name_unique": {
                     "name": "education_categories_name_unique",
                     "nullsNotDistinct": false,
-                    "columns": [
-                        "name"
-                    ]
+                    "columns": ["name"]
                 },
                 "education_categories_slug_unique": {
                     "name": "education_categories_slug_unique",
                     "nullsNotDistinct": false,
-                    "columns": [
-                        "slug"
-                    ]
+                    "columns": ["slug"]
                 }
             },
             "policies": {},
@@ -5051,12 +4817,8 @@
                     "name": "inventories_posyandu_id_posyandus_id_fk",
                     "tableFrom": "inventories",
                     "tableTo": "posyandus",
-                    "columnsFrom": [
-                        "posyandu_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["posyandu_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -5064,12 +4826,8 @@
                     "name": "inventories_managed_by_midwife_id_midwifes_id_fk",
                     "tableFrom": "inventories",
                     "tableTo": "midwifes",
-                    "columnsFrom": [
-                        "managed_by_midwife_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["managed_by_midwife_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 }
@@ -5412,12 +5170,8 @@
                     "name": "media_uploaded_by_users_id_fk",
                     "tableFrom": "media",
                     "tableTo": "users",
-                    "columnsFrom": [
-                        "uploaded_by"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["uploaded_by"],
+                    "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 }
@@ -5527,12 +5281,8 @@
                     "name": "push_subscriptions_user_id_users_id_fk",
                     "tableFrom": "push_subscriptions",
                     "tableTo": "users",
-                    "columnsFrom": [
-                        "user_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 }
@@ -5542,9 +5292,7 @@
                 "push_subscriptions_endpoint_unique": {
                     "name": "push_subscriptions_endpoint_unique",
                     "nullsNotDistinct": false,
-                    "columns": [
-                        "endpoint"
-                    ]
+                    "columns": ["endpoint"]
                 }
             },
             "policies": {},
@@ -5568,68 +5316,37 @@
         "public.account_status": {
             "name": "account_status",
             "schema": "public",
-            "values": [
-                "active",
-                "inactive",
-                "disabled",
-                "pending_verification"
-            ]
+            "values": ["active", "inactive", "disabled", "pending_verification"]
         },
         "public.admin_type": {
             "name": "admin_type",
             "schema": "public",
-            "values": [
-                "posyandu_admin",
-                "village_admin",
-                "super_admin"
-            ]
+            "values": ["posyandu_admin", "village_admin", "super_admin"]
         },
         "public.age_unit": {
             "name": "age_unit",
             "schema": "public",
-            "values": [
-                "day",
-                "month",
-                "year"
-            ]
+            "values": ["day", "month", "year"]
         },
         "public.blood_type": {
             "name": "blood_type",
             "schema": "public",
-            "values": [
-                "A",
-                "B",
-                "AB",
-                "O",
-                "UNKNOWN"
-            ]
+            "values": ["A", "B", "AB", "O", "UNKNOWN"]
         },
         "public.cadre_position": {
             "name": "cadre_position",
             "schema": "public",
-            "values": [
-                "leader",
-                "secretary",
-                "treasurer",
-                "member"
-            ]
+            "values": ["leader", "secretary", "treasurer", "member"]
         },
         "public.capsule_color": {
             "name": "capsule_color",
             "schema": "public",
-            "values": [
-                "blue",
-                "red"
-            ]
+            "values": ["blue", "red"]
         },
         "public.child_category": {
             "name": "child_category",
             "schema": "public",
-            "values": [
-                "infant",
-                "young_child",
-                "toddler"
-            ]
+            "values": ["infant", "young_child", "toddler"]
         },
         "public.consultation_status": {
             "name": "consultation_status",
@@ -5645,66 +5362,37 @@
         "public.consultation_type": {
             "name": "consultation_type",
             "schema": "public",
-            "values": [
-                "pregnancy",
-                "child_development",
-                "general"
-            ]
+            "values": ["pregnancy", "child_development", "general"]
         },
         "public.distribution_period": {
             "name": "distribution_period",
             "schema": "public",
-            "values": [
-                "february",
-                "august"
-            ]
+            "values": ["february", "august"]
         },
         "public.examination_status": {
             "name": "examination_status",
             "schema": "public",
-            "values": [
-                "pending",
-                "processing",
-                "completed",
-                "cancelled"
-            ]
+            "values": ["pending", "processing", "completed", "cancelled"]
         },
         "public.examination_type": {
             "name": "examination_type",
             "schema": "public",
-            "values": [
-                "infant",
-                "pregnant_mother",
-                "toddler",
-                "young_child"
-            ]
+            "values": ["infant", "pregnant_mother", "toddler", "young_child"]
         },
         "public.family_relation": {
             "name": "family_relation",
             "schema": "public",
-            "values": [
-                "father",
-                "mother",
-                "guardian"
-            ]
+            "values": ["father", "mother", "guardian"]
         },
         "public.gender": {
             "name": "gender",
             "schema": "public",
-            "values": [
-                "male",
-                "female"
-            ]
+            "values": ["male", "female"]
         },
         "public.immunization_status": {
             "name": "immunization_status",
             "schema": "public",
-            "values": [
-                "not_yet",
-                "scheduled",
-                "completed",
-                "missed"
-            ]
+            "values": ["not_yet", "scheduled", "completed", "missed"]
         },
         "public.inventory_condition": {
             "name": "inventory_condition",
@@ -5720,39 +5408,22 @@
         "public.inventory_item_type": {
             "name": "inventory_item_type",
             "schema": "public",
-            "values": [
-                "vaccine",
-                "vitamin",
-                "general"
-            ]
+            "values": ["vaccine", "vitamin", "general"]
         },
         "public.inventory_unit": {
             "name": "inventory_unit",
             "schema": "public",
-            "values": [
-                "pcs",
-                "box",
-                "bottle",
-                "pack",
-                "set"
-            ]
+            "values": ["pcs", "box", "bottle", "pack", "set"]
         },
         "public.kipi_severity": {
             "name": "kipi_severity",
             "schema": "public",
-            "values": [
-                "mild",
-                "moderate",
-                "severe"
-            ]
+            "values": ["mild", "moderate", "severe"]
         },
         "public.notification_status": {
             "name": "notification_status",
             "schema": "public",
-            "values": [
-                "unread",
-                "read"
-            ]
+            "values": ["unread", "read"]
         },
         "public.notification_type": {
             "name": "notification_type",
@@ -5780,11 +5451,7 @@
         "public.pregnancy_risk": {
             "name": "pregnancy_risk",
             "schema": "public",
-            "values": [
-                "low",
-                "moderate",
-                "high"
-            ]
+            "values": ["low", "moderate", "high"]
         },
         "public.pregnancy_status": {
             "name": "pregnancy_status",
@@ -5799,11 +5466,7 @@
         "public.schedule_compliance": {
             "name": "schedule_compliance",
             "schema": "public",
-            "values": [
-                "on_time",
-                "late",
-                "non_compliant"
-            ]
+            "values": ["on_time", "late", "non_compliant"]
         },
         "public.service_location_type": {
             "name": "service_location_type",
@@ -5822,37 +5485,22 @@
         "public.status": {
             "name": "status",
             "schema": "public",
-            "values": [
-                "active",
-                "inactive"
-            ]
+            "values": ["active", "inactive"]
         },
         "public.sync_status": {
             "name": "sync_status",
             "schema": "public",
-            "values": [
-                "pending",
-                "synced",
-                "failed"
-            ]
+            "values": ["pending", "synced", "failed"]
         },
         "public.vaccine_route": {
             "name": "vaccine_route",
             "schema": "public",
-            "values": [
-                "injection",
-                "oral"
-            ]
+            "values": ["injection", "oral"]
         },
         "public.vitamin_record_status": {
             "name": "vitamin_record_status",
             "schema": "public",
-            "values": [
-                "not_yet",
-                "given",
-                "missed",
-                "sweeping"
-            ]
+            "values": ["not_yet", "given", "missed", "sweeping"]
         }
     },
     "schemas": {},
