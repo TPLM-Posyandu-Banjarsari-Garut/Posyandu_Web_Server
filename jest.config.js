@@ -40,9 +40,7 @@ export default {
     clearMocks: true,
     resetMocks: true,
     restoreMocks: true,
-    setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
     moduleNameMapper: {
-        '\\.d\\.ts$': '<rootDir>/src/__tests__/setup.ts', // Map .d.ts imports to an empty file
         '^@/(.*)$': '<rootDir>/src/$1'
     },
     reporters: [
@@ -51,7 +49,7 @@ export default {
             'jest-html-reporter',
             {
                 pageTitle: 'Test Report',
-                outputPath: 'test-report.html'
+                outputPath: 'coverage/test-report.html'
             }
         ]
     ]

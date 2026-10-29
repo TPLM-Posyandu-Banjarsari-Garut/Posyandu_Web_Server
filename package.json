@@ -28,10 +28,11 @@
         "format:check": "prettier . --check",
         "format:fix": "prettier . --write && eslint . --fix",
         "docs": "bun swagger.config.ts",
-        "test": "jest",
-        "test:watch": "jest --watch",
-        "test:coverage": "jest --coverage",
-        "test:verbose": "jest --verbose",
+        "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+        "test:ci": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand",
+        "test:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch",
+        "test:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
+        "test:verbose": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --verbose",
         "prepare": "husky"
     },
     "lint-staged": {

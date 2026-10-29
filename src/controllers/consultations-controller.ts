@@ -79,7 +79,7 @@ export class ConsultationsController {
         logger.info({ userId: user?.id }, 'Incoming request: Get Consultations')
 
         if (user?.role === 'parent') {
-            query.parent_id = user.parent_id
+            query.parent_id = this.requireParentId(user)
         } else if (
             (user?.role === 'cadre' || user?.role === 'midwife') &&
             user.posyandu_id
@@ -107,7 +107,7 @@ export class ConsultationsController {
             if (user?.role === 'parent') {
                 return this.consultations_service.verifyParentAccess(
                     id,
-                    user.parent_id
+                    this.requireParentId(user)
                 )
             }
             const consultation =
@@ -137,7 +137,7 @@ export class ConsultationsController {
         if (user?.role === 'parent') {
             await this.consultations_service.verifyParentAccess(
                 public_id,
-                user.parent_id
+                this.requireParentId(user)
             )
         }
 
@@ -166,12 +166,16 @@ export class ConsultationsController {
         )
 
         const actor = {
-            role: user?.role,
+            role: user.role,
             midwife_id:
-                user?.role === 'midwife' ? assignedProfileId : user?.midwife_id,
+                user.role === 'midwife'
+                    ? assignedProfileId
+                    : (user.midwife_id ?? undefined),
             cadre_id:
-                user?.role === 'cadre' ? assignedProfileId : user?.cadre_id,
-            parent_id: user?.parent_id
+                user.role === 'cadre'
+                    ? assignedProfileId
+                    : (user.cadre_id ?? undefined),
+            parent_id: user.parent_id ?? undefined
         }
 
         const booking = await this.consultations_service.updateBookingStatus(
@@ -194,15 +198,20 @@ export class ConsultationsController {
             'Incoming request: Delete Booking'
         )
 
-        return handleDeleteRequest(req, res, 'Consultation', async id => {
-            if (user?.role === 'parent') {
-                await this.consultations_service.verifyParentAccess(
-                    id,
-                    user.parent_id
-                )
+        return handleDeleteRequest(
+            req,
+            res,
+            'Consultation',
+            async (id, isPermanent) => {
+                if (user?.role === 'parent') {
+                    await this.consultations_service.verifyParentAccess(
+                        id,
+                        this.requireParentId(user)
+                    )
+                }
+                return this.consultations_service.deleteBooking(id, isPermanent)
             }
-            return this.consultations_service.deleteBooking(id, is_permanent)
-        })
+        )
     }
 
     restoreBooking = async (req: Request, res: Response) => {
@@ -217,7 +226,7 @@ export class ConsultationsController {
             if (user?.role === 'parent') {
                 await this.consultations_service.verifyParentAccess(
                     id,
-                    user.parent_id
+                    this.requireParentId(user)
                 )
             }
             return this.consultations_service.restoreBooking(id)
@@ -244,5 +253,15 @@ export class ConsultationsController {
             'Consultation notification broadcasted successfully',
             result
         )
+    }
+
+    private requireParentId(user: AuthenticatedUser): string {
+        if (!user.parent_id) {
+            throw ApiError.forbidden(
+                'Parent profile is not fully registered yet'
+            )
+        }
+
+        return user.parent_id
     }
 }

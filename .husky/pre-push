@@ -1,0 +1,4 @@
+rm -rf dist &&
+    ./node_modules/.bin/tsc &&
+    ./node_modules/.bin/tsc-alias &&
+    node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand
