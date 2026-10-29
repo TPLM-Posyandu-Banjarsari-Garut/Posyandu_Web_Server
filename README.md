@@ -1,5 +1,7 @@
 # Posyandu Core API Server
 
+Dokumentasi gabungan server dan client tersedia di [Posyandu Web Docs](../Posyandu_Web_Docs/README.md).
+
 Repositori ini berisi backend server untuk sistem Posyandu Banjarsari Garut. Dibangun menggunakan **Node.js/Bun**, **Express**, **TypeScript**, dan **Drizzle ORM** dengan database **PostgreSQL**.
 
 ---
@@ -48,15 +50,15 @@ Proyek ini menggunakan **Infisical** untuk mengelola secrets secara aman.
 
 Server testing ini memakai environment Infisical `dev` (default pada `.infisical.json` dan Makefile). Simpan URL host dan kredensial PostgreSQL lokal di environment `dev`, pada root folder secret `/`:
 
-| Secret | Nilai untuk testing lokal |
-| --- | --- |
-| `DATABASE_URL` | `postgresql://<DATABASE_USER>:<DATABASE_PASSWORD>@localhost:5432/<DATABASE_NAME>` untuk perintah yang dijalankan dari host |
-| `DATABASE_USER` | Nama role PostgreSQL lokal |
-| `DATABASE_PASSWORD` | Password lokal yang kuat; gunakan karakter alfanumerik agar aman dalam URL Compose |
-| `DATABASE_NAME` | Nama database lokal |
-| `DB_POOL_MAX` | `10` koneksi maksimum per proses aplikasi |
-| `DB_POOL_IDLE_TIMEOUT_MS` | `30000` |
-| `DB_POOL_CONNECTION_TIMEOUT_MS` | `5000` |
+| Secret                          | Nilai untuk testing lokal                                                                                                  |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                  | `postgresql://<DATABASE_USER>:<DATABASE_PASSWORD>@localhost:5432/<DATABASE_NAME>` untuk perintah yang dijalankan dari host |
+| `DATABASE_USER`                 | Nama role PostgreSQL lokal                                                                                                 |
+| `DATABASE_PASSWORD`             | Password lokal yang kuat; gunakan karakter alfanumerik agar aman dalam URL Compose                                         |
+| `DATABASE_NAME`                 | Nama database lokal                                                                                                        |
+| `DB_POOL_MAX`                   | `10` koneksi maksimum per proses aplikasi                                                                                  |
+| `DB_POOL_IDLE_TIMEOUT_MS`       | `30000`                                                                                                                    |
+| `DB_POOL_CONNECTION_TIMEOUT_MS` | `5000`                                                                                                                     |
 
 Compose membentuk `DATABASE_URL` internal dengan hostname `postgres`, sehingga aplikasi dalam container mengakses database pada jaringan Podman. Jangan memakai URL host `localhost` untuk aplikasi dalam container. Server production harus memakai environment Infisical `prod` dan database production secara terpisah.
 
@@ -103,7 +105,7 @@ Proyek ini dilengkapi dengan `makefile` untuk mempercepat eksekusi perintah deve
     ```bash
     make db-mig
     ```
-  Jalankan migrasi setelah PostgreSQL lokal sehat. Perintah ini memakai URL host `localhost` dari Infisical atau `.env`.
+    Jalankan migrasi setelah PostgreSQL lokal sehat. Perintah ini memakai URL host `localhost` dari Infisical atau `.env`.
 - **Buka GUI Dashboard (Drizzle Studio)**:
     ```bash
     make db-studio
@@ -139,7 +141,7 @@ Proyek ini dilengkapi dengan `makefile` untuk mempercepat eksekusi perintah deve
 
 ## Struktur Folder Proyek
 
-Enkripsi data sensitif, pengelolaan key Infisical, dan prosedur backfill dijelaskan di [SECURITY_ENCRYPTION.md](./SECURITY_ENCRYPTION.md).
+Enkripsi data sensitif, pengelolaan key Infisical, dan prosedur backfill dijelaskan di [panduan enkripsi](../Posyandu_Web_Docs/Posyandu_Web_Server/SECURITY_ENCRYPTION.md).
 
 Berikut adalah struktur folder keseluruhan di dalam proyek ini:
 
@@ -164,12 +166,18 @@ Posyandu_Web_Server/
 │   ├── validations/        # Skema validasi muatan request menggunakan Zod
 │   ├── app.ts              # Konfigurasi inisialisasi Express app
 │   └── server.ts           # Bootstrapper pembuat server & listener port
-├── docker-compose.yml      # Orkestrasi Podman Compose untuk PostgreSQL & app
+├── docker/
+│   └── compose/
+│       ├── base.yml         # Layanan bersama: app, PostgreSQL, jaringan, volume
+│       ├── development.yml  # Target development, source mount, bun dev
+│       └── production.yml   # Target production
 ├── dockerfile              # Konfigurasi image builder
 ├── makefile                # Custom make commands development
 ├── package.json            # Daftar dependensi npm/bun & scripts
 └── tsconfig.json           # Konfigurasi compiler TypeScript
 ```
+
+Stack container dijalankan melalui `make dc-up` atau `make dc-bg` untuk development. Untuk production gunakan `make dc-prod-up` atau `make dc-prod-bg`. Kedua stack mengambil konfigurasi environment dari Infisical; Compose hanya meneruskan variabel yang diperlukan aplikasi.
 
 ---
 
