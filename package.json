@@ -78,6 +78,7 @@
         "@types/ws": "^8.18.1",
         "@upstash/redis": "^1.38.0",
         "better-auth": "^1.6.19",
+        "cloudflare": "^7.3.0",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.6",
         "cross-env": "^10.1.0",

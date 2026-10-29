@@ -1,8 +1,11 @@
 BUN := bun
 PODMAN_COMPOSE := podman compose
 INFISICAL_ENV ?= dev
+COMPOSE_BASE := --project-directory . -f docker/compose/base.yml
+COMPOSE_DEV := $(COMPOSE_BASE) -f docker/compose/development.yml
+COMPOSE_PROD := $(COMPOSE_BASE) -f docker/compose/production.yml
 
-.PHONY: help dev build start typecheck lint format db-gen db-mig db-studio data-encrypt-preview data-encrypt-apply clean dc-up dc-bg dc-down dc-reset dc-restart
+.PHONY: help dev build start typecheck lint format db-gen db-mig db-studio data-encrypt-preview data-encrypt-apply clean dc-up dc-bg dc-down dc-reset dc-restart dc-prod-up dc-prod-bg dc-prod-down
 
 help:
 	@echo "=============================================================================="
@@ -31,6 +34,9 @@ help:
 	@echo "  make dc-down     : Menghentikan dan menghapus semua kontainer/resource"
 	@echo "  make dc-reset    : Menghapus kontainer dan volume database lokal"
 	@echo "  make dc-restart  : Memuat ulang (restart) semua layanan container"
+	@echo "  make dc-prod-up  : Menjalankan app production dan PostgreSQL"
+	@echo "  make dc-prod-bg  : Menjalankan app production di background"
+	@echo "  make dc-prod-down: Menghentikan stack production"
 	@echo "=============================================================================="
 
 dev:
@@ -70,16 +76,25 @@ data-encrypt-apply:
 	infisical run --env=$(INFISICAL_ENV) -- $(BUN) run data:encrypt-sensitive -- --apply
 
 dc-up:
-	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null up --build app-dev postgres
+	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null -p posyandu-dev $(COMPOSE_DEV) up --build app postgres
  
 dc-bg:
-	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null up --build -d app-dev postgres
+	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null -p posyandu-dev $(COMPOSE_DEV) up --build -d app postgres
 	
 dc-down:
-	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null down --remove-orphans
+	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null -p posyandu-dev $(COMPOSE_DEV) down --remove-orphans
 
 dc-reset:
-	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null down --remove-orphans --volumes
+	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null -p posyandu-dev $(COMPOSE_DEV) down --remove-orphans --volumes
 
 dc-restart:
-	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null restart
+	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null -p posyandu-dev $(COMPOSE_DEV) restart
+
+dc-prod-up:
+	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null -p posyandu-prod $(COMPOSE_PROD) up --build app postgres
+
+dc-prod-bg:
+	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null -p posyandu-prod $(COMPOSE_PROD) up --build -d app postgres
+
+dc-prod-down:
+	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null -p posyandu-prod $(COMPOSE_PROD) down --remove-orphans

@@ -5,6 +5,7 @@ import {
     ExaminationsQueryFilters
 } from '@/repositories/examinations-repository'
 import { ApiError } from '@/utils/api-error'
+import { cacheGetOrLoad, invalidateCache } from '@/utils/cloudflare-cache'
 
 export class ExaminationsService {
     constructor(
@@ -12,22 +13,35 @@ export class ExaminationsService {
     ) {}
 
     async createExamination(payload: NewExamination): Promise<Examination> {
-        return this.examinations_repository.create(payload)
+        const created = await this.examinations_repository.create(payload)
+        await invalidateCache('examinations')
+        return created
     }
 
     async getExaminations(filters?: ExaminationsQueryFilters) {
         const { page = 1, limit = 10 } = filters || {}
-        const { data, totalItems } =
-            await this.examinations_repository.getExaminations(filters)
-
-        return {
-            data,
-            meta: createPaginationMeta(page, limit, totalItems)
-        }
+        return cacheGetOrLoad(
+            'examinations',
+            { type: 'list', filters },
+            180,
+            async () => {
+                const { data, totalItems } =
+                    await this.examinations_repository.getExaminations(filters)
+                return {
+                    data,
+                    meta: createPaginationMeta(page, limit, totalItems)
+                }
+            }
+        )
     }
 
     async getExaminationById(id: string): Promise<Examination> {
-        const record = await this.examinations_repository.findById(id)
+        const record = await cacheGetOrLoad(
+            'examinations',
+            { type: 'item', id },
+            180,
+            () => this.examinations_repository.findById(id)
+        )
         if (!record) throw ApiError.notFound('Examination template not found')
         return record
     }
@@ -40,6 +54,7 @@ export class ExaminationsService {
         const updated = await this.examinations_repository.update(id, payload)
         if (!updated)
             throw ApiError.server('Failed to update examination template')
+        await invalidateCache('examinations')
         return updated
     }
 
@@ -54,6 +69,7 @@ export class ExaminationsService {
 
         if (!deleted)
             throw ApiError.server('Failed to delete examination template')
+        await invalidateCache('examinations')
         return deleted
     }
 
@@ -61,6 +77,7 @@ export class ExaminationsService {
         const restored = await this.examinations_repository.restore(id)
         if (!restored)
             throw ApiError.server('Failed to restore examination template')
+        await invalidateCache('examinations')
         return restored
     }
 }

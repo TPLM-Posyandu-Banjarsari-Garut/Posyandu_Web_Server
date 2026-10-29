@@ -1,6 +1,7 @@
 import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewVitamin, Vitamin } from '@/db'
+import { cacheGetOrLoad, invalidateCache } from '@/utils/cloudflare-cache'
 import {
     VitaminRepository,
     VitaminQueryFilters
@@ -17,22 +18,35 @@ export class VitaminService {
             throw ApiError.conflict('Vitamin name is already registered')
         }
 
-        return this.vitamin_repository.create(vitamin_payload)
+        const created = await this.vitamin_repository.create(vitamin_payload)
+        await invalidateCache('vitamins')
+        return created
     }
 
     async getVitamins(query_filters?: VitaminQueryFilters) {
         const { page = 1, limit = 10 } = query_filters || {}
-        const { data, totalItems } =
-            await this.vitamin_repository.getVitamins(query_filters)
-
-        return {
-            data,
-            meta: createPaginationMeta(page, limit, totalItems)
-        }
+        return cacheGetOrLoad(
+            'vitamins',
+            { type: 'list', filters: query_filters },
+            300,
+            async () => {
+                const { data, totalItems } =
+                    await this.vitamin_repository.getVitamins(query_filters)
+                return {
+                    data,
+                    meta: createPaginationMeta(page, limit, totalItems)
+                }
+            }
+        )
     }
 
     async getVitaminById(public_id: string): Promise<Vitamin> {
-        const vitamin = await this.vitamin_repository.findById(public_id)
+        const vitamin = await cacheGetOrLoad(
+            'vitamins',
+            { type: 'item', id: public_id },
+            300,
+            () => this.vitamin_repository.findById(public_id)
+        )
         if (!vitamin) throw ApiError.notFound('Vitamin not found')
         return vitamin
     }
@@ -62,6 +76,7 @@ export class VitaminService {
             vitamin_payload
         )
         if (!updated) throw ApiError.badRequest('Failed to update vitamin')
+        await invalidateCache('vitamins')
         return updated
     }
 
@@ -76,12 +91,14 @@ export class VitaminService {
             : await this.vitamin_repository.softDelete(public_id)
 
         if (!deleted) throw ApiError.badRequest('Failed to delete vitamin')
+        await invalidateCache('vitamins')
         return deleted
     }
 
     async restoreVitamin(public_id: string): Promise<Vitamin> {
         const restored = await this.vitamin_repository.restore(public_id)
         if (!restored) throw ApiError.badRequest('Failed to restore vitamin')
+        await invalidateCache('vitamins')
         return restored
     }
 }

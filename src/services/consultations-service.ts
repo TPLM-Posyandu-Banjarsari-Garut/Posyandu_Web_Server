@@ -23,7 +23,7 @@ import {
 } from '@/constants/booking-schedules'
 import { cadres } from '@/db/schemas/cadres-schema'
 import { midwifes } from '@/db/schemas/midwifes-schema'
-import { redis } from '@/configs/redis'
+import { cacheGetOrLoad, invalidateCache } from '@/utils/cloudflare-cache'
 import { logger } from '@/utils/logger'
 import {
     EmailService,
@@ -381,27 +381,9 @@ export class ConsultationsService {
         return undefined
     }
 
-    private async invalidateSlotsCache(
-        posyandu_id: string,
-        consultation_type: string,
-        scheduled_at: Date,
-        midwife_id?: string | null
-    ): Promise<void> {
-        if (!redis) return
-        try {
-            const dateString = scheduled_at.toISOString().split('T')[0]
-            const baseKey = `slots:${posyandu_id}:${consultation_type}:${dateString}`
-            await redis.del(baseKey)
-            if (midwife_id) {
-                await redis.del(`${baseKey}:${midwife_id}`)
-            }
-            logger.debug(
-                { dateString, midwife_id },
-                'Invalidated slot availability cache'
-            )
-        } catch (err) {
-            logger.error(err, 'Failed to invalidate slots cache')
-        }
+    private async invalidateSlotsCache(): Promise<void> {
+        await invalidateCache('consultation-slots')
+        logger.debug('Invalidated slot availability cache')
     }
 
     private validateScheduledAt(
@@ -463,20 +445,26 @@ export class ConsultationsService {
         dateString: string,
         midwife_id?: string | null
     ): Promise<{ time: string; available: boolean }[]> {
-        const cacheKey = midwife_id
-            ? `slots:${posyandu_id}:${consultation_type}:${dateString}:${midwife_id}`
-            : `slots:${posyandu_id}:${consultation_type}:${dateString}`
-        if (redis) {
-            try {
-                const cached = await redis.get<unknown[]>(cacheKey)
-                if (cached) {
-                    return cached as { time: string; available: boolean }[]
-                }
-            } catch (err) {
-                logger.error(err, 'Redis get error')
-            }
-        }
+        return cacheGetOrLoad(
+            'consultation-slots',
+            { posyandu_id, consultation_type, dateString, midwife_id },
+            30,
+            () =>
+                this.loadAvailableSlotsFromDatabase(
+                    posyandu_id,
+                    consultation_type,
+                    dateString,
+                    midwife_id
+                )
+        )
+    }
 
+    private async loadAvailableSlotsFromDatabase(
+        posyandu_id: string,
+        consultation_type: ConsultationType,
+        dateString: string,
+        midwife_id?: string | null
+    ): Promise<{ time: string; available: boolean }[]> {
         const dateParts = dateString.split('-')
         if (dateParts.length !== 3) {
             throw ApiError.badRequest(
@@ -518,7 +506,7 @@ export class ConsultationsService {
 
         const now = new Date()
 
-        const result = timeslots.map(timeStr => {
+        return timeslots.map(timeStr => {
             const [hours, minutes] = timeStr.split(':').map(Number)
             const slotDate = new Date(
                 Date.UTC(year, month, day, hours, minutes, 0, 0)
@@ -534,16 +522,6 @@ export class ConsultationsService {
                 available: !isPast && !isBooked
             }
         })
-
-        if (redis) {
-            try {
-                await redis.set(cacheKey, result, { ex: 30 })
-            } catch (err) {
-                logger.error(err, 'Redis set error')
-            }
-        }
-
-        return result
     }
 
     async createBooking(
@@ -709,12 +687,7 @@ export class ConsultationsService {
             const enriched = await this.enrichWithQueueNumber(created)
             enrichedBookings.push(enriched)
 
-            await this.invalidateSlotsCache(
-                finalPosyanduId,
-                payload.consultation_type,
-                created.scheduled_at,
-                finalMidwifeId
-            )
+            await this.invalidateSlotsCache()
 
             try {
                 const dateString = created.scheduled_at
@@ -1019,19 +992,9 @@ export class ConsultationsService {
         }
         const enriched = await this.enrichWithQueueNumber(result)
 
-        await this.invalidateSlotsCache(
-            oldPosyanduId,
-            oldType,
-            oldScheduledAt,
-            consultation.midwife_id
-        )
+        await this.invalidateSlotsCache()
         if (payload.scheduled_at) {
-            await this.invalidateSlotsCache(
-                oldPosyanduId,
-                oldType,
-                payload.scheduled_at,
-                consultation.midwife_id
-            )
+            await this.invalidateSlotsCache()
         }
 
         const datesToUpdate = [oldScheduledAt]
@@ -1197,12 +1160,7 @@ export class ConsultationsService {
         }
         const enriched = await this.enrichWithQueueNumber(result)
 
-        await this.invalidateSlotsCache(
-            consultation.posyandu_id,
-            consultation.consultation_type,
-            consultation.scheduled_at,
-            consultation.midwife_id
-        )
+        await this.invalidateSlotsCache()
 
         try {
             const dateString = new Date(consultation.scheduled_at)
@@ -1345,12 +1303,7 @@ export class ConsultationsService {
         }
         const enriched = await this.enrichWithQueueNumber(result)
 
-        await this.invalidateSlotsCache(
-            consultation.posyandu_id,
-            consultation.consultation_type,
-            consultation.scheduled_at,
-            consultation.midwife_id
-        )
+        await this.invalidateSlotsCache()
 
         try {
             const dateString = new Date(consultation.scheduled_at)
@@ -1387,12 +1340,7 @@ export class ConsultationsService {
         }
         const enriched = await this.enrichWithQueueNumber(result)
 
-        await this.invalidateSlotsCache(
-            consultation.posyandu_id,
-            consultation.consultation_type,
-            consultation.scheduled_at,
-            consultation.midwife_id
-        )
+        await this.invalidateSlotsCache()
 
         try {
             const dateString = new Date(consultation.scheduled_at)

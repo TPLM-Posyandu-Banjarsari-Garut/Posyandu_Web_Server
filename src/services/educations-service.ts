@@ -6,6 +6,7 @@ import {
     EducationQueryFilters
 } from '@/repositories/educations-repository'
 import { EducationCategoryRepository } from '@/repositories/education-categories-repository'
+import { cacheGetOrLoad, invalidateCache } from '@/utils/cloudflare-cache'
 
 export class EducationService {
     constructor(
@@ -21,18 +22,26 @@ export class EducationService {
             throw ApiError.notFound('Education category not found')
         }
 
-        return this.educationRepository.create(payload)
+        const created = await this.educationRepository.create(payload)
+        await invalidateCache('educations')
+        return created
     }
 
     async getEducations(queryFilters?: EducationQueryFilters) {
         const { page = 1, limit = 10 } = queryFilters || {}
-        const { data, totalItems } =
-            await this.educationRepository.getEducations(queryFilters)
-
-        return {
-            data,
-            meta: createPaginationMeta(page, limit, totalItems)
-        }
+        return cacheGetOrLoad(
+            'educations',
+            { type: 'list', filters: queryFilters },
+            120,
+            async () => {
+                const { data, totalItems } =
+                    await this.educationRepository.getEducations(queryFilters)
+                return {
+                    data,
+                    meta: createPaginationMeta(page, limit, totalItems)
+                }
+            }
+        )
     }
 
     async getEducationById(
@@ -70,6 +79,7 @@ export class EducationService {
         )
         if (!updated)
             throw ApiError.badRequest('Failed to update education article')
+        await invalidateCache('educations')
         return updated
     }
 
@@ -93,6 +103,7 @@ export class EducationService {
 
         if (!deleted)
             throw ApiError.badRequest('Failed to delete education article')
+        await invalidateCache('educations')
         return deleted
     }
 
@@ -100,6 +111,7 @@ export class EducationService {
         const restored = await this.educationRepository.restore(public_id)
         if (!restored)
             throw ApiError.badRequest('Failed to restore education article')
+        await invalidateCache('educations')
         return restored
     }
 }

@@ -1,0 +1,7 @@
+services:
+    app:
+        image: posyandu-server:prod
+        build:
+            target: prod
+        environment:
+            - NODE_ENV=production

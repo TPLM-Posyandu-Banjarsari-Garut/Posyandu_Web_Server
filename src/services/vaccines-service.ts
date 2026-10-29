@@ -1,6 +1,7 @@
 import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
 import { NewVaccine, Vaccine } from '@/db'
+import { cacheGetOrLoad, invalidateCache } from '@/utils/cloudflare-cache'
 import {
     VaccineRepository,
     VaccineQueryFilters
@@ -22,22 +23,35 @@ export class VaccineService {
             throw ApiError.conflict('Vaccine code is already registered')
         }
 
-        return this.vaccine_repository.create(vaccine_payload)
+        const created = await this.vaccine_repository.create(vaccine_payload)
+        await invalidateCache('vaccines')
+        return created
     }
 
     async getVaccines(query_filters?: VaccineQueryFilters) {
         const { page = 1, limit = 10 } = query_filters || {}
-        const { data, totalItems } =
-            await this.vaccine_repository.getVaccines(query_filters)
-
-        return {
-            data,
-            meta: createPaginationMeta(page, limit, totalItems)
-        }
+        return cacheGetOrLoad(
+            'vaccines',
+            { type: 'list', filters: query_filters },
+            300,
+            async () => {
+                const { data, totalItems } =
+                    await this.vaccine_repository.getVaccines(query_filters)
+                return {
+                    data,
+                    meta: createPaginationMeta(page, limit, totalItems)
+                }
+            }
+        )
     }
 
     async getVaccineById(public_id: string): Promise<Vaccine> {
-        const vaccine = await this.vaccine_repository.findById(public_id)
+        const vaccine = await cacheGetOrLoad(
+            'vaccines',
+            { type: 'item', id: public_id },
+            300,
+            () => this.vaccine_repository.findById(public_id)
+        )
         if (!vaccine) throw ApiError.notFound('Vaccine not found')
         return vaccine
     }
@@ -77,6 +91,7 @@ export class VaccineService {
             vaccine_payload
         )
         if (!updated) throw ApiError.badRequest('Failed to update vaccine')
+        await invalidateCache('vaccines')
         return updated
     }
 
@@ -91,12 +106,14 @@ export class VaccineService {
             : await this.vaccine_repository.softDelete(public_id)
 
         if (!deleted) throw ApiError.badRequest('Failed to delete vaccine')
+        await invalidateCache('vaccines')
         return deleted
     }
 
     async restoreVaccine(public_id: string): Promise<Vaccine> {
         const restored = await this.vaccine_repository.restore(public_id)
         if (!restored) throw ApiError.badRequest('Failed to restore vaccine')
+        await invalidateCache('vaccines')
         return restored
     }
 }

@@ -1,5 +1,6 @@
 import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
+import { cacheGetOrLoad, invalidateCache } from '@/utils/cloudflare-cache'
 import { NewPosyandu, Posyandu } from '@/db'
 import {
     PosyanduRepository,
@@ -17,22 +18,35 @@ export class PosyanduService {
             throw ApiError.conflict('Posyandu name is already registered')
         }
 
-        return this.posyandu_repository.create(posyandu_payload)
+        const created = await this.posyandu_repository.create(posyandu_payload)
+        await invalidateCache('posyandus')
+        return created
     }
 
     async getPosyandus(query_filters?: PosyanduQueryFilters) {
         const { page = 1, limit = 10 } = query_filters || {}
-        const { data, totalItems } =
-            await this.posyandu_repository.getPosyandus(query_filters)
-
-        return {
-            data,
-            meta: createPaginationMeta(page, limit, totalItems)
-        }
+        return cacheGetOrLoad(
+            'posyandus',
+            { type: 'list', filters: query_filters },
+            180,
+            async () => {
+                const { data, totalItems } =
+                    await this.posyandu_repository.getPosyandus(query_filters)
+                return {
+                    data,
+                    meta: createPaginationMeta(page, limit, totalItems)
+                }
+            }
+        )
     }
 
     async getPosyanduById(public_id: string): Promise<Posyandu> {
-        const posyandu = await this.posyandu_repository.findById(public_id)
+        const posyandu = await cacheGetOrLoad(
+            'posyandus',
+            { type: 'item', id: public_id },
+            180,
+            () => this.posyandu_repository.findById(public_id)
+        )
         if (!posyandu) throw ApiError.notFound('Posyandu not found')
         return posyandu
     }
@@ -62,6 +76,7 @@ export class PosyanduService {
             posyandu_payload
         )
         if (!updated) throw ApiError.badRequest('Failed to update posyandu')
+        await invalidateCache('posyandus')
         return updated
     }
 
@@ -84,12 +99,14 @@ export class PosyanduService {
             : await this.posyandu_repository.softDelete(public_id)
 
         if (!deleted) throw ApiError.badRequest('Failed to delete posyandu')
+        await invalidateCache('posyandus')
         return deleted
     }
 
     async restorePosyandu(public_id: string): Promise<Posyandu> {
         const restored = await this.posyandu_repository.restore(public_id)
         if (!restored) throw ApiError.badRequest('Failed to restore posyandu')
+        await invalidateCache('posyandus')
         return restored
     }
 }

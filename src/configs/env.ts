@@ -94,6 +94,10 @@ export const envSchema = z.object({
         .url({ message: 'Invalid R2_PUBLIC_URL format' })
         .optional(),
 
+    CLOUDFLARE_ACCOUNT_ID: z.string().optional().default(''),
+    CLOUDFLARE_API_TOKEN: z.string().optional().default(''),
+    CLOUDFLARE_KV_NAMESPACE_ID: z.string().optional().default(''),
+
     MEDIA_UPLOAD_MAX_SIZE_MB: numeric,
     MEDIA_UPLOAD_MAX_RAW_SIZE_MB: numeric,
     MEDIA_UPLOAD_ALLOWED_EXTENSIONS: z
