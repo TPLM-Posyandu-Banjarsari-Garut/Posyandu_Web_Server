@@ -9,9 +9,9 @@ Repositori ini berisi backend server untuk sistem Posyandu Banjarsari Garut. Dib
 Sebelum menjalankan aplikasi, pastikan Anda telah menginstal:
 
 - [Bun 1.4.4](https://bun.sh/) (versi yang diwajibkan sebagai package manager dan runtime)
-- [Docker & Docker Compose](https://www.docker.com/) (Jika ingin menjalankan PostgreSQL lokal melalui container)
+- [Podman dan Podman Compose](https://podman.io/) (Untuk menjalankan PostgreSQL dan aplikasi secara lokal)
 - [Infisical CLI](https://infisical.com/docs/cli/overview) (Untuk manajemen secrets & environment variables)
-- Database PostgreSQL aktif jika tidak menggunakan Docker.
+- Database PostgreSQL aktif jika tidak menggunakan Podman.
 
 ---
 
@@ -46,15 +46,23 @@ Proyek ini menggunakan **Infisical** untuk mengelola secrets secara aman.
     ```
     Pilih organisasi `Posyandu Banjarsari` dan proyek `Posyandu Web Server`.
 
-Variabel lingkungan (secrets) Anda akan disuntikkan secara dinamis saat aplikasi dijalankan lewat perintah `make` (tanpa membutuhkan file `.env` lokal manual).
+Server testing ini memakai environment Infisical `dev` (default pada `.infisical.json` dan Makefile). Simpan URL host dan kredensial PostgreSQL lokal di environment `dev`, pada root folder secret `/`:
+
+| Secret | Nilai untuk testing lokal |
+| --- | --- |
+| `DATABASE_URL` | `postgresql://<DATABASE_USER>:<DATABASE_PASSWORD>@localhost:5432/<DATABASE_NAME>` untuk perintah yang dijalankan dari host |
+| `DATABASE_USER` | Nama role PostgreSQL lokal |
+| `DATABASE_PASSWORD` | Password lokal yang kuat; gunakan karakter alfanumerik agar aman dalam URL Compose |
+| `DATABASE_NAME` | Nama database lokal |
+| `DB_POOL_MAX` | `10` koneksi maksimum per proses aplikasi |
+| `DB_POOL_IDLE_TIMEOUT_MS` | `30000` |
+| `DB_POOL_CONNECTION_TIMEOUT_MS` | `5000` |
+
+Compose membentuk `DATABASE_URL` internal dengan hostname `postgres`, sehingga aplikasi dalam container mengakses database pada jaringan Podman. Jangan memakai URL host `localhost` untuk aplikasi dalam container. Server production harus memakai environment Infisical `prod` dan database production secara terpisah.
 
 ### 4. Konfigurasi `.env` Lokal (Opsional / Fallback)
 
-Jika Anda ingin menyimpan berkas `.env` lokal secara manual, salin berkas `.env.example`:
-
-```bash
-cp .env.example .env
-```
+Jika Anda menjalankan perintah tanpa Infisical, siapkan `.env` lokal yang diabaikan Git dan isi konfigurasi aplikasi yang diwajibkan. Nilai `DATABASE_URL` harus memakai `localhost` saat aplikasi berjalan langsung di host. Pool memakai default di atas jika variabelnya tidak diatur.
 
 ---
 
@@ -68,9 +76,21 @@ Proyek ini dilengkapi dengan `makefile` untuk mempercepat eksekusi perintah deve
     ```bash
     make dev
     ```
-- **Menjalankan via Docker Compose**:
+- **Menjalankan via Podman Compose**:
     ```bash
     make dc-up
+    ```
+- **Menjalankan di background**:
+    ```bash
+    make dc-bg
+    ```
+- **Menghentikan container tanpa menghapus data database**:
+    ```bash
+    make dc-down
+    ```
+- **Reset database lokal beserta volumenya**:
+    ```bash
+    make dc-reset
     ```
 
 ### Operasi Database (Drizzle ORM)
@@ -83,6 +103,7 @@ Proyek ini dilengkapi dengan `makefile` untuk mempercepat eksekusi perintah deve
     ```bash
     make db-mig
     ```
+  Jalankan migrasi setelah PostgreSQL lokal sehat. Perintah ini memakai URL host `localhost` dari Infisical atau `.env`.
 - **Buka GUI Dashboard (Drizzle Studio)**:
     ```bash
     make db-studio
@@ -143,9 +164,8 @@ Posyandu_Web_Server/
 │   ├── validations/        # Skema validasi muatan request menggunakan Zod
 │   ├── app.ts              # Konfigurasi inisialisasi Express app
 │   └── server.ts           # Bootstrapper pembuat server & listener port
-├── .env.example            # Contoh template file konfigurasi env
-├── docker-compose.yml      # Orkestrasi Docker untuk postgres & app
-├── dockerfile              # Konfigurasi Docker image builder
+├── docker-compose.yml      # Orkestrasi Podman Compose untuk PostgreSQL & app
+├── dockerfile              # Konfigurasi image builder
 ├── makefile                # Custom make commands development
 ├── package.json            # Daftar dependensi npm/bun & scripts
 └── tsconfig.json           # Konfigurasi compiler TypeScript

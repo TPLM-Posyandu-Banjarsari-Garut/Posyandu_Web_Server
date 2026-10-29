@@ -1,15 +1,12 @@
-import { drizzle } from 'drizzle-orm/neon-serverless'
-import { Pool, neonConfig } from '@neondatabase/serverless'
-import ws from 'ws'
+import { drizzle } from 'drizzle-orm/node-postgres'
+import { Pool } from 'pg'
 import env from '@/configs/env'
-
-neonConfig.webSocketConstructor = ws
 
 const pool = new Pool({
     connectionString: env.DATABASE_URL,
-    max: 20,
-    connectionTimeoutMillis: 5000,
-    idleTimeoutMillis: 30000
+    max: env.DB_POOL_MAX,
+    connectionTimeoutMillis: env.DB_POOL_CONNECTION_TIMEOUT_MS,
+    idleTimeoutMillis: env.DB_POOL_IDLE_TIMEOUT_MS
 })
 
 const db = drizzle(pool, {

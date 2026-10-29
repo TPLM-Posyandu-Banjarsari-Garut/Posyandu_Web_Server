@@ -26,6 +26,9 @@ export const envSchema = z.object({
         .transform(val => (val ? val.split(',').map(url => url.trim()) : [])),
 
     DATABASE_URL: z.url('Invalid Database URL format'),
+    DB_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
+    DB_POOL_IDLE_TIMEOUT_MS: z.coerce.number().int().min(0).default(30000),
+    DB_POOL_CONNECTION_TIMEOUT_MS: z.coerce.number().int().min(1).default(5000),
 
     DATA_ENCRYPTION_KEY: z
         .string()

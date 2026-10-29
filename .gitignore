@@ -39,3 +39,4 @@ temp
 *.txt
 .vercel
 .env*
+!.env.example

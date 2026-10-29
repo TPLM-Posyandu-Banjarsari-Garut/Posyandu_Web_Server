@@ -1,7 +1,8 @@
 BUN := bun
-DOCKER_COMPOSE := docker compose
+PODMAN_COMPOSE := podman compose
+INFISICAL_ENV ?= dev
 
-.PHONY: help dev build start typecheck lint format db-gen db-mig db-studio data-encrypt-preview data-encrypt-apply clean dc-up dc-down dc-restart
+.PHONY: help dev build start typecheck lint format db-gen db-mig db-studio data-encrypt-preview data-encrypt-apply clean dc-up dc-bg dc-down dc-reset dc-restart
 
 help:
 	@echo "=============================================================================="
@@ -24,20 +25,22 @@ help:
 	@echo "  make data-encrypt-preview : Melihat jumlah data lama yang belum terenkripsi"
 	@echo "  make data-encrypt-apply   : Mengenkripsi data lama (setelah backup)"
 	@echo "------------------------------------------------------------------------------"
-	@echo "Docker Compose Environment:"
-	@echo "  make dc-up       : Menjalankan semua container di latar belakang (-d)"
+	@echo "Podman Compose Environment (Infisical env: $(INFISICAL_ENV)):"
+	@echo "  make dc-up       : Menjalankan app dan PostgreSQL di foreground"
+	@echo "  make dc-bg       : Menjalankan app dan PostgreSQL di background"
 	@echo "  make dc-down     : Menghentikan dan menghapus semua kontainer/resource"
+	@echo "  make dc-reset    : Menghapus kontainer dan volume database lokal"
 	@echo "  make dc-restart  : Memuat ulang (restart) semua layanan container"
 	@echo "=============================================================================="
 
 dev:
-	infisical run -- $(BUN) run dev
+	infisical run --env=$(INFISICAL_ENV) -- $(BUN) run dev
 
 build:
 	$(BUN) run build
 
 start:
-	infisical run -- $(BUN) run start
+	infisical run --env=$(INFISICAL_ENV) -- $(BUN) run start
 
 typecheck:
 	$(BUN) run typecheck
@@ -52,28 +55,31 @@ clean:
 	rm -rf dist
 
 db-gen:
-	infisical run -- $(BUN) run db:generate
+	infisical run --env=$(INFISICAL_ENV) -- $(BUN) run db:generate
 
 db-mig:
-	infisical run -- $(BUN) run db:migrate
+	infisical run --env=$(INFISICAL_ENV) -- $(BUN) run db:migrate
 
 db-studio:
-	infisical run -- $(BUN) run db:studio
+	infisical run --env=$(INFISICAL_ENV) -- $(BUN) run db:studio
 
 data-encrypt-preview:
-	infisical run -- $(BUN) run data:encrypt-sensitive
+	infisical run --env=$(INFISICAL_ENV) -- $(BUN) run data:encrypt-sensitive
 
 data-encrypt-apply:
-	infisical run -- $(BUN) run data:encrypt-sensitive -- --apply
+	infisical run --env=$(INFISICAL_ENV) -- $(BUN) run data:encrypt-sensitive -- --apply
 
 dc-up:
-	infisical run -- env DOCKER_BUILDKIT=1 $(DOCKER_COMPOSE) --env-file /dev/null up --build app-dev postgres
+	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null up --build app-dev postgres
  
 dc-bg:
-	infisical run -- env DOCKER_BUILDKIT=1 $(DOCKER_COMPOSE) --env-file /dev/null up -d
+	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null up --build -d app-dev postgres
 	
 dc-down:
-	infisical run -- $(DOCKER_COMPOSE) --env-file /dev/null down --remove-orphans
+	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null down --remove-orphans
+
+dc-reset:
+	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null down --remove-orphans --volumes
 
 dc-restart:
-	infisical run -- $(DOCKER_COMPOSE) --env-file /dev/null restart
+	infisical run --env=$(INFISICAL_ENV) -- $(PODMAN_COMPOSE) --env-file /dev/null restart

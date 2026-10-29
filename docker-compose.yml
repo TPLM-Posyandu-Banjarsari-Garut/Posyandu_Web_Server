@@ -12,6 +12,9 @@ services:
             - NODE_ENV=development
             - TZ=Asia/Jakarta
             - DATABASE_URL=postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@postgres:5432/${DATABASE_NAME}
+            - DB_POOL_MAX=${DB_POOL_MAX:-10}
+            - DB_POOL_IDLE_TIMEOUT_MS=${DB_POOL_IDLE_TIMEOUT_MS:-30000}
+            - DB_POOL_CONNECTION_TIMEOUT_MS=${DB_POOL_CONNECTION_TIMEOUT_MS:-5000}
             - PORT
             - LOG_LEVEL
             - CORS_ORIGIN

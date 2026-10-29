@@ -19,7 +19,7 @@ Drizzle mendekripsi kolom saat server membaca database. API tetap mengirim nilai
 
 Enkripsi ini melindungi salinan database dari pembaca yang hanya memperoleh akses ke PostgreSQL atau file dump. Server aplikasi dan pihak yang dapat mengambil secret dari Infisical tetap dapat mendekripsi data. Batasi akses Infisical dan server produksi sesuai kebutuhan, serta audit akses admin.
 
-Target Docker Compose lokal mengambil secret langsung dari proses Infisical, tidak menulis salinan `.env`, dan hanya mengirim kredensial database ke container PostgreSQL. Pengelola Docker pada host tetap dapat membaca environment container aplikasi; batasi akses host tersebut.
+Target Podman Compose lokal mengambil secret langsung dari proses Infisical, tidak menulis salinan `.env`, dan hanya mengirim kredensial database ke container PostgreSQL. Pengelola Podman pada host tetap dapat membaca environment container aplikasi; batasi akses host tersebut.
 
 Port PostgreSQL Compose hanya terikat ke loopback host. Container aplikasi tetap mengakses database melalui network internal Compose. Bila alur lama sudah pernah membuat `.env` berisi secret, periksa dan hapus file lama secara aman setelah dipastikan tidak dipakai lagi.
 
@@ -35,7 +35,7 @@ Simpan hasilnya langsung di Infisical; jangan commit ke repository, kirim lewat 
 
 ## Penerapan pada database yang sudah berisi data
 
-Lakukan pada database aktif yang saat ini dipakai aplikasi. Migrasi PostgreSQL ini juga tetap berlaku ketika database nanti dipindah ke PostgreSQL lokal Docker.
+Lakukan pada database aktif yang saat ini dipakai aplikasi. Migrasi PostgreSQL ini juga tetap berlaku ketika database nanti dipindah ke PostgreSQL lokal Podman.
 
 1. Pastikan `DATA_ENCRYPTION_KEY` sudah tersedia untuk proses server dan CLI melalui Infisical.
 2. Buat dan verifikasi backup database serta simpan backup key secara terpisah.
