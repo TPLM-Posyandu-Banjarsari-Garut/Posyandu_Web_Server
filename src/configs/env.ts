@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+const DEFAULT_CSRF_SECRET = 'dev-csrf-secret-change-in-production-32chars'
+
 const numeric = z.string().transform((val, ctx) => {
     const parsed = Number(val)
     if (Number.isNaN(parsed)) {
@@ -12,7 +14,7 @@ const numeric = z.string().transform((val, ctx) => {
     return parsed
 })
 
-export const envSchema = z.object({
+const envObjectSchema = z.object({
     NODE_ENV: z.enum(['development', 'test', 'production']),
 
     PORT: numeric,
@@ -115,7 +117,7 @@ export const envSchema = z.object({
         .string()
         .min(32, 'CSRF_SECRET must be at least 32 characters')
         .optional()
-        .default('dev-csrf-secret-change-in-production-32chars'),
+        .default(DEFAULT_CSRF_SECRET),
 
     CRON_SECRET: z.string().min(1, 'CRON_SECRET is required'),
     SESSION_EXPIRES_IN: numeric,
@@ -123,20 +125,60 @@ export const envSchema = z.object({
     SESSION_COOKIE_CACHE_ENABLED: z.string().transform(val => val === 'true'),
     SESSION_COOKIE_CACHE_MAX_AGE: numeric,
 
-    VAPID_PUBLIC_KEY: z
-        .string()
-        .optional()
-        .default(
-            'BLWBCiQ87BQp75V-V9L3g4meoFG6rC-HiwrPphYBEeZhEdxkN7kFyMoQcrG6mngEY0JWmm-ukxDjKzrYCBaHx70'
-        ),
-    VAPID_PRIVATE_KEY: z
-        .string()
-        .optional()
-        .default('Hwnbtx_xE_Gk82-HE1lDsGLPMYP3tVNuWtEmCO3RVVk'),
+    VAPID_PUBLIC_KEY: z.string().optional().default(''),
+    VAPID_PRIVATE_KEY: z.string().optional().default(''),
     VAPID_SUBJECT: z
         .string()
         .optional()
         .default('mailto:admin@posyandubanjarsari.my.id')
+})
+
+export const envSchema = envObjectSchema.superRefine((value, ctx) => {
+    if (value.NODE_ENV !== 'production') return
+
+    if (value.BETTER_AUTH_SECRET.length < 32) {
+        ctx.addIssue({
+            code: 'custom',
+            path: ['BETTER_AUTH_SECRET'],
+            message:
+                'BETTER_AUTH_SECRET must be at least 32 characters in production'
+        })
+    }
+
+    if (value.CSRF_SECRET === DEFAULT_CSRF_SECRET) {
+        ctx.addIssue({
+            code: 'custom',
+            path: ['CSRF_SECRET'],
+            message: 'Set a unique CSRF_SECRET in production'
+        })
+    }
+
+    if (value.TURNSTILE_SECRET_KEY === 'skip') {
+        ctx.addIssue({
+            code: 'custom',
+            path: ['TURNSTILE_SECRET_KEY'],
+            message: 'Set a Turnstile secret key in production'
+        })
+    }
+
+    if (Boolean(value.VAPID_PUBLIC_KEY) !== Boolean(value.VAPID_PRIVATE_KEY)) {
+        ctx.addIssue({
+            code: 'custom',
+            path: ['VAPID_PUBLIC_KEY'],
+            message:
+                'Set both VAPID keys in production or leave both empty to disable web push'
+        })
+    }
+
+    for (const field of ['CORS_ORIGIN', 'BETTER_AUTH_URL'] as const) {
+        if (!value[field].startsWith('https://')) {
+            ctx.addIssue({
+                code: 'custom',
+                path: [field],
+                message: `${field} must use HTTPS in production`
+            })
+        }
+    }
 })
 
 export type Env = z.infer<typeof envSchema>

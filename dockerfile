@@ -1,4 +1,4 @@
-FROM oven/bun:1.4.4-slim AS deps
+FROM docker.io/oven/bun:1.4.4-slim AS deps
 WORKDIR /app
 
 COPY package.json bun.lock ./
@@ -12,7 +12,7 @@ COPY src ./src
 FROM development AS builder
 RUN bun run build
 
-FROM oven/bun:1.4.4-slim AS prod
+FROM docker.io/oven/bun:1.4.4-slim AS prod
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates tzdata && \
@@ -30,11 +30,5 @@ COPY --from=builder /app/dist ./dist
 USER bunapp
 
 EXPOSE 3000
-
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD bun --eval \
-    "fetch('http://localhost:3000/health') \
-    .then(r => process.exit(r.ok ? 0 : 1)) \
-    .catch(() => process.exit(1))"
 
 CMD ["bun", "run", "dist/server.js"]

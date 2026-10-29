@@ -92,7 +92,8 @@ export async function cacheGetOrLoad<T>(
     const memoryEntry = memoryCache.get(cacheKey)
 
     if (memoryEntry && memoryEntry.expiresAt > Date.now()) {
-        return JSON.parse(memoryEntry.value) as T
+        const envelope = JSON.parse(memoryEntry.value) as CacheEnvelope<T>
+        return envelope.value
     }
     if (memoryEntry) memoryCache.delete(cacheKey)
 

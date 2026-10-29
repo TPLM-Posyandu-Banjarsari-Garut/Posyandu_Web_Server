@@ -1,6 +1,6 @@
 # Posyandu Core API Server
 
-Dokumentasi gabungan server dan client tersedia di [Posyandu Web Docs](../Posyandu_Web_Docs/README.md).
+Dokumentasi gabungan server dan client tersedia di [Posyandu Web Docs](../Posyandu_Docs/README.md).
 
 Repositori ini berisi backend server untuk sistem Posyandu Banjarsari Garut. Dibangun menggunakan **Node.js/Bun**, **Express**, **TypeScript**, dan **Drizzle ORM** dengan database **PostgreSQL**.
 
@@ -48,7 +48,7 @@ Proyek ini menggunakan **Infisical** untuk mengelola secrets secara aman.
     ```
     Pilih organisasi `Posyandu Banjarsari` dan proyek `Posyandu Web Server`.
 
-Server testing ini memakai environment Infisical `dev` (default pada `.infisical.json` dan Makefile). Simpan URL host dan kredensial PostgreSQL lokal di environment `dev`, pada root folder secret `/`:
+Development memakai environment Infisical `dev`. Target production memakai environment `prod` secara terpisah. Simpan URL host dan kredensial PostgreSQL lokal di environment `dev`, pada root folder secret `/`:
 
 | Secret                          | Nilai untuk testing lokal                                                                                                  |
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -60,11 +60,11 @@ Server testing ini memakai environment Infisical `dev` (default pada `.infisical
 | `DB_POOL_IDLE_TIMEOUT_MS`       | `30000`                                                                                                                    |
 | `DB_POOL_CONNECTION_TIMEOUT_MS` | `5000`                                                                                                                     |
 
-Compose membentuk `DATABASE_URL` internal dengan hostname `postgres`, sehingga aplikasi dalam container mengakses database pada jaringan Podman. Jangan memakai URL host `localhost` untuk aplikasi dalam container. Server production harus memakai environment Infisical `prod` dan database production secara terpisah.
+Compose membentuk `DATABASE_URL` internal dengan hostname `postgres`, sehingga aplikasi dalam container mengakses database pada jaringan Podman. Jangan memakai URL host `localhost` untuk aplikasi dalam container. File Compose production saat ini menjalankan PostgreSQL pada host yang sama; siapkan backup volume PostgreSQL dan gunakan kredensial Infisical `prod`.
 
 ### 4. Konfigurasi `.env` Lokal (Opsional / Fallback)
 
-Jika Anda menjalankan perintah tanpa Infisical, siapkan `.env` lokal yang diabaikan Git dan isi konfigurasi aplikasi yang diwajibkan. Nilai `DATABASE_URL` harus memakai `localhost` saat aplikasi berjalan langsung di host. Pool memakai default di atas jika variabelnya tidak diatur.
+Jika Anda menjalankan perintah tanpa Infisical, salin `.env.example` menjadi `.env` lalu ganti semua placeholder. Buat `DATA_ENCRYPTION_KEY` dengan `openssl rand -hex 32`. Nilai `DATABASE_URL` harus memakai `localhost` saat perintah dijalankan dari host. File `.env` diabaikan Git dan tidak boleh berisi kredensial production.
 
 ---
 
@@ -86,6 +86,7 @@ Proyek ini dilengkapi dengan `makefile` untuk mempercepat eksekusi perintah deve
     ```bash
     make dc-bg
     ```
+    Compose memakai port internal `3000`. Ubah port host melalui `APP_HOST_PORT` bila diperlukan.
 - **Menghentikan container tanpa menghapus data database**:
     ```bash
     make dc-down
@@ -106,6 +107,12 @@ Proyek ini dilengkapi dengan `makefile` untuk mempercepat eksekusi perintah deve
     make db-mig
     ```
     Jalankan migrasi setelah PostgreSQL lokal sehat. Perintah ini memakai URL host `localhost` dari Infisical atau `.env`.
+- **Jalankan migrasi production**:
+    ```bash
+    make dc-prod-db-up
+    make db-mig-prod
+    ```
+    `dc-prod-db-up` menunggu PostgreSQL sehat. Simpan `DATABASE_URL` host-reachable di Infisical environment `prod` untuk menjalankan migrasi dari host. Untuk PostgreSQL Compose, gunakan `localhost:${DB_PORT:-5432}`. Aplikasi production memakai hostname internal `postgres`.
 - **Buka GUI Dashboard (Drizzle Studio)**:
     ```bash
     make db-studio
@@ -147,6 +154,7 @@ Berikut adalah struktur folder keseluruhan di dalam proyek ini:
 
 ```text
 Posyandu_Web_Server/
+├── .env.example            # Template environment lokal tanpa secret production
 ├── migrations/             # File hasil auto-generate Drizzle migrations (SQL)
 ├── src/
 │   ├── configs/            # Konfigurasi database client, Swagger generator, dsb.
@@ -177,33 +185,33 @@ Posyandu_Web_Server/
 └── tsconfig.json           # Konfigurasi compiler TypeScript
 ```
 
-Stack container dijalankan melalui `make dc-up` atau `make dc-bg` untuk development. Untuk production gunakan `make dc-prod-up` atau `make dc-prod-bg`. Kedua stack mengambil konfigurasi environment dari Infisical; Compose hanya meneruskan variabel yang diperlukan aplikasi.
+Stack development dijalankan melalui `make dc-up` atau `make dc-bg`. Untuk production, jalankan migrasi terlebih dahulu, lalu `make dc-prod-up` atau `make dc-prod-bg`. Target production selalu memakai Infisical environment `prod`; target development tetap memakai `dev`. `APP_HOST_PORT` mengatur port host, sementara aplikasi dalam container tetap mendengarkan port `3000`.
+
+Sebelum deployment production:
+
+- Set `CORS_ORIGIN` dan `BETTER_AUTH_URL` ke domain HTTPS, serta isi `TRUSTED_ORIGINS` dengan origin frontend yang sah.
+- Gunakan `DATA_ENCRYPTION_KEY` yang sama dengan data terenkripsi yang sudah ada. Jangan mengganti key tanpa prosedur rotasi dan migrasi terencana.
+- Isi kredensial R2 dan buat bucket/public domain yang sesuai. Jika cache lintas instance diperlukan, isi `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, dan `CLOUDFLARE_KV_NAMESPACE_ID`.
+- Isi `TURNSTILE_SECRET_KEY` dan `CSRF_SECRET` production. Bila web push aktif, buat pasangan VAPID baru untuk deployment; jika tidak digunakan, biarkan kedua variabel VAPID kosong. Pasangan VAPID yang sebelumnya tertanam di source harus dianggap terekspos dan dirotasi.
+- Upstash Redis masih digunakan untuk Better Auth secondary storage dan distributed rate limiting; Cloudflare KV hanya dipakai untuk cache data aplikasi. Siapkan Upstash untuk deployment multi-instance.
+- Siapkan OAuth redirect URI Google, domain pengirim terverifikasi Resend, reverse proxy TLS, DNS, firewall, backup/restore PostgreSQL, dan pemantauan log.
+- Jalankan migrasi sebelum aplikasi diperbarui. Untuk data lama yang memerlukan backfill enkripsi, lakukan backup, preview dengan `make data-encrypt-preview-prod`, lalu apply dengan `make data-encrypt-apply-prod` setelah hasilnya ditinjau.
+- GitHub Actions saat ini hanya menjalankan unit test sesuai konfigurasi CI. Build image dan deployment belum dijalankan otomatis oleh workflow.
 
 ---
 
 ## CI/CD Pipeline
 
-Proyek ini telah dikonfigurasi dengan alur kerja (_workflow_) GitHub Actions untuk mengotomatisasi integrasi dan pengujian kode secara kontinu (_Continuous Integration_ & _Continuous Testing_):
+Proyek memiliki satu workflow GitHub Actions untuk unit test. Build, lint, formatting, dan deployment tidak dijalankan oleh workflow ini.
 
 ### 1. Continuous Integration (CI)
 
-Berkas konfigurasi: `.github/workflows/ci.yml`
-Berjalan otomatis pada setiap _Push_ ke branch `main` dan _Pull Request_ ke branch `main` & `dev`.
-Tahapan yang dilakukan:
+Berkas konfigurasi: `.github/workflows/ci.yml`. Workflow berjalan pada push ke `main` dan pull request ke `main` atau `dev`. Tahapannya:
 
-- **Instalasi Dependensi**: Mengunduh dan meng-cache modul dari `bun.lock`.
-- **Typecheck**: Memastikan kode TypeScript bebas dari error tipe statik (`bun run typecheck`).
-- **Linting & Formatting**: Memvalidasi standar penulisan kode (`bun run lint:check` dan `bun run format:check`).
-- **Build**: Menguji kompilasi kode untuk memastikan tidak ada masalah saat _build_ rilis (`bun run build`).
+- **Instalasi Dependensi** dari `bun.lock`.
+- **Unit testing** dengan `bun run test:ci`.
 
-### 2. Continuous Testing (CT)
-
-Berkas konfigurasi: `.github/workflows/ct.yml`
-Berjalan otomatis bersamaan dengan alur CI untuk memastikan fungsionalitas logika program tetap berjalan baik.
-Tahapan yang dilakukan:
-
-- **Unit Testing dengan Coverage**: Menjalankan seluruh pengujian (tes) unit otomatis menggunakan Jest (`bun run test:coverage`).
-- **Laporan Otomatis (Artifacts)**: Mengunggah hasil dari laporan HTML pengujian (`jest-test-report`) dan _code coverage_ (`jest-coverage-report`) yang dapat diunduh langsung dari menu _Artifacts_ di halaman eksekusi GitHub Actions.
+Build dan unit testing juga dijalankan oleh hook pre-push lokal. Tidak ada workflow deployment otomatis.
 
 ---
 
@@ -213,7 +221,8 @@ Semua endpoint API didaftarkan menggunakan prefix `/api`. Berikut adalah daftar 
 
 | Route Path                  | Deskripsi Modul / Fitur                               |
 | :-------------------------- | :---------------------------------------------------- |
-| `/api/health`               | Health Check status server                            |
+| `/api/health/live`          | Liveness check server                                 |
+| `/api/health/ready`         | Readiness check server dan database                   |
 | `/api/users`                | Pengelolaan data Pengguna (User) & Autentikasi        |
 | `/api/parents`              | Pengelolaan data Orang Tua (Orang Tua Anak)           |
 | `/api/cadres`               | Pengelolaan data Kader Posyandu                       |

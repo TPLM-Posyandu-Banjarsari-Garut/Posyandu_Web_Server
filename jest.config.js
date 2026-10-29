@@ -4,6 +4,7 @@ export default {
     testEnvironment: 'node',
     roots: ['<rootDir>/src'],
     testMatch: ['**/__tests__/**/*.test.ts', '**/?(*.)+(spec|test).ts'],
+    setupFiles: ['<rootDir>/src/__tests__/setup-env.ts'],
     transform: {
         '^.+\\.tsx?$': ['ts-jest', { useESM: true }]
     },
