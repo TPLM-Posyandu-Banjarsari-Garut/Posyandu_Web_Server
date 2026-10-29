@@ -17,7 +17,10 @@ export const kipiDetails = pgTable(
 
         symptoms: encryptedText('symptoms', 'kipi_details.symptoms').notNull(),
         severity: kipiSeverityEnum('severity').notNull(),
-        action_taken: encryptedText('action_taken', 'kipi_details.action_taken'),
+        action_taken: encryptedText(
+            'action_taken',
+            'kipi_details.action_taken'
+        ),
         referred: boolean('referred').notNull().default(false),
 
         ...timestamps

@@ -47,10 +47,7 @@ export class InventoryController {
 
     updateInventory = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
-        logger.info(
-            { public_id },
-            'Incoming request: Update Inventory'
-        )
+        logger.info({ public_id }, 'Incoming request: Update Inventory')
 
         const inventory = await this.inventory_service.updateInventory(
             public_id,

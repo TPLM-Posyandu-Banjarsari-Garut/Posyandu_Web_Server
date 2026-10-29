@@ -58,7 +58,10 @@ export class ExaminationRecordsService {
                     .from(relationChildrens)
                     .where(
                         and(
-                            eq(relationChildrens.children_id, payload.children_id),
+                            eq(
+                                relationChildrens.children_id,
+                                payload.children_id
+                            ),
                             eq(relationChildrens.parent_id, payload.parent_id),
                             eq(relationChildrens.is_deleted, false),
                             sql`${relationChildrens.deleted_at} IS NULL`
@@ -113,7 +116,10 @@ export class ExaminationRecordsService {
                     .where(
                         and(
                             eq(pregnancyRecords.parent_id, payload.parent_id),
-                            eq(pregnancyRecords.posyandu_id, payload.posyandu_id),
+                            eq(
+                                pregnancyRecords.posyandu_id,
+                                payload.posyandu_id
+                            ),
                             sql`${pregnancyRecords.deleted_at} IS NULL`
                         )
                     )
@@ -257,7 +263,9 @@ export class ExaminationRecordsService {
             const isValidating =
                 payload.medically_validated_at != null ||
                 payload.medically_validated_by_midwife_id != null
-            safePayload.medically_validated_at = isValidating ? new Date() : null
+            safePayload.medically_validated_at = isValidating
+                ? new Date()
+                : null
             safePayload.medically_validated_by_midwife_id = isValidating
                 ? effectiveMidwifeId
                 : null
@@ -301,7 +309,10 @@ export class ExaminationRecordsService {
         currentUser: AuthenticatedUser,
         includeDeleted = false
     ): Promise<ExaminationRecord> {
-        const record = await this.records_repository.findById(id, includeDeleted)
+        const record = await this.records_repository.findById(
+            id,
+            includeDeleted
+        )
         if (!record) throw ApiError.notFound('Examination record not found')
         await this.assertCanAccessRecord(record, currentUser)
         return record
@@ -316,10 +327,7 @@ export class ExaminationRecordsService {
         const existing = await this.getRecordById(id, currentUser)
         const safePayload = { ...payload }
 
-        if (
-            currentUser.role === 'cadre' ||
-            currentUser.role === 'midwife'
-        ) {
+        if (currentUser.role === 'cadre' || currentUser.role === 'midwife') {
             delete safePayload.posyandu_id
             delete safePayload.children_id
             delete safePayload.parent_id
@@ -416,10 +424,7 @@ export class ExaminationRecordsService {
     ): Promise<void> {
         if (this.isAdmin(currentUser)) return
 
-        if (
-            currentUser.role === 'cadre' ||
-            currentUser.role === 'midwife'
-        ) {
+        if (currentUser.role === 'cadre' || currentUser.role === 'midwife') {
             this.authorization_service.requireAssignedPosyandu(
                 currentUser,
                 record.posyandu_id

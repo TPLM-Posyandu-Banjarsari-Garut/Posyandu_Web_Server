@@ -1,13 +1,17 @@
+/// <reference types="node" />
+
 import 'dotenv-flow/config'
+import pino from 'pino'
 import postgres from 'postgres'
 import {
     decryptSensitiveValue,
     encryptSensitiveValue,
     validateEncryptionKey
-} from '@/db/helpers/encrypted-field'
+} from '../src/db/helpers/encrypted-field'
 
 const batchSize = 500
 const applyChanges = process.argv.includes('--apply')
+const logger = pino({ level: process.env.LOG_LEVEL || 'info' })
 
 const fields = [
     ['childrens', 'identity_number', 'childrens.identity_number'],
@@ -20,15 +24,27 @@ const fields = [
     ['users', 'phone_number', 'users.phone_number'],
     ['pregnancy_records', 'notes', 'pregnancy_records.notes'],
     ['nutrition_records', 'notes', 'nutrition_records.notes'],
-    ['examination_records', 'result_summary', 'examination_records.result_summary'],
+    [
+        'examination_records',
+        'result_summary',
+        'examination_records.result_summary'
+    ],
     ['examination_records', 'notes', 'examination_records.notes'],
     ['immunization_records', 'notes', 'immunization_records.notes'],
     ['kipi_details', 'symptoms', 'kipi_details.symptoms'],
     ['kipi_details', 'action_taken', 'kipi_details.action_taken'],
-    ['vitamin_records', 'special_condition_notes', 'vitamin_records.special_condition_notes'],
+    [
+        'vitamin_records',
+        'special_condition_notes',
+        'vitamin_records.special_condition_notes'
+    ],
     ['vitamin_records', 'notes', 'vitamin_records.notes'],
     ['consultations', 'notes', 'consultations.notes'],
-    ['consultations', 'cancellation_reason', 'consultations.cancellation_reason']
+    [
+        'consultations',
+        'cancellation_reason',
+        'consultations.cancellation_reason'
+    ]
 ] as const
 
 const databaseUrl = process.env.DATABASE_URL
@@ -43,9 +59,7 @@ async function verifyExistingCiphertext(
 ) {
     let lastId = ''
     while (true) {
-        const rows = await client.unsafe<
-            { id: string; value: string }[]
-        >(
+        const rows = await client.unsafe<{ id: string; value: string }[]>(
             `SELECT "id", "${column}" AS "value" FROM "${table}" WHERE "id" > $1 AND "${column}" LIKE 'enc:v1:%' ORDER BY "id" LIMIT $2`,
             [lastId, batchSize]
         )
@@ -64,15 +78,13 @@ async function main() {
         const count = Number(legacyRows[0]?.count ?? 0)
 
         if (!applyChanges) {
-            console.info(`${table}.${column}: ${count} rows need encryption`)
+            logger.info(`${table}.${column}: ${count} rows need encryption`)
             continue
         }
 
         let encryptedCount = 0
         while (true) {
-            const rows = await client.unsafe<
-                { id: string; value: string }[]
-            >(
+            const rows = await client.unsafe<{ id: string; value: string }[]>(
                 `SELECT "id", "${column}" AS "value" FROM "${table}" WHERE "${column}" IS NOT NULL AND "${column}" NOT LIKE 'enc:v1:%' ORDER BY "id" LIMIT $1`,
                 [batchSize]
             )
@@ -90,19 +102,21 @@ async function main() {
             })
         }
 
-        console.info(`${table}.${column}: encrypted ${encryptedCount} rows`)
+        logger.info(`${table}.${column}: encrypted ${encryptedCount} rows`)
     }
 }
 
 try {
     await main()
     if (!applyChanges) {
-        console.info('Preview only. Add --apply after taking a database backup.')
+        logger.info('Preview only. Add --apply after taking a database backup.')
     }
 } catch (error) {
-    console.error(
-        'Sensitive-data encryption stopped. No row values were logged.',
-        error instanceof Error ? error.name : 'UnknownError'
+    logger.error(
+        {
+            errorName: error instanceof Error ? error.name : 'UnknownError'
+        },
+        'Sensitive-data encryption stopped. No row values were logged.'
     )
     process.exitCode = 1
 } finally {

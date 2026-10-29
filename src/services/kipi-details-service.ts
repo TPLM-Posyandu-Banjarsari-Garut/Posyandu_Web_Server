@@ -34,9 +34,7 @@ export class KipiDetailService {
         return this.kipi_detail_repository.create(kipi_payload)
     }
 
-    async getKipiDetails(
-        query_filters: KipiDetailQueryFilters | undefined
-    ) {
+    async getKipiDetails(query_filters: KipiDetailQueryFilters | undefined) {
         const { page = 1, limit = 10 } = query_filters || {}
         const filters = { ...query_filters }
         const { data, totalItems } =
@@ -105,9 +103,7 @@ export class KipiDetailService {
     ): Promise<KipiDetail> {
         this.assertCanWrite(currentUser)
         const kipi = await this.getKipiDetailById(public_id, currentUser)
-        await this.assertImmunizationRecordExists(
-            kipi.immunization_record_id
-        )
+        await this.assertImmunizationRecordExists(kipi.immunization_record_id)
 
         const deleted = is_permanent
             ? await this.kipi_detail_repository.hardDelete(public_id)
@@ -121,11 +117,7 @@ export class KipiDetailService {
         currentUser: AuthenticatedUser
     ): Promise<KipiDetail> {
         this.assertCanWrite(currentUser)
-        const kipi = await this.getKipiDetailById(
-            public_id,
-            currentUser,
-            true
-        )
+        const kipi = await this.getKipiDetailById(public_id, currentUser, true)
         await this.assertImmunizationRecordExists(
             kipi.immunization_record_id,
             true
@@ -154,5 +146,4 @@ export class KipiDetailService {
             throw ApiError.forbidden('Parents cannot modify KIPI details')
         }
     }
-
 }

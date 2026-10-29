@@ -11,8 +11,7 @@ import type { AuthenticatedUser } from '@/services/auth-service'
 export class ImmunizationRecordService {
     constructor(
         private readonly immunization_record_repository: ImmunizationRecordRepository,
-        private readonly authorization_service: AuthorizationService =
-            new AuthorizationService()
+        private readonly authorization_service: AuthorizationService = new AuthorizationService()
     ) {}
 
     async createImmunizationRecord(
@@ -116,13 +115,11 @@ export class ImmunizationRecordService {
             currentUser
         )
         const childrenId = record_payload.children_id ?? existing.children_id
-        const posyanduId = await this.authorization_service.getChildPosyanduId(
-            childrenId
-        )
+        const posyanduId =
+            await this.authorization_service.getChildPosyanduId(childrenId)
 
         const vaccineId = record_payload.vaccine_id ?? existing.vaccine_id
-        const doseNumber =
-            record_payload.dose_number ?? existing.dose_number
+        const doseNumber = record_payload.dose_number ?? existing.dose_number
         if (
             childrenId !== existing.children_id ||
             vaccineId !== existing.vaccine_id ||

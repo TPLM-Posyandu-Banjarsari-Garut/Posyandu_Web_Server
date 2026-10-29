@@ -52,10 +52,7 @@ export class EducationController {
 
     updateEducation = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
-        logger.info(
-            { public_id },
-            'Incoming request: Update Education'
-        )
+        logger.info({ public_id }, 'Incoming request: Update Education')
 
         const education = await this.educationService.updateEducation(
             public_id,

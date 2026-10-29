@@ -168,9 +168,7 @@ export class ConsultationsController {
         const actor = {
             role: user?.role,
             midwife_id:
-                user?.role === 'midwife'
-                    ? assignedProfileId
-                    : user?.midwife_id,
+                user?.role === 'midwife' ? assignedProfileId : user?.midwife_id,
             cadre_id:
                 user?.role === 'cadre' ? assignedProfileId : user?.cadre_id,
             parent_id: user?.parent_id
@@ -196,23 +194,15 @@ export class ConsultationsController {
             'Incoming request: Delete Booking'
         )
 
-        return handleDeleteRequest(
-            req,
-            res,
-            'Consultation',
-            async id => {
-                if (user?.role === 'parent') {
-                    await this.consultations_service.verifyParentAccess(
-                        id,
-                        user.parent_id
-                    )
-                }
-                return this.consultations_service.deleteBooking(
+        return handleDeleteRequest(req, res, 'Consultation', async id => {
+            if (user?.role === 'parent') {
+                await this.consultations_service.verifyParentAccess(
                     id,
-                    is_permanent
+                    user.parent_id
                 )
             }
-        )
+            return this.consultations_service.deleteBooking(id, is_permanent)
+        })
     }
 
     restoreBooking = async (req: Request, res: Response) => {

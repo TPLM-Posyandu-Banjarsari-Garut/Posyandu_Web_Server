@@ -1,2 +1,2 @@
 bun run typecheck
-bunx lint-staged
+bun x --no-install lint-staged

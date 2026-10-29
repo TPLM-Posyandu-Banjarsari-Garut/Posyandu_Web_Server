@@ -65,10 +65,7 @@ export class UserController {
     updateUser = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
         const currentUser = res.locals.user
-        logger.info(
-            { public_id },
-            'Incoming request: Update User'
-        )
+        logger.info({ public_id }, 'Incoming request: Update User')
 
         const user = await this.user_service.updateUser(
             public_id,

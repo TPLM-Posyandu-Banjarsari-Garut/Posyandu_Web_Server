@@ -5,13 +5,7 @@ import { timestamps } from '@/db/helpers/timestamps'
 import { posyandus } from '@/db/schemas/posyandus-schema'
 import { users } from '@/db/schemas/users-schema'
 import { sql } from 'drizzle-orm'
-import {
-    boolean,
-    pgTable,
-    text,
-    uniqueIndex,
-    index
-} from 'drizzle-orm/pg-core'
+import { boolean, pgTable, text, uniqueIndex, index } from 'drizzle-orm/pg-core'
 
 export const cadres = pgTable(
     'cadres',

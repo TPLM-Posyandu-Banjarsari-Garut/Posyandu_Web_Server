@@ -92,8 +92,7 @@ export class ChildrenService {
     ) {
         const scopedFilters = { ...filters }
         if (
-            (currentUser.role === 'cadre' ||
-                currentUser.role === 'midwife') &&
+            (currentUser.role === 'cadre' || currentUser.role === 'midwife') &&
             currentUser.posyandu_id
         ) {
             scopedFilters.posyandu_id = currentUser.posyandu_id
@@ -165,10 +164,7 @@ export class ChildrenService {
             )
         }
 
-        const existingChild = await this.getChildrenById(
-            public_id,
-            currentUser
-        )
+        const existingChild = await this.getChildrenById(public_id, currentUser)
 
         let linkedParent: Parent | undefined
         if (children_payload.parent_user_id) {

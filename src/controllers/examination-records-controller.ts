@@ -42,11 +42,8 @@ export class ExaminationRecordsController {
     }
 
     getRecordById = async (req: Request, res: Response) =>
-        handleGetByIdRequest(
-            req,
-            res,
-            'ExaminationRecord',
-            (id, currentUser) => this.service.getRecordById(id, currentUser)
+        handleGetByIdRequest(req, res, 'ExaminationRecord', (id, currentUser) =>
+            this.service.getRecordById(id, currentUser)
         )
 
     updateRecord = async (req: Request, res: Response) => {

@@ -47,10 +47,7 @@ export class PosyanduController {
 
     updatePosyandu = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
-        logger.info(
-            { public_id },
-            'Incoming request: Update Posyandu'
-        )
+        logger.info({ public_id }, 'Incoming request: Update Posyandu')
 
         const posyandu = await this.posyandu_service.updatePosyandu(
             public_id,

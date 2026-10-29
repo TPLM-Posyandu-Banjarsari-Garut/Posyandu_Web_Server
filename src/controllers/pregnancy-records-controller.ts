@@ -49,10 +49,7 @@ export class PregnancyRecordsController {
 
     updatePregnancyRecord = async (req: Request, res: Response) => {
         const public_id = (req.params.public_id || req.params.id) as string
-        logger.info(
-            { public_id },
-            'Incoming request: Update Pregnancy Record'
-        )
+        logger.info({ public_id }, 'Incoming request: Update Pregnancy Record')
         const record = await this.service.updatePregnancyRecord(
             public_id,
             req.body,

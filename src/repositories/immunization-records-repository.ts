@@ -6,15 +6,7 @@ import {
     relationChildrens,
     childrens
 } from '@/db'
-import {
-    and,
-    eq,
-    sql,
-    asc,
-    desc,
-    getTableColumns,
-    inArray
-} from 'drizzle-orm'
+import { and, eq, sql, asc, desc, getTableColumns, inArray } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ImmunizationRecordQueryFilters {

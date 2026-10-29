@@ -136,9 +136,7 @@ export class AuthorizationService {
             (!posyanduId ||
                 !(currentUser.posyandu_ids ?? []).includes(posyanduId))
         ) {
-            throw ApiError.forbidden(
-                'You do not have access to this Posyandu'
-            )
+            throw ApiError.forbidden('You do not have access to this Posyandu')
         }
     }
 
@@ -146,10 +144,7 @@ export class AuthorizationService {
         currentUser: AuthenticatedUser,
         posyanduId: string
     ): string | undefined {
-        if (
-            currentUser.role !== 'cadre' &&
-            currentUser.role !== 'midwife'
-        ) {
+        if (currentUser.role !== 'cadre' && currentUser.role !== 'midwife') {
             return undefined
         }
 

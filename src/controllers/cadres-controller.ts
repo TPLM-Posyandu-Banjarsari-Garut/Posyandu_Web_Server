@@ -40,10 +40,7 @@ export class CadreController {
 
     updateCadre = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
-        logger.info(
-            { public_id },
-            'Incoming request: Update Cadre'
-        )
+        logger.info({ public_id }, 'Incoming request: Update Cadre')
 
         const cadre = await this.cadre_service.updateCadre(public_id, req.body)
         return ApiResponse.ok(res, 'Cadre updated successfully', cadre)

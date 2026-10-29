@@ -110,9 +110,7 @@ export class ParentService {
             currentUser.role === 'parent' &&
             parent_payload.status !== undefined
         ) {
-            throw ApiError.forbidden(
-                'Parents cannot change profile status'
-            )
+            throw ApiError.forbidden('Parents cannot change profile status')
         }
 
         const checks = await this.parent_repository.checkUniqueConstraints({

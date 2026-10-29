@@ -4,13 +4,7 @@ import { encryptedText } from '@/db/helpers/encrypted-field'
 import { timestamps } from '@/db/helpers/timestamps'
 import { posyandus } from '@/db/schemas/posyandus-schema'
 import { users } from '@/db/schemas/users-schema'
-import {
-    boolean,
-    pgTable,
-    text,
-    uniqueIndex,
-    index
-} from 'drizzle-orm/pg-core'
+import { boolean, pgTable, text, uniqueIndex, index } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
 
 export const midwifes = pgTable(

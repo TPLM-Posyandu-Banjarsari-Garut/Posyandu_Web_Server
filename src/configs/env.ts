@@ -30,18 +30,16 @@ export const envSchema = z.object({
     DB_POOL_IDLE_TIMEOUT_MS: z.coerce.number().int().min(0).default(30000),
     DB_POOL_CONNECTION_TIMEOUT_MS: z.coerce.number().int().min(1).default(5000),
 
-    DATA_ENCRYPTION_KEY: z
-        .string()
-        .refine(value => {
-            if (/^[\da-f]{64}$/i.test(value)) return true
-            const base64 = value.replace(/-/g, '+').replace(/_/g, '/')
-            const decoded = Buffer.from(base64, 'base64')
-            return (
-                decoded.length === 32 &&
-                decoded.toString('base64').replace(/=+$/, '') ===
-                    base64.replace(/=+$/, '')
-            )
-        }, 'DATA_ENCRYPTION_KEY must encode exactly 32 random bytes as 64 hex characters or base64'),
+    DATA_ENCRYPTION_KEY: z.string().refine(value => {
+        if (/^[\da-f]{64}$/i.test(value)) return true
+        const base64 = value.replace(/-/g, '+').replace(/_/g, '/')
+        const decoded = Buffer.from(base64, 'base64')
+        return (
+            decoded.length === 32 &&
+            decoded.toString('base64').replace(/=+$/, '') ===
+                base64.replace(/=+$/, '')
+        )
+    }, 'DATA_ENCRYPTION_KEY must encode exactly 32 random bytes as 64 hex characters or base64'),
 
     BETTER_AUTH_SECRET: z.string().min(1, 'BETTER_AUTH_SECRET is required'),
 

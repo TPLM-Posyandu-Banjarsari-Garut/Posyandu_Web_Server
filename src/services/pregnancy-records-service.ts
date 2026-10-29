@@ -121,10 +121,7 @@ export class PregnancyRecordsService {
         ) {
             return
         }
-        if (
-            currentUser.role === 'cadre' ||
-            currentUser.role === 'midwife'
-        ) {
+        if (currentUser.role === 'cadre' || currentUser.role === 'midwife') {
             return
         }
         if (
@@ -141,9 +138,7 @@ export class PregnancyRecordsService {
 
     private assertCanWrite(currentUser: AuthenticatedUser): void {
         if (currentUser.role === 'parent') {
-            throw ApiError.forbidden(
-                'Parents cannot modify pregnancy records'
-            )
+            throw ApiError.forbidden('Parents cannot modify pregnancy records')
         }
     }
 }

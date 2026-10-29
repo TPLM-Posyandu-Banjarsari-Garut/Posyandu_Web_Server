@@ -23,10 +23,11 @@ const namespace = {
 export const cloudflareKv = cloudflareKvClient
     ? {
           get: async (key: string): Promise<string> => {
-              const response = await cloudflareKvClient.kv.namespaces.values.get(
-                  key,
-                  namespace
-              )
+              const response =
+                  await cloudflareKvClient.kv.namespaces.values.get(
+                      key,
+                      namespace
+                  )
               return response.text()
           },
           put: async (

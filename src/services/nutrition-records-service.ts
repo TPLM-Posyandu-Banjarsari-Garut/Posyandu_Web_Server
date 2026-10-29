@@ -11,8 +11,7 @@ import type { AuthenticatedUser } from '@/services/auth-service'
 export class NutritionRecordService {
     constructor(
         private readonly nutrition_record_repository: NutritionRecordRepository,
-        private readonly authorization_service: AuthorizationService =
-            new AuthorizationService()
+        private readonly authorization_service: AuthorizationService = new AuthorizationService()
     ) {}
 
     async createNutritionRecord(
@@ -105,9 +104,8 @@ export class NutritionRecordService {
             currentUser
         )
         const childId = record_payload.children_id ?? existing.children_id
-        const posyanduId = await this.authorization_service.getChildPosyanduId(
-            childId
-        )
+        const posyanduId =
+            await this.authorization_service.getChildPosyanduId(childId)
 
         const scopedPayload: Partial<NewNutritionRecord> = {
             ...record_payload
@@ -171,9 +169,7 @@ export class NutritionRecordService {
 
     private assertCanWrite(currentUser: AuthenticatedUser): void {
         if (currentUser.role === 'parent') {
-            throw ApiError.forbidden(
-                'Parents cannot modify nutrition records'
-            )
+            throw ApiError.forbidden('Parents cannot modify nutrition records')
         }
     }
 }

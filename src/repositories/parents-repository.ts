@@ -107,7 +107,9 @@ export class ParentRepository {
                     ? inArray(
                           parents.id,
                           this.db
-                              .select({ parent_id: relationChildrens.parent_id })
+                              .select({
+                                  parent_id: relationChildrens.parent_id
+                              })
                               .from(relationChildrens)
                               .innerJoin(
                                   childrens,
@@ -229,7 +231,9 @@ export class ParentRepository {
                 .returning()
 
             if (parent && updated_parent.status === 'inactive') {
-                await tx.delete(sessions).where(eq(sessions.user_id, parent.user_id))
+                await tx
+                    .delete(sessions)
+                    .where(eq(sessions.user_id, parent.user_id))
             }
 
             return parent
@@ -276,7 +280,9 @@ export class ParentRepository {
                 .returning()
 
             if (parent) {
-                await tx.delete(sessions).where(eq(sessions.user_id, parent.user_id))
+                await tx
+                    .delete(sessions)
+                    .where(eq(sessions.user_id, parent.user_id))
             }
 
             return parent

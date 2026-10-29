@@ -40,10 +40,7 @@ export class VitaminController {
 
     updateVitamin = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
-        logger.info(
-            { public_id },
-            'Incoming request: Update Vitamin'
-        )
+        logger.info({ public_id }, 'Incoming request: Update Vitamin')
 
         const vitamin = await this.vitamin_service.updateVitamin(
             public_id,

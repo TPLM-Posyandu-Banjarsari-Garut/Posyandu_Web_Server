@@ -11,8 +11,7 @@ import type { AuthenticatedUser } from '@/services/auth-service'
 export class VitaminRecordService {
     constructor(
         private readonly vitamin_record_repository: VitaminRecordRepository,
-        private readonly authorization_service: AuthorizationService =
-            new AuthorizationService()
+        private readonly authorization_service: AuthorizationService = new AuthorizationService()
     ) {}
 
     async createVitaminRecord(
@@ -105,18 +104,13 @@ export class VitaminRecordService {
         currentUser: AuthenticatedUser
     ): Promise<VitaminRecord> {
         this.assertCanWrite(currentUser)
-        const existing = await this.getVitaminRecordById(
-            public_id,
-            currentUser
-        )
+        const existing = await this.getVitaminRecordById(public_id, currentUser)
         const childrenId = record_payload.children_id ?? existing.children_id
-        const posyanduId = await this.authorization_service.getChildPosyanduId(
-            childrenId
-        )
+        const posyanduId =
+            await this.authorization_service.getChildPosyanduId(childrenId)
 
         const period =
-            record_payload.distribution_period ??
-            existing.distribution_period
+            record_payload.distribution_period ?? existing.distribution_period
         const year =
             record_payload.distribution_year ?? existing.distribution_year
         if (

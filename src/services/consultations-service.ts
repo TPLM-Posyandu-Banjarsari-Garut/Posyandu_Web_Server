@@ -544,7 +544,9 @@ export class ConsultationsService {
             currentUser.role === 'parent' &&
             currentUser.parent_id !== parent_id
         ) {
-            throw ApiError.forbidden('You can only create bookings for yourself')
+            throw ApiError.forbidden(
+                'You can only create bookings for yourself'
+            )
         }
 
         const [activeParent] = await this.dbInstance
@@ -663,11 +665,12 @@ export class ConsultationsService {
                     notes: payload.notes || null,
                     cadre_id:
                         currentUser.role === 'cadre'
-                            ? currentUser.posyandu_assignments?.find(
+                            ? (currentUser.posyandu_assignments?.find(
                                   assignment =>
-                                      assignment.posyandu_id ===
-                                      finalPosyanduId
-                              )?.id ?? currentUser.cadre_id ?? null
+                                      assignment.posyandu_id === finalPosyanduId
+                              )?.id ??
+                              currentUser.cadre_id ??
+                              null)
                             : null,
                     midwife_id: finalMidwifeId,
                     status: 'pending'

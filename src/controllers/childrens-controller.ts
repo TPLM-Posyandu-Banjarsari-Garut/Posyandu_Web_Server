@@ -44,12 +44,12 @@ export class ChildrenController {
         const user = res.locals.user
         const query = req.query as unknown as GetNewbornReportQueryInput
 
-        logger.info({ userId: user?.id }, 'Incoming request: Get Newborn Report')
-
-        const result = await this.children_service.getNewbornReport(
-            query,
-            user
+        logger.info(
+            { userId: user?.id },
+            'Incoming request: Get Newborn Report'
         )
+
+        const result = await this.children_service.getNewbornReport(query, user)
         return ApiResponse.ok(
             res,
             'Newborn report retrieved successfully',

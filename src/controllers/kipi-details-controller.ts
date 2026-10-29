@@ -54,10 +54,7 @@ export class KipiDetailController {
 
     updateKipiDetail = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
-        logger.info(
-            { public_id },
-            'Incoming request: Update KIPI Detail'
-        )
+        logger.info({ public_id }, 'Incoming request: Update KIPI Detail')
 
         const kipi = await this.kipi_detail_service.updateKipiDetail(
             public_id,

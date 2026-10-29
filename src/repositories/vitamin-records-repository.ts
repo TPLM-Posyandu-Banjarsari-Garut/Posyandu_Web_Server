@@ -6,15 +6,7 @@ import {
     parents,
     relationChildrens
 } from '@/db'
-import {
-    and,
-    eq,
-    sql,
-    asc,
-    desc,
-    getTableColumns,
-    inArray
-} from 'drizzle-orm'
+import { and, eq, sql, asc, desc, getTableColumns, inArray } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface VitaminRecordQueryFilters {
@@ -112,7 +104,9 @@ export class VitaminRecordRepository {
                 .from(relationChildrens)
                 .innerJoin(parents, eq(relationChildrens.parent_id, parents.id))
                 .where(eq(parents.user_id, parent_user_id))
-            conditions.push(inArray(vitaminRecords.children_id, parentChildrenSubquery))
+            conditions.push(
+                inArray(vitaminRecords.children_id, parentChildrenSubquery)
+            )
         }
 
         if (cadre_id) {

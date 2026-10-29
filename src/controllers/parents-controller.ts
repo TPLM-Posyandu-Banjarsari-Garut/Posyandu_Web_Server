@@ -53,10 +53,7 @@ export class ParentController {
     updateParent = async (req: Request, res: Response) => {
         const user = res.locals.user
         const public_id = req.params.public_id as string
-        logger.info(
-            { public_id },
-            'Incoming request: Update Parent'
-        )
+        logger.info({ public_id }, 'Incoming request: Update Parent')
 
         if (user?.role === 'parent' && user.parent_id !== public_id) {
             throw ApiError.forbidden('You can only update your own profile')

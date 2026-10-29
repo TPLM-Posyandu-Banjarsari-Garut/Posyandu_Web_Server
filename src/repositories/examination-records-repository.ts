@@ -3,15 +3,7 @@ import {
     ExaminationRecord,
     examinationRecords
 } from '@/db'
-import {
-    and,
-    eq,
-    inArray,
-    sql,
-    asc,
-    desc,
-    getTableColumns
-} from 'drizzle-orm'
+import { and, eq, inArray, sql, asc, desc, getTableColumns } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ExaminationRecordsQueryFilters {

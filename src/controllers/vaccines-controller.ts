@@ -40,10 +40,7 @@ export class VaccineController {
 
     updateVaccine = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
-        logger.info(
-            { public_id },
-            'Incoming request: Update Vaccine'
-        )
+        logger.info({ public_id }, 'Incoming request: Update Vaccine')
 
         const vaccine = await this.vaccine_service.updateVaccine(
             public_id,

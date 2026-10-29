@@ -47,10 +47,7 @@ export class EducationCategoryController {
 
     updateCategory = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
-        logger.info(
-            { public_id },
-            'Incoming request: Update Category'
-        )
+        logger.info({ public_id }, 'Incoming request: Update Category')
 
         const category = await this.categoryService.updateCategory(
             public_id,
