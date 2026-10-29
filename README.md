@@ -8,7 +8,7 @@ Repositori ini berisi backend server untuk sistem Posyandu Banjarsari Garut. Dib
 
 Sebelum menjalankan aplikasi, pastikan Anda telah menginstal:
 
-- [Bun](https://bun.sh/) (Rekomendasi package manager & runtime)
+- [Bun 1.4.4](https://bun.sh/) (versi yang diwajibkan sebagai package manager dan runtime)
 - [Docker & Docker Compose](https://www.docker.com/) (Jika ingin menjalankan PostgreSQL lokal melalui container)
 - [Infisical CLI](https://infisical.com/docs/cli/overview) (Untuk manajemen secrets & environment variables)
 - Database PostgreSQL aktif jika tidak menggunakan Docker.
@@ -26,10 +26,10 @@ cd Posyandu_Web_Server
 
 ### 2. Instalasi Dependensi
 
-Gunakan Bun untuk menginstal modul Node:
+Gunakan Bun 1.4.4 untuk menginstal dependensi dari lockfile:
 
 ```bash
-bun install
+bun install --frozen-lockfile
 ```
 
 ### 3. Konfigurasi Secrets menggunakan Infisical
@@ -161,7 +161,7 @@ Berkas konfigurasi: `.github/workflows/ci.yml`
 Berjalan otomatis pada setiap _Push_ ke branch `main` dan _Pull Request_ ke branch `main` & `dev`.
 Tahapan yang dilakukan:
 
-- **Instalasi Dependensi**: Mengunduh dan meng-cache modul dari `bun.lockb`.
+- **Instalasi Dependensi**: Mengunduh dan meng-cache modul dari `bun.lock`.
 - **Typecheck**: Memastikan kode TypeScript bebas dari error tipe statik (`bun run typecheck`).
 - **Linting & Formatting**: Memvalidasi standar penulisan kode (`bun run lint:check` dan `bun run format:check`).
 - **Build**: Menguji kompilasi kode untuk memastikan tidak ada masalah saat _build_ rilis (`bun run build`).

@@ -1,4 +1,4 @@
-FROM oven/bun:1.3-slim AS deps
+FROM oven/bun:1.4.4-slim AS deps
 WORKDIR /app
 
 COPY package.json bun.lock ./
@@ -12,7 +12,7 @@ COPY src ./src
 FROM development AS builder
 RUN bun run build
 
-FROM oven/bun:1.3-slim AS prod
+FROM oven/bun:1.4.4-slim AS prod
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates tzdata && \

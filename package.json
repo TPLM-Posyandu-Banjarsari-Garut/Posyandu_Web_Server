@@ -3,9 +3,17 @@
     "version": "1.0.0",
     "main": "dist/server.js",
     "type": "module",
+    "packageManager": "bun@1.4.4",
+    "engines": {
+        "bun": "1.4.4"
+    },
     "scripts": {
+        "check:bun": "bun src/configs/require-bun-version.ts",
+        "predev": "bun run check:bun",
         "dev": "NODE_ENV=development bun --watch src/server.ts",
+        "prestart": "bun run check:bun",
         "start": "NODE_ENV=production bun dist/server.js",
+        "prebuild": "bun run check:bun",
         "build": "rm -rf dist && tsc && tsc-alias",
         "vercel-build": "bun run build",
         "typecheck": "tsc --noEmit",
