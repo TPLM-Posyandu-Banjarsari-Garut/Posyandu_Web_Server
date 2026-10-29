@@ -3,6 +3,7 @@ import {
     createChildSchema,
     updateChildSchema,
     getChildrenQuerySchema,
+    getNewbornReportQuerySchema,
     childParamsSchema,
     deleteChildQuerySchema
 } from '@/validations/childrens-validation'
@@ -44,6 +45,21 @@ export const registerChildrenRoutes = (registry: OpenAPIRegistry) => {
         request: { query: getChildrenQuerySchema },
         responses: {
             200: { description: 'Success get list of children' },
+            401: { description: 'Unauthorized' },
+            403: { description: 'Forbidden - Insufficient permissions' }
+        }
+    })
+
+    registry.registerPath({
+        method: 'get',
+        path: '/api/childrens/reports/newborns',
+        tags: CHILD_TAG,
+        summary:
+            'Get the newborn report [Roles: posyandu_admin, village_admin, cadre, midwife]',
+        security: SECURITY_AUTH,
+        request: { query: getNewbornReportQuerySchema },
+        responses: {
+            200: { description: 'Newborn report retrieved successfully' },
             401: { description: 'Unauthorized' },
             403: { description: 'Forbidden - Insufficient permissions' }
         }

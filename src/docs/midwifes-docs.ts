@@ -35,7 +35,7 @@ export const registerMidwifesRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/midwifes',
         tags: MIDWIFE_TAG,
         summary:
-            'Get list of midwife [Roles: posyandu_admin, village_admin, midwife]',
+            'Get list of midwife [Roles: posyandu_admin, village_admin, midwife, parent]',
         request: { query: getMidwifesQuerySchema },
         responses: {
             200: { description: 'Success get list of midwife' }
@@ -47,7 +47,7 @@ export const registerMidwifesRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/midwifes/{public_id}',
         tags: MIDWIFE_TAG,
         summary:
-            'Get midwife by public ID [Roles: posyandu_admin, village_admin, midwife]',
+            'Get midwife by public ID [Roles: posyandu_admin, village_admin, midwife, parent]',
         request: { params: midwifeParamsSchema },
         responses: {
             200: { description: 'Success get midwife detail' },

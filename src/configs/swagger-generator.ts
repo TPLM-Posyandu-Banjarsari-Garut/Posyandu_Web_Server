@@ -27,6 +27,7 @@ import { registerExaminationsRoutes } from '@/docs/examinations-docs'
 import { registerExaminationSchedulesRoutes } from '@/docs/examination-schedules-docs'
 import { registerExaminationRecordsRoutes } from '@/docs/examination-records-docs'
 import { registerTrashRoutes } from '@/docs/trash-docs'
+import { registerPushSubscriptionsRoutes } from '@/docs/push-subscriptions-docs'
 
 import { registerAuthRoutes } from '@/docs/auth-docs'
 import env from '@/configs/env'
@@ -42,6 +43,7 @@ registry.registerComponent('securitySchemes', 'BearerAuth', {
 })
 
 registerAuthRoutes(registry)
+registerPushSubscriptionsRoutes(registry)
 registerTrashRoutes(registry)
 registerUsersRoutes(registry)
 registerParentsRoutes(registry)

@@ -37,6 +37,7 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
             path,
             tags: AUTH_TAG,
             summary,
+            security: [],
             request: {
                 body: {
                     content: {
@@ -114,6 +115,7 @@ export const registerAuthRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/auth/sign-in/social',
         tags: AUTH_TAG,
         summary: 'Social login provider initiator',
+        security: [],
         request: {
             body: {
                 content: { 'application/json': { schema: signInSocialSchema } }

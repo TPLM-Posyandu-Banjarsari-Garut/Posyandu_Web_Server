@@ -6,7 +6,8 @@ import {
     getConsultationsQuerySchema,
     consultationParamsSchema,
     deleteConsultationQuerySchema,
-    getAvailableSlotsQuerySchema
+    getAvailableSlotsQuerySchema,
+    broadcastConsultationNotificationSchema
 } from '@/validations/consultations-validation'
 
 export const registerConsultationsRoutes = (registry: OpenAPIRegistry) => {
@@ -17,6 +18,10 @@ export const registerConsultationsRoutes = (registry: OpenAPIRegistry) => {
         updateConsultationStatusSchema
     )
     registry.register('GetAvailableSlotsQuery', getAvailableSlotsQuerySchema)
+    registry.register(
+        'BroadcastConsultationNotificationInput',
+        broadcastConsultationNotificationSchema
+    )
 
     const TAG = ['Consultations']
 
@@ -25,7 +30,7 @@ export const registerConsultationsRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/consultations',
         tags: TAG,
         summary:
-            'Create a new consultation booking [Roles: posyandu_admin, village_admin, parent]',
+            'Create a new consultation booking [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: {
             body: {
                 content: {
@@ -146,6 +151,29 @@ export const registerConsultationsRoutes = (registry: OpenAPIRegistry) => {
         request: { params: consultationParamsSchema },
         responses: {
             200: { description: 'Consultation restored successfully' },
+            404: { description: 'Consultation not found' }
+        }
+    })
+
+    registry.registerPath({
+        method: 'post',
+        path: '/api/consultations/{public_id}/broadcast-notification',
+        tags: TAG,
+        summary:
+            'Send or schedule a consultation notification [Roles: posyandu_admin, village_admin, midwife, cadre]',
+        request: {
+            params: consultationParamsSchema,
+            body: {
+                content: {
+                    'application/json': {
+                        schema: broadcastConsultationNotificationSchema
+                    }
+                }
+            }
+        },
+        responses: {
+            200: { description: 'Consultation notification broadcasted' },
+            400: { description: 'Validation error' },
             404: { description: 'Consultation not found' }
         }
     })

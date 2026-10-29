@@ -9,7 +9,8 @@ export const registerNotificationsRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/notifications',
         tags: TAG,
-        summary: 'Get list of user notifications [Roles: authenticated]',
+        summary:
+            'Get list of user notifications [Roles: posyandu_admin, village_admin, parent, midwife, cadre]',
         request: {
             query: z.object({
                 ...paginationQuerySchema,
@@ -25,7 +26,8 @@ export const registerNotificationsRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/notifications/unread-count',
         tags: TAG,
-        summary: 'Get count of unread notifications [Roles: authenticated]',
+        summary:
+            'Get count of unread notifications [Roles: posyandu_admin, village_admin, parent, midwife, cadre]',
         responses: {
             200: { description: 'Success retrieve unread count' }
         }
@@ -35,7 +37,8 @@ export const registerNotificationsRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/notifications/read-all',
         tags: TAG,
-        summary: 'Mark all notifications as read [Roles: authenticated]',
+        summary:
+            'Mark all notifications as read [Roles: posyandu_admin, village_admin, parent, midwife, cadre]',
         responses: {
             200: { description: 'Success mark all as read' }
         }
@@ -45,7 +48,8 @@ export const registerNotificationsRoutes = (registry: OpenAPIRegistry) => {
         method: 'put',
         path: '/api/notifications/{id}/read',
         tags: TAG,
-        summary: 'Mark a specific notification as read [Roles: authenticated]',
+        summary:
+            'Mark a specific notification as read [Roles: posyandu_admin, village_admin, parent, midwife, cadre]',
         request: {
             params: z.object({
                 id: z.string().min(1, 'Notification ID is required')

@@ -7,7 +7,19 @@ export const registerHealthRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/health',
         tags: TAG,
-        summary: 'Basic server health check',
+        summary: 'Detailed server health metrics',
+        security: [],
+        responses: {
+            200: { description: 'Detailed health metrics retrieved' }
+        }
+    })
+
+    registry.registerPath({
+        method: 'get',
+        path: '/api/health/live',
+        tags: TAG,
+        summary: 'Check whether the server process is running',
+        security: [],
         responses: {
             200: { description: 'Server is healthy and running' }
         }
@@ -15,11 +27,13 @@ export const registerHealthRoutes = (registry: OpenAPIRegistry) => {
 
     registry.registerPath({
         method: 'get',
-        path: '/api/health/detailed',
+        path: '/api/health/ready',
         tags: TAG,
-        summary: 'Detailed system health metrics',
+        summary: 'Check whether the server and database are ready',
+        security: [],
         responses: {
-            200: { description: 'Detailed health specifications retrieved' }
+            200: { description: 'Server and database are ready' },
+            503: { description: 'Server is not ready' }
         }
     })
 }

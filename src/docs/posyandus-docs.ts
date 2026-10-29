@@ -35,7 +35,8 @@ export const registerPosyandusRoutes = (registry: OpenAPIRegistry) => {
         method: 'get',
         path: '/api/posyandus',
         tags: POSYANDU_TAG,
-        summary: 'Get list of posyandus [Roles: posyandu_admin, village_admin]',
+        summary:
+            'Get list of posyandus [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { query: getPosyandusQuerySchema },
         responses: {
             200: { description: 'Success get list of posyandus' }
@@ -47,7 +48,7 @@ export const registerPosyandusRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/posyandus/{public_id}',
         tags: POSYANDU_TAG,
         summary:
-            'Get posyandu by public ID [Roles: posyandu_admin, village_admin]',
+            'Get posyandu by public ID [Roles: posyandu_admin, village_admin, midwife, cadre, parent]',
         request: { params: posyanduParamsSchema },
         responses: {
             200: { description: 'Success get posyandu detail' },

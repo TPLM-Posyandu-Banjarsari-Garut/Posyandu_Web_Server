@@ -34,7 +34,7 @@ export const registerUsersRoutes = (registry: OpenAPIRegistry) => {
         path: '/api/users',
         tags: USER_TAG,
         summary:
-            'Get list of users [Roles: posyandu_admin, village_admin]',
+            'Get list of users [Roles: posyandu_admin, village_admin, midwife, cadre]',
         request: { query: getUsersQuerySchema },
         responses: {
             200: { description: 'Success get list of users' }
