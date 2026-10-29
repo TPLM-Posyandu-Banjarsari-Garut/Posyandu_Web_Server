@@ -3,13 +3,22 @@ import {
     ExaminationRecord,
     examinationRecords
 } from '@/db'
-import { and, eq, sql, asc, desc, getTableColumns } from 'drizzle-orm'
+import {
+    and,
+    eq,
+    inArray,
+    sql,
+    asc,
+    desc,
+    getTableColumns
+} from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ExaminationRecordsQueryFilters {
     examination_id?: string
     schedule_id?: string
     posyandu_id?: string
+    posyandu_ids?: string[]
     children_id?: string
     parent_id?: string
     cadre_id?: string
@@ -37,6 +46,7 @@ export class ExaminationRecordsRepository {
             examination_id,
             schedule_id,
             posyandu_id,
+            posyandu_ids,
             children_id,
             parent_id,
             cadre_id,
@@ -71,11 +81,19 @@ export class ExaminationRecordsRepository {
             conditions.push(eq(examinationRecords.posyandu_id, posyandu_id))
         }
 
+        if (posyandu_ids !== undefined) {
+            conditions.push(
+                posyandu_ids.length > 0
+                    ? inArray(examinationRecords.posyandu_id, posyandu_ids)
+                    : sql`false`
+            )
+        }
+
         if (children_id) {
             conditions.push(eq(examinationRecords.children_id, children_id))
         }
 
-        if (parent_id) {
+        if (parent_id !== undefined) {
             conditions.push(eq(examinationRecords.parent_id, parent_id))
         }
 
@@ -127,16 +145,18 @@ export class ExaminationRecordsRepository {
         }
     }
 
-    async findById(id: string): Promise<ExaminationRecord | undefined> {
+    async findById(
+        id: string,
+        includeDeleted = false
+    ): Promise<ExaminationRecord | undefined> {
+        const conditions = [eq(examinationRecords.id, id)]
+        if (!includeDeleted) {
+            conditions.push(sql`${examinationRecords.deleted_at} IS NULL`)
+        }
         const [record] = await this.db
             .select()
             .from(examinationRecords)
-            .where(
-                and(
-                    eq(examinationRecords.id, id),
-                    sql`${examinationRecords.deleted_at} IS NULL`
-                )
-            )
+            .where(and(...conditions))
             .limit(1)
         return record
     }

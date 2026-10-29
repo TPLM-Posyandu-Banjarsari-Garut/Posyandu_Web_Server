@@ -15,13 +15,14 @@ export class NutritionRecordController {
     ) {}
 
     createNutritionRecord = async (req: Request, res: Response) => {
-        logger.info(
-            { body: req.body },
-            'Incoming request: Create Nutrition Record'
-        )
+        const user = res.locals.user
+        logger.info('Incoming request: Create Nutrition Record')
 
         const record =
-            await this.nutrition_record_service.createNutritionRecord(req.body)
+            await this.nutrition_record_service.createNutritionRecord(
+                req.body,
+                user
+            )
 
         logger.info(
             { recordId: record.id },
@@ -37,22 +38,10 @@ export class NutritionRecordController {
     getNutritionRecords = async (req: Request, res: Response) => {
         const user = res.locals.user
         const query = req.query as unknown as NutritionRecordQueryFilters
-        logger.info(
-            { userId: user?.id, query },
-            'Incoming request: Get Nutrition Records'
-        )
-
-        if (user?.role === 'parent') {
-            query.parent_id = user.parent_id
-        } else if (
-            (user?.role === 'cadre' || user?.role === 'midwife') &&
-            user.posyandu_id
-        ) {
-            query.posyandu_id = user.posyandu_id
-        }
+        logger.info({ userId: user?.id }, 'Incoming request: Get Nutrition Records')
 
         const result =
-            await this.nutrition_record_service.getNutritionRecords(query)
+            await this.nutrition_record_service.getNutritionRecords(query, user)
         return ApiResponse.ok(
             res,
             'Nutrition Records retrieved successfully',
@@ -74,14 +63,15 @@ export class NutritionRecordController {
     updateNutritionRecord = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Nutrition Record'
         )
 
         const record =
             await this.nutrition_record_service.updateNutritionRecord(
                 public_id,
-                req.body
+                req.body,
+                res.locals.user
             )
         return ApiResponse.ok(
             res,

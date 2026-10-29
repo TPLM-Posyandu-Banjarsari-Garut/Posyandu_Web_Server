@@ -15,6 +15,7 @@ import {
 import { ApiError } from '@/utils/api-error'
 import { BaseRepository } from '@/repositories/base-repository'
 import { sanitizeSearchTerm } from '@/utils/sanitize'
+import { encryptedFieldEquals } from '@/db/helpers/encrypted-field'
 import {
     and,
     eq,
@@ -45,6 +46,8 @@ export interface UserWithProfile extends User {
     midwife_id?: string | null
     cadre_id?: string | null
     posyandu_id?: string | null
+    posyandu_ids?: string[]
+    posyandu_assignments?: Array<{ id: string; posyandu_id: string }>
     posyandu_name?: string | null
 }
 
@@ -177,17 +180,54 @@ export class UserRepository extends BaseRepository<
         const [result] = await this.db
             .select({
                 ...getTableColumns(users),
-                parent_id: parents.id,
-                midwife_id: midwifes.id,
-                cadre_id: cadres.id,
-                posyandu_id: sql<string>`COALESCE(${midwifes.posyandu_id}, ${cadres.posyandu_id})`
+                parent_id: parents.id
             })
             .from(users)
-            .leftJoin(parents, eq(users.id, parents.user_id))
-            .leftJoin(midwifes, eq(users.id, midwifes.user_id))
-            .leftJoin(cadres, eq(users.id, cadres.user_id))
+            .leftJoin(
+                parents,
+                and(
+                    eq(users.id, parents.user_id),
+                    eq(parents.status, 'active'),
+                    eq(parents.is_deleted, false)
+                )
+            )
             .where(and(eq(users.id, public_id), eq(users.status, 'active')))
             .limit(1)
+
+        if (!result) return undefined
+
+        if (result.role === 'cadre') {
+            const assignments = await this.db
+                .select({ id: cadres.id, posyandu_id: cadres.posyandu_id })
+                .from(cadres)
+                .where(eq(cadres.user_id, public_id))
+
+            const posyandu_ids = assignments.map(item => item.posyandu_id)
+            return {
+                ...result,
+                cadre_id: assignments[0]?.id ?? null,
+                posyandu_id: posyandu_ids[0] ?? null,
+                posyandu_ids,
+                posyandu_assignments: assignments
+            }
+        }
+
+        if (result.role === 'midwife') {
+            const assignments = await this.db
+                .select({ id: midwifes.id, posyandu_id: midwifes.posyandu_id })
+                .from(midwifes)
+                .where(eq(midwifes.user_id, public_id))
+
+            const posyandu_ids = assignments.map(item => item.posyandu_id)
+            return {
+                ...result,
+                midwife_id: assignments[0]?.id ?? null,
+                posyandu_id: posyandu_ids[0] ?? null,
+                posyandu_ids,
+                posyandu_assignments: assignments
+            }
+        }
+
         return result
     }
 
@@ -203,7 +243,11 @@ export class UserRepository extends BaseRepository<
     async findByPhoneNumber(phone_number: string): Promise<User | undefined> {
         return this.findByCondition(
             and(
-                eq(users.phone_number, phone_number),
+                encryptedFieldEquals(
+                    users.phone_number,
+                    phone_number,
+                    'users.phone_number'
+                ),
                 eq(users.status, 'active')
             )
         )
@@ -427,7 +471,11 @@ export class UserRepository extends BaseRepository<
     async existsByPhoneNumber(phone_number: string): Promise<boolean> {
         return this.checkExists(
             and(
-                eq(users.phone_number, phone_number),
+                encryptedFieldEquals(
+                    users.phone_number,
+                    phone_number,
+                    'users.phone_number'
+                ),
                 eq(users.status, 'active')
             )
         )

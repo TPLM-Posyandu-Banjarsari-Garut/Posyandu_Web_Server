@@ -12,7 +12,7 @@ export class EducationController {
     constructor(private readonly educationService: EducationService) {}
 
     createEducation = async (req: Request, res: Response) => {
-        logger.info({ body: req.body }, 'Incoming request: Create Education')
+        logger.info('Incoming request: Create Education')
 
         const education = await this.educationService.createEducation(req.body)
 
@@ -29,7 +29,7 @@ export class EducationController {
 
     getEducations = async (req: Request, res: Response) => {
         const query = req.query as unknown as EducationQueryFilters
-        logger.info({ query }, 'Incoming request: Get Educations')
+        logger.info('Incoming request: Get Educations')
 
         const result = await this.educationService.getEducations(query)
         return ApiResponse.ok(res, 'Educations retrieved successfully', result)
@@ -53,7 +53,7 @@ export class EducationController {
     updateEducation = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Education'
         )
 

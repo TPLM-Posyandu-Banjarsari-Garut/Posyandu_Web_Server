@@ -14,9 +14,10 @@ export class ChildrenController {
     constructor(private readonly children_service: ChildrenService) {}
 
     createChildren = async (req: Request, res: Response) => {
-        logger.info({ body: req.body }, 'Incoming request: Create Children')
+        const user = res.locals.user
+        logger.info('Incoming request: Create Children')
 
-        const child = await this.children_service.createChildren(req.body)
+        const child = await this.children_service.createChildren(req.body, user)
 
         logger.info(
             { childId: child.id },
@@ -33,21 +34,9 @@ export class ChildrenController {
         const user = res.locals.user
         const query = req.query as unknown as ChildrenQueryFilters
 
-        logger.info(
-            { userId: user?.id, query },
-            'Incoming request: Get Childrens'
-        )
+        logger.info({ userId: user?.id }, 'Incoming request: Get Childrens')
 
-        if (user?.role === 'parent') {
-            query.parent_id = user.parent_id
-        } else if (
-            (user?.role === 'cadre' || user?.role === 'midwife') &&
-            user.posyandu_id
-        ) {
-            query.posyandu_id = user.posyandu_id
-        }
-
-        const result = await this.children_service.getChildrens(query)
+        const result = await this.children_service.getChildrens(query, user)
         return ApiResponse.ok(res, 'Childrens retrieved successfully', result)
     }
 
@@ -55,21 +44,12 @@ export class ChildrenController {
         const user = res.locals.user
         const query = req.query as unknown as GetNewbornReportQueryInput
 
-        logger.info(
-            { userId: user?.id, query },
-            'Incoming request: Get Newborn Report'
+        logger.info({ userId: user?.id }, 'Incoming request: Get Newborn Report')
+
+        const result = await this.children_service.getNewbornReport(
+            query,
+            user
         )
-
-        if (
-            (user?.role === 'cadre' ||
-                user?.role === 'midwife' ||
-                user?.role === 'posyandu_admin') &&
-            user.posyandu_id
-        ) {
-            query.posyandu_id = user.posyandu_id
-        }
-
-        const result = await this.children_service.getNewbornReport(query)
         return ApiResponse.ok(
             res,
             'Newborn report retrieved successfully',
@@ -98,7 +78,7 @@ export class ChildrenController {
         const public_id = req.params.public_id as string
 
         logger.info(
-            { userId: user?.id, public_id, body: req.body },
+            { userId: user?.id, public_id },
             'Incoming request: Update Children'
         )
 

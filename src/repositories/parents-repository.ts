@@ -1,4 +1,12 @@
-import { NewParent, Parent, parents, relationChildrens, users } from '@/db'
+import {
+    NewParent,
+    Parent,
+    parents,
+    relationChildrens,
+    users,
+    childrens,
+    sessions
+} from '@/db'
 import {
     and,
     eq,
@@ -8,13 +16,17 @@ import {
     SQL,
     asc,
     desc,
-    getTableColumns
+    getTableColumns,
+    inArray
 } from 'drizzle-orm'
+import { encryptedFieldEquals } from '@/db/helpers/encrypted-field'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ParentQueryFilters {
     search?: string
+    nameOnlySearch?: boolean
     user_id?: string
+    posyandu_ids?: string[]
     blood_type?: Parent['blood_type']
     status?: Parent['status']
     page?: number
@@ -41,7 +53,9 @@ export class ParentRepository {
     async getParents(filters?: ParentQueryFilters) {
         const {
             search,
+            nameOnlySearch = false,
             user_id,
+            posyandu_ids,
             blood_type,
             status,
             page = 1,
@@ -66,16 +80,61 @@ export class ParentRepository {
 
         const whereClause = and(
             escapedSearch
-                ? or(
-                      ilike(parents.identity_number, `%${escapedSearch}%`),
-                      ilike(users.name, `%${escapedSearch}%`),
-                      ilike(parents.address_line, `%${escapedSearch}%`),
-                      ilike(users.phone_number, `%${escapedSearch}%`)
-                  )
+                ? nameOnlySearch
+                    ? ilike(users.name, `%${escapedSearch}%`)
+                    : or(
+                          encryptedFieldEquals(
+                              parents.identity_number,
+                              search!,
+                              'parents.identity_number'
+                          ),
+                          ilike(users.name, `%${escapedSearch}%`),
+                          encryptedFieldEquals(
+                              parents.address_line,
+                              search!,
+                              'parents.address_line'
+                          ),
+                          encryptedFieldEquals(
+                              users.phone_number,
+                              search!,
+                              'users.phone_number'
+                          )
+                      )
                 : undefined,
             user_id ? eq(parents.user_id, user_id) : undefined,
+            posyandu_ids !== undefined
+                ? posyandu_ids.length > 0
+                    ? inArray(
+                          parents.id,
+                          this.db
+                              .select({ parent_id: relationChildrens.parent_id })
+                              .from(relationChildrens)
+                              .innerJoin(
+                                  childrens,
+                                  eq(
+                                      relationChildrens.children_id,
+                                      childrens.id
+                                  )
+                              )
+                              .where(
+                                  and(
+                                      inArray(
+                                          childrens.posyandu_id,
+                                          posyandu_ids
+                                      ),
+                                      eq(childrens.is_deleted, false),
+                                      sql`${childrens.deleted_at} IS NULL`,
+                                      eq(relationChildrens.is_deleted, false),
+                                      sql`${relationChildrens.deleted_at} IS NULL`
+                                  )
+                              )
+                      )
+                    : sql`false`
+                : undefined,
             blood_type ? eq(parents.blood_type, blood_type) : undefined,
-            statusCondition
+            statusCondition,
+            !includeDeleted ? eq(parents.is_deleted, false) : undefined,
+            !includeDeleted ? eq(users.status, 'active') : undefined
         )
 
         const dataWithCount = await this.db
@@ -109,7 +168,11 @@ export class ParentRepository {
     ): Promise<Parent | undefined> {
         const condition = includeDeleted
             ? eq(parents.id, public_id)
-            : and(eq(parents.id, public_id), eq(parents.status, 'active'))
+            : and(
+                  eq(parents.id, public_id),
+                  eq(parents.status, 'active'),
+                  eq(parents.is_deleted, false)
+              )
         return this.findByCondition(condition)
     }
 
@@ -117,9 +180,24 @@ export class ParentRepository {
         const [parent] = await this.db
             .select()
             .from(parents)
-            .where(eq(parents.user_id, user_id))
+            .where(
+                and(
+                    eq(parents.user_id, user_id),
+                    eq(parents.status, 'active'),
+                    eq(parents.is_deleted, false)
+                )
+            )
             .limit(1)
         return parent
+    }
+
+    async findUserRole(user_id: string) {
+        const [user] = await this.db
+            .select({ role: users.role })
+            .from(users)
+            .where(eq(users.id, user_id))
+            .limit(1)
+        return user?.role
     }
 
     async findByIdentityNumber(
@@ -128,7 +206,13 @@ export class ParentRepository {
         const [parent] = await this.db
             .select()
             .from(parents)
-            .where(eq(parents.identity_number, identity_number))
+            .where(
+                encryptedFieldEquals(
+                    parents.identity_number,
+                    identity_number,
+                    'parents.identity_number'
+                )
+            )
             .limit(1)
         return parent
     }
@@ -137,12 +221,19 @@ export class ParentRepository {
         public_id: string,
         updated_parent: Partial<NewParent>
     ): Promise<Parent | undefined> {
-        const [parent] = await this.db
-            .update(parents)
-            .set(updated_parent)
-            .where(eq(parents.id, public_id))
-            .returning()
-        return parent
+        return this.db.transaction(async tx => {
+            const [parent] = await tx
+                .update(parents)
+                .set(updated_parent)
+                .where(eq(parents.id, public_id))
+                .returning()
+
+            if (parent && updated_parent.status === 'inactive') {
+                await tx.delete(sessions).where(eq(sessions.user_id, parent.user_id))
+            }
+
+            return parent
+        })
     }
     private async findByCondition(
         condition: SQL | undefined
@@ -177,7 +268,19 @@ export class ParentRepository {
     }
 
     async softDelete(public_id: string): Promise<Parent | undefined> {
-        return this.updateStatus(public_id, 'inactive')
+        return this.db.transaction(async tx => {
+            const [parent] = await tx
+                .update(parents)
+                .set({ status: 'inactive' })
+                .where(eq(parents.id, public_id))
+                .returning()
+
+            if (parent) {
+                await tx.delete(sessions).where(eq(sessions.user_id, parent.user_id))
+            }
+
+            return parent
+        })
     }
 
     async hardDelete(public_id: string): Promise<Parent | undefined> {
@@ -196,7 +299,13 @@ export class ParentRepository {
         const [parent] = await this.db
             .select({ id: parents.id })
             .from(parents)
-            .where(eq(parents.identity_number, identity_number))
+            .where(
+                encryptedFieldEquals(
+                    parents.identity_number,
+                    identity_number,
+                    'parents.identity_number'
+                )
+            )
             .limit(1)
         return !!parent
     }

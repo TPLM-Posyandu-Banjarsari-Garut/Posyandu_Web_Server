@@ -1,5 +1,6 @@
 import { examinationStatusEnum } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
+import { encryptedText } from '@/db/helpers/encrypted-field'
 import { timestamps } from '@/db/helpers/timestamps'
 import { cadres } from '@/db/schemas/cadres-schema'
 import { childrens } from '@/db/schemas/childrens-schema'
@@ -45,8 +46,11 @@ export const examinationRecords = pgTable(
 
         examination_date: date('examination_date', { mode: 'date' }).notNull(),
         status: examinationStatusEnum('status').notNull().default('pending'),
-        result_summary: text('result_summary'),
-        notes: text('notes'),
+        result_summary: encryptedText(
+            'result_summary',
+            'examination_records.result_summary'
+        ),
+        notes: encryptedText('notes', 'examination_records.notes'),
 
         medically_validated_at: timestamp('medically_validated_at', {
             withTimezone: true,

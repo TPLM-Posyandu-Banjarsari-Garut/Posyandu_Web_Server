@@ -13,7 +13,7 @@ export class VitaminController {
     constructor(private readonly vitamin_service: VitaminService) {}
 
     createVitamin = async (req: Request, res: Response) => {
-        logger.info({ body: req.body }, 'Incoming request: Create Vitamin')
+        logger.info('Incoming request: Create Vitamin')
 
         const vitamin = await this.vitamin_service.createVitamin(req.body)
 
@@ -23,7 +23,7 @@ export class VitaminController {
 
     getVitamins = async (req: Request, res: Response) => {
         const query = req.query as unknown as VitaminQueryFilters
-        logger.info({ query }, 'Incoming request: Get Vitamins')
+        logger.info('Incoming request: Get Vitamins')
 
         const result = await this.vitamin_service.getVitamins(query)
         return ApiResponse.ok(res, 'Vitamins retrieved successfully', result)
@@ -41,7 +41,7 @@ export class VitaminController {
     updateVitamin = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Vitamin'
         )
 

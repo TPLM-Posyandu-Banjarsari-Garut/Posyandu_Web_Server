@@ -15,10 +15,7 @@ export class ExaminationsController {
 
     createExamination = async (req: Request, res: Response) => {
         const user = res.locals.user
-        logger.info(
-            { body: req.body },
-            'Incoming request: Create Examination Template'
-        )
+        logger.info('Incoming request: Create Examination Template')
 
         if (user?.posyandu_id && req.body.posyandu_id !== user.posyandu_id) {
             throw ApiError.forbidden(
@@ -41,7 +38,7 @@ export class ExaminationsController {
     getExaminations = async (req: Request, res: Response) => {
         const user = res.locals.user
         const query = req.query as unknown as ExaminationsQueryFilters
-        logger.info({ query }, 'Incoming request: Get Examination Templates')
+        logger.info('Incoming request: Get Examination Templates')
 
         if (
             (user?.role === 'cadre' || user?.role === 'midwife') &&
@@ -85,7 +82,7 @@ export class ExaminationsController {
         const user = res.locals.user
         const public_id = (req.params.public_id || req.params.id) as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Examination Template'
         )
 

@@ -1,4 +1,5 @@
 import { NewMidwife, Midwife, midwifes, users } from '@/db'
+import { encryptedFieldEquals } from '@/db/helpers/encrypted-field'
 import {
     and,
     eq,
@@ -70,12 +71,26 @@ export class MidwifeRepository {
         const whereClause = and(
             escapedSearch
                 ? or(
-                      ilike(midwifes.identity_number, `%${escapedSearch}%`),
-                      ilike(midwifes.license_number, `%${escapedSearch}%`)
+                      encryptedFieldEquals(
+                          midwifes.identity_number,
+                          search!,
+                          'midwifes.identity_number'
+                      ),
+                      encryptedFieldEquals(
+                          midwifes.license_number,
+                          search!,
+                          'midwifes.license_number'
+                      )
                   )
                 : undefined,
             posyandu_id ? eq(midwifes.posyandu_id, posyandu_id) : undefined,
-            str_number ? eq(midwifes.license_number, str_number) : undefined,
+            str_number
+                ? encryptedFieldEquals(
+                      midwifes.license_number,
+                      str_number,
+                      'midwifes.license_number'
+                  )
+                : undefined,
             statusCondition
         )
 
@@ -150,7 +165,11 @@ export class MidwifeRepository {
             .from(midwifes)
             .where(
                 and(
-                    eq(midwifes.identity_number, identity_number),
+                    encryptedFieldEquals(
+                        midwifes.identity_number,
+                        identity_number,
+                        'midwifes.identity_number'
+                    ),
                     eq(midwifes.status, 'active')
                 )
             )
@@ -221,7 +240,13 @@ export class MidwifeRepository {
         const [midwife] = await this.db
             .select({ id: midwifes.id })
             .from(midwifes)
-            .where(eq(midwifes.license_number, str_number))
+            .where(
+                encryptedFieldEquals(
+                    midwifes.license_number,
+                    str_number,
+                    'midwifes.license_number'
+                )
+            )
             .limit(1)
         return !!midwife
     }
@@ -230,7 +255,13 @@ export class MidwifeRepository {
         const [midwife] = await this.db
             .select({ id: midwifes.id })
             .from(midwifes)
-            .where(eq(midwifes.identity_number, identity_number))
+            .where(
+                encryptedFieldEquals(
+                    midwifes.identity_number,
+                    identity_number,
+                    'midwifes.identity_number'
+                )
+            )
             .limit(1)
         return !!midwife
     }

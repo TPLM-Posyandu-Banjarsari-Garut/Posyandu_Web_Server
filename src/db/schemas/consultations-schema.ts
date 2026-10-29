@@ -1,5 +1,6 @@
 import { consultationStatusEnum, consultationTypeEnum } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
+import { encryptedText } from '@/db/helpers/encrypted-field'
 import { timestamps } from '@/db/helpers/timestamps'
 import { cadres } from '@/db/schemas/cadres-schema'
 import { midwifes } from '@/db/schemas/midwifes-schema'
@@ -57,8 +58,11 @@ export const consultations = pgTable(
         follow_up_date: date('follow_up_date', { mode: 'date' }),
 
         status: consultationStatusEnum('status').notNull().default('pending'),
-        notes: text('notes'),
-        cancellation_reason: text('cancellation_reason'),
+        notes: encryptedText('notes', 'consultations.notes'),
+        cancellation_reason: encryptedText(
+            'cancellation_reason',
+            'consultations.cancellation_reason'
+        ),
 
         ...timestamps
     },

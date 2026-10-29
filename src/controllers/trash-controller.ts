@@ -9,7 +9,7 @@ export class TrashController {
 
     getTrash = async (req: Request, res: Response) => {
         const query = req.query as unknown as TrashQueryFilters
-        logger.info({ query }, 'Incoming request: Get Trash')
+        logger.info('Incoming request: Get Trash')
 
         const result = await this.trashService.getTrashItems(query)
         return ApiResponse.ok(res, 'Trash items retrieved successfully', result)

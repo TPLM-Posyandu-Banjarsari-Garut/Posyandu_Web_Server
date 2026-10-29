@@ -25,7 +25,7 @@ export class MediaController {
 
     getMedias = async (req: Request, res: Response) => {
         const query = req.query as unknown as MediaQueryFilters
-        logger.info({ query }, 'Incoming request: Get Medias list')
+        logger.info('Incoming request: Get Medias list')
 
         const result = await this.media_service.getMedias(query)
         return ApiResponse.ok(res, 'Medias list retrieved successfully', result)

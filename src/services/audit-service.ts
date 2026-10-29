@@ -10,11 +10,8 @@ export class AuditService {
         action: 'CREATE' | 'UPDATE' | 'DELETE' | 'READ'
         entity_type: string
         entity_id: string
-        old_values?: unknown
-        new_values?: unknown
         request?: Request
         status?: 'success' | 'failed'
-        error_message?: string
     }) {
         try {
             await db.insert(auditLogs).values({
@@ -23,17 +20,20 @@ export class AuditService {
                 action: params.action,
                 entityType: params.entity_type,
                 entityId: params.entity_id,
-                oldValue: params.old_values,
-                newValue: params.new_values,
                 ipAddress: params.request?.ip,
                 userAgent: params.request?.get('user-agent'),
                 payload: {
-                    status: params.status || 'success',
-                    error: params.error_message
+                    status: params.status || 'success'
                 }
             })
         } catch (error) {
-            logger.error(error, 'Failed to insert audit log')
+            logger.error(
+                {
+                    errorType:
+                        error instanceof Error ? error.name : 'UnknownError'
+                },
+                'Failed to insert audit log'
+            )
         }
     }
 }

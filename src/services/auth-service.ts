@@ -16,6 +16,8 @@ export interface AuthenticatedUser extends User {
     midwife_id?: string | null
     cadre_id?: string | null
     posyandu_id?: string | null
+    posyandu_ids?: string[]
+    posyandu_assignments?: Array<{ id: string; posyandu_id: string }>
 }
 
 export class AuthService {
@@ -32,9 +34,7 @@ export class AuthService {
                 email,
                 password,
                 name,
-                image: avatar_url || undefined,
-                role: role || 'parent',
-                status: 'active'
+                image: avatar_url || undefined
             }
         })
 
@@ -47,13 +47,17 @@ export class AuthService {
         const generated_public_id = account_creation.user.id
 
         try {
-            if (phone_number) {
-                await this.user_repository.updateWithTransaction(
-                    db,
-                    generated_public_id,
-                    { phone_number }
-                )
-            }
+            // Role and status are not accepted from Better Auth public inputs.
+            // This service is reached through the admin-protected /api/users route.
+            await this.user_repository.updateWithTransaction(
+                db,
+                generated_public_id,
+                {
+                    role: role || 'parent',
+                    status: 'active',
+                    ...(phone_number ? { phone_number } : {})
+                }
+            )
 
             await db.transaction(async tx => {
                 if (role === 'parent') {
@@ -114,7 +118,12 @@ export class AuthService {
                 })
             } catch (cleanupError) {
                 logger.error(
-                    cleanupError,
+                    {
+                        errorType:
+                            cleanupError instanceof Error
+                                ? cleanupError.name
+                                : 'UnknownError'
+                    },
                     'Critical: Registration cleanup failed'
                 )
             }

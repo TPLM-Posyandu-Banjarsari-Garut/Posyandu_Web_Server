@@ -1,11 +1,20 @@
 import { NewPregnancyRecord, PregnancyRecord, pregnancyRecords } from '@/db'
-import { and, eq, sql, asc, desc, getTableColumns } from 'drizzle-orm'
+import {
+    and,
+    eq,
+    sql,
+    asc,
+    desc,
+    getTableColumns,
+    inArray
+} from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface PregnancyRecordQueryFilters {
     search?: string
     parent_id?: string
     posyandu_id?: string
+    posyandu_ids?: string[]
     pregnancy_status?: PregnancyRecord['pregnancy_status']
     risk_level?: PregnancyRecord['risk_level']
     page?: number
@@ -29,6 +38,7 @@ export class PregnancyRecordsRepository {
         const {
             parent_id,
             posyandu_id,
+            posyandu_ids,
             pregnancy_status,
             risk_level,
             page = 1,
@@ -46,12 +56,20 @@ export class PregnancyRecordsRepository {
             conditions.push(sql`${pregnancyRecords.deleted_at} IS NULL`)
         }
 
-        if (parent_id) {
+        if (parent_id !== undefined) {
             conditions.push(eq(pregnancyRecords.parent_id, parent_id))
         }
 
         if (posyandu_id) {
             conditions.push(eq(pregnancyRecords.posyandu_id, posyandu_id))
+        }
+
+        if (posyandu_ids !== undefined) {
+            conditions.push(
+                posyandu_ids.length > 0
+                    ? inArray(pregnancyRecords.posyandu_id, posyandu_ids)
+                    : sql`false`
+            )
         }
 
         if (pregnancy_status) {
@@ -100,15 +118,20 @@ export class PregnancyRecordsRepository {
         }
     }
 
-    async findById(id: string): Promise<PregnancyRecord | undefined> {
+    async findById(
+        id: string,
+        includeDeleted = false
+    ): Promise<PregnancyRecord | undefined> {
         const [record] = await this.db
             .select()
             .from(pregnancyRecords)
             .where(
-                and(
-                    eq(pregnancyRecords.id, id),
-                    sql`${pregnancyRecords.deleted_at} IS NULL`
-                )
+                includeDeleted
+                    ? eq(pregnancyRecords.id, id)
+                    : and(
+                          eq(pregnancyRecords.id, id),
+                          sql`${pregnancyRecords.deleted_at} IS NULL`
+                      )
             )
             .limit(1)
         return record

@@ -1,5 +1,6 @@
 import { pregnancyStatusEnum, pregnancyRiskEnum } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
+import { encryptedText } from '@/db/helpers/encrypted-field'
 import { timestamps } from '@/db/helpers/timestamps'
 import { parents } from '@/db/schemas/parents-schema'
 import { posyandus } from '@/db/schemas/posyandus-schema'
@@ -40,7 +41,7 @@ export const pregnancyRecords = pgTable(
         parity: integer('parity'),
         abortus: integer('abortus'),
         is_active: boolean('is_active').notNull().default(true),
-        notes: text('notes'),
+        notes: encryptedText('notes', 'pregnancy_records.notes'),
 
         ...timestamps
     },

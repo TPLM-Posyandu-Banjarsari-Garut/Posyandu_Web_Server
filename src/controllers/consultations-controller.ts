@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { ConsultationsService } from '@/services/consultations-service'
+import type { AuthenticatedUser } from '@/services/auth-service'
 import { ConsultationsQueryFilters } from '@/repositories/consultations-repository'
 import { GetAvailableSlotsQueryInput } from '@/validations/consultations-validation'
 import { ApiResponse } from '@/utils/api-response'
@@ -17,10 +18,7 @@ export class ConsultationsController {
     getAvailableSlots = async (req: Request, res: Response) => {
         const { posyandu_id, consultation_type, date, midwife_id } =
             req.query as unknown as GetAvailableSlotsQueryInput
-        logger.info(
-            { posyandu_id, consultation_type, date, midwife_id },
-            'Incoming request: Get Available Slots'
-        )
+        logger.info('Incoming request: Get Available Slots')
 
         const slots = await this.consultations_service.getAvailableSlots(
             posyandu_id,
@@ -37,9 +35,9 @@ export class ConsultationsController {
     }
 
     createBooking = async (req: Request, res: Response) => {
-        const user = res.locals.user
+        const user = res.locals.user as AuthenticatedUser
         logger.info(
-            { userId: user?.id, body: req.body },
+            { userId: user?.id },
             'Incoming request: Create Consultation Booking'
         )
 
@@ -59,7 +57,8 @@ export class ConsultationsController {
 
         const booking = await this.consultations_service.createBooking(
             parentId,
-            req.body
+            req.body,
+            user
         )
 
         const bookingId = Array.isArray(booking)
@@ -75,12 +74,9 @@ export class ConsultationsController {
     }
 
     getConsultations = async (req: Request, res: Response) => {
-        const user = res.locals.user
+        const user = res.locals.user as AuthenticatedUser
         const query = req.query as unknown as ConsultationsQueryFilters
-        logger.info(
-            { userId: user?.id, query },
-            'Incoming request: Get Consultations'
-        )
+        logger.info({ userId: user?.id }, 'Incoming request: Get Consultations')
 
         if (user?.role === 'parent') {
             query.parent_id = user.parent_id
@@ -100,7 +96,7 @@ export class ConsultationsController {
     }
 
     getConsultationById = async (req: Request, res: Response) => {
-        const user = res.locals.user
+        const user = res.locals.user as AuthenticatedUser
         const public_id = req.params.public_id as string
         logger.info(
             { userId: user?.id, public_id },
@@ -116,11 +112,11 @@ export class ConsultationsController {
             }
             const consultation =
                 await this.consultations_service.getConsultationById(id)
-            if (
-                (user?.role === 'midwife' || user?.role === 'cadre') &&
-                user.posyandu_id
-            ) {
-                if (consultation.posyandu_id !== user.posyandu_id) {
+            if (user?.role === 'midwife' || user?.role === 'cadre') {
+                if (
+                    user.posyandu_id &&
+                    consultation.posyandu_id !== user.posyandu_id
+                ) {
                     throw ApiError.forbidden(
                         'Access denied. Consultation belongs to a different Posyandu.'
                     )
@@ -131,10 +127,10 @@ export class ConsultationsController {
     }
 
     updateBooking = async (req: Request, res: Response) => {
-        const user = res.locals.user
+        const user = res.locals.user as AuthenticatedUser
         const public_id = req.params.public_id as string
         logger.info(
-            { userId: user?.id, public_id, body: req.body },
+            { userId: user?.id, public_id },
             'Incoming request: Update Booking'
         )
 
@@ -157,8 +153,13 @@ export class ConsultationsController {
     }
 
     updateBookingStatus = async (req: Request, res: Response) => {
-        const user = res.locals.user
+        const user = res.locals.user as AuthenticatedUser
         const public_id = req.params.public_id as string
+        const consultation =
+            await this.consultations_service.getConsultationById(public_id)
+        const assignedProfileId = user?.posyandu_assignments?.find(
+            assignment => assignment.posyandu_id === consultation.posyandu_id
+        )?.id
         logger.info(
             { userId: user?.id, public_id, status: req.body.status },
             'Incoming request: Update Booking Status'
@@ -166,8 +167,12 @@ export class ConsultationsController {
 
         const actor = {
             role: user?.role,
-            midwife_id: user?.midwife_id,
-            cadre_id: user?.cadre_id,
+            midwife_id:
+                user?.role === 'midwife'
+                    ? assignedProfileId
+                    : user?.midwife_id,
+            cadre_id:
+                user?.role === 'cadre' ? assignedProfileId : user?.cadre_id,
             parent_id: user?.parent_id
         }
 
@@ -184,7 +189,7 @@ export class ConsultationsController {
     }
 
     deleteBooking = async (req: Request, res: Response) => {
-        const user = res.locals.user
+        const user = res.locals.user as AuthenticatedUser
         const public_id = req.params.public_id as string
         logger.info(
             { userId: user?.id, public_id },
@@ -195,7 +200,7 @@ export class ConsultationsController {
             req,
             res,
             'Consultation',
-            async (id, is_permanent) => {
+            async id => {
                 if (user?.role === 'parent') {
                     await this.consultations_service.verifyParentAccess(
                         id,
@@ -211,7 +216,7 @@ export class ConsultationsController {
     }
 
     restoreBooking = async (req: Request, res: Response) => {
-        const user = res.locals.user
+        const user = res.locals.user as AuthenticatedUser
         const public_id = req.params.public_id as string
         logger.info(
             { userId: user?.id, public_id },
@@ -230,11 +235,11 @@ export class ConsultationsController {
     }
 
     broadcastConsultationNotification = async (req: Request, res: Response) => {
-        const user = res.locals.user
+        const user = res.locals.user as AuthenticatedUser
         const public_id = req.params.public_id as string
 
         logger.info(
-            { userId: user?.id, public_id, body: req.body },
+            { userId: user?.id, public_id },
             'Incoming request: Broadcast Consultation Notification'
         )
 

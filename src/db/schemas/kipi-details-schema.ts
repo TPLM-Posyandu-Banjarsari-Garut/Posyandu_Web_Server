@@ -1,5 +1,6 @@
 import { kipiSeverityEnum } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
+import { encryptedText } from '@/db/helpers/encrypted-field'
 import { timestamps } from '@/db/helpers/timestamps'
 import { immunizationRecords } from '@/db/schemas/immunization-records'
 import { boolean, integer, pgTable, text, index } from 'drizzle-orm/pg-core'
@@ -14,9 +15,9 @@ export const kipiDetails = pgTable(
             .unique()
             .references(() => immunizationRecords.id),
 
-        symptoms: text('symptoms').notNull(),
+        symptoms: encryptedText('symptoms', 'kipi_details.symptoms').notNull(),
         severity: kipiSeverityEnum('severity').notNull(),
-        action_taken: text('action_taken'),
+        action_taken: encryptedText('action_taken', 'kipi_details.action_taken'),
         referred: boolean('referred').notNull().default(false),
 
         ...timestamps

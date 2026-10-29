@@ -1,6 +1,6 @@
 import { ApiError } from '@/utils/api-error'
 import { createPaginationMeta } from '@/utils/pagination'
-import { NewChildren, Children, User } from '@/db'
+import { NewChildren, Children, Parent } from '@/db'
 import {
     ChildrenRepository,
     ChildrenQueryFilters,
@@ -8,6 +8,7 @@ import {
 } from '@/repositories/childrens-repository'
 import { ParentRepository } from '@/repositories/parents-repository'
 import { AuthorizationService } from '@/services/authorization-service'
+import type { AuthenticatedUser } from '@/services/auth-service'
 
 export class ChildrenService {
     constructor(
@@ -17,8 +18,25 @@ export class ChildrenService {
     ) {}
 
     async createChildren(
-        children_payload: NewChildren & { parent_user_id?: string | null }
+        children_payload: NewChildren & { parent_user_id?: string | null },
+        currentUser: AuthenticatedUser
     ): Promise<Children> {
+        const parent_user_id =
+            currentUser.role === 'parent'
+                ? currentUser.id
+                : children_payload.parent_user_id
+
+        let parent: Parent | undefined
+        if (parent_user_id) {
+            if (!this.parent_repository) {
+                throw ApiError.internal()
+            }
+            parent = await this.parent_repository.findByUserId(parent_user_id)
+            if (!parent) {
+                throw ApiError.badRequest('Parent profile not found')
+            }
+        }
+
         const checks = await this.children_repository.checkUniqueConstraints({
             identity_number: children_payload.identity_number || undefined
         })
@@ -28,29 +46,39 @@ export class ChildrenService {
             )
         }
 
-        const { parent_user_id, ...childData } = children_payload
+        const { parent_user_id: _requestedParentUserId, ...childData } =
+            children_payload
         const child = await this.children_repository.create(childData)
 
-        if (parent_user_id && this.parent_repository) {
-            let parent =
-                await this.parent_repository.findByUserId(parent_user_id)
-            parent ??= await this.parent_repository.create({
-                user_id: parent_user_id,
-                rt: null,
-                rw: null
-            })
-            if (parent) {
-                await this.children_repository.linkParent(child.id, parent.id)
-            }
+        if (parent) {
+            await this.children_repository.linkParent(child.id, parent.id)
         }
 
         return child
     }
 
-    async getChildrens(query_filters?: ChildrenQueryFilters) {
+    async getChildrens(
+        query_filters: ChildrenQueryFilters | undefined,
+        currentUser: AuthenticatedUser
+    ) {
+        const filters = { ...query_filters }
+
+        if (currentUser.role === 'parent') {
+            filters.parent_id = currentUser.parent_id ?? ''
+            filters.includeDeleted = false
+        } else if (
+            currentUser.role === 'cadre' ||
+            currentUser.role === 'midwife'
+        ) {
+            if (currentUser.posyandu_id) {
+                filters.posyandu_id = currentUser.posyandu_id
+            }
+            filters.includeDeleted = false
+        }
+
         const { page = 1, limit = 10 } = query_filters || {}
         const { data, totalItems } =
-            await this.children_repository.getChildrens(query_filters)
+            await this.children_repository.getChildrens(filters)
 
         return {
             data,
@@ -58,10 +86,22 @@ export class ChildrenService {
         }
     }
 
-    async getNewbornReport(filters: NewbornReportFilters) {
+    async getNewbornReport(
+        filters: NewbornReportFilters,
+        currentUser: AuthenticatedUser
+    ) {
+        const scopedFilters = { ...filters }
+        if (
+            (currentUser.role === 'cadre' ||
+                currentUser.role === 'midwife') &&
+            currentUser.posyandu_id
+        ) {
+            scopedFilters.posyandu_id = currentUser.posyandu_id
+        }
+
         const { page = 1, limit = 10 } = filters
         const { summary, data, totalItems } =
-            await this.children_repository.getNewbornReport(filters)
+            await this.children_repository.getNewbornReport(scopedFilters)
 
         return {
             summary,
@@ -72,23 +112,21 @@ export class ChildrenService {
 
     async getChildrenById(
         public_id: string,
-        currentUser?: User
+        currentUser: AuthenticatedUser
     ): Promise<
         Exclude<
             Awaited<ReturnType<ChildrenRepository['findByIdWithEnrichment']>>,
             undefined
         >
     > {
-        if (currentUser) {
-            const canAccess = await this.authorization_service.canAccessChild(
-                currentUser,
-                public_id
+        const canAccess = await this.authorization_service.canAccessChild(
+            currentUser,
+            public_id
+        )
+        if (!canAccess) {
+            throw ApiError.forbidden(
+                'You do not have permission to access this child record'
             )
-            if (!canAccess) {
-                throw ApiError.forbidden(
-                    'You do not have permission to access this child record'
-                )
-            }
         }
         const child =
             await this.children_repository.findByIdWithEnrichment(public_id)
@@ -105,21 +143,45 @@ export class ChildrenService {
         children_payload: Partial<NewChildren> & {
             parent_user_id?: string | null
         },
-        currentUser?: User
+        currentUser: AuthenticatedUser
     ): Promise<Children> {
-        if (currentUser) {
-            const canAccess = await this.authorization_service.canAccessChild(
-                currentUser,
-                public_id
+        const canAccess = await this.authorization_service.canAccessChild(
+            currentUser,
+            public_id
+        )
+        if (!canAccess) {
+            throw ApiError.forbidden(
+                'You do not have permission to update this child record'
             )
-            if (!canAccess) {
-                throw ApiError.forbidden(
-                    'You do not have permission to update this child record'
-                )
-            }
         }
 
-        const existingChild = await this.getChildrenById(public_id)
+        if (
+            currentUser.role === 'parent' &&
+            (children_payload.parent_user_id !== undefined ||
+                children_payload.posyandu_id !== undefined)
+        ) {
+            throw ApiError.forbidden(
+                'Parents cannot change child ownership or Posyandu assignment'
+            )
+        }
+
+        const existingChild = await this.getChildrenById(
+            public_id,
+            currentUser
+        )
+
+        let linkedParent: Parent | undefined
+        if (children_payload.parent_user_id) {
+            if (!this.parent_repository) {
+                throw ApiError.internal()
+            }
+            linkedParent = await this.parent_repository.findByUserId(
+                children_payload.parent_user_id
+            )
+            if (!linkedParent) {
+                throw ApiError.badRequest('Parent profile not found')
+            }
+        }
 
         const checks = await this.children_repository.checkUniqueConstraints({
             identity_number:
@@ -148,19 +210,10 @@ export class ChildrenService {
             if (parent_user_id === null || parent_user_id === '') {
                 await this.children_repository.unlinkParent(public_id)
             } else {
-                let parent =
-                    await this.parent_repository.findByUserId(parent_user_id)
-                parent ??= await this.parent_repository.create({
-                    user_id: parent_user_id,
-                    rt: null,
-                    rw: null
-                })
-                if (parent) {
-                    await this.children_repository.linkParent(
-                        updated.id,
-                        parent.id
-                    )
-                }
+                await this.children_repository.linkParent(
+                    updated.id,
+                    linkedParent!.id
+                )
             }
         }
 
@@ -169,19 +222,17 @@ export class ChildrenService {
 
     async deleteChildren(
         public_id: string,
-        is_permanent: boolean = false,
-        currentUser?: User
+        is_permanent: boolean,
+        currentUser: AuthenticatedUser
     ): Promise<Children> {
-        if (currentUser) {
-            const canAccess = await this.authorization_service.canAccessChild(
-                currentUser,
-                public_id
+        const canAccess = await this.authorization_service.canAccessChild(
+            currentUser,
+            public_id
+        )
+        if (!canAccess) {
+            throw ApiError.forbidden(
+                'You do not have permission to delete this child record'
             )
-            if (!canAccess) {
-                throw ApiError.forbidden(
-                    'You do not have permission to delete this child record'
-                )
-            }
         }
 
         const existing = await this.children_repository.findByIdWithEnrichment(
@@ -205,18 +256,16 @@ export class ChildrenService {
 
     async restoreChildren(
         public_id: string,
-        currentUser?: User
+        currentUser: AuthenticatedUser
     ): Promise<Children> {
-        if (currentUser) {
-            const canAccess = await this.authorization_service.canAccessChild(
-                currentUser,
-                public_id
+        const canAccess = await this.authorization_service.canAccessChild(
+            currentUser,
+            public_id
+        )
+        if (!canAccess) {
+            throw ApiError.forbidden(
+                'You do not have permission to restore this child record'
             )
-            if (!canAccess) {
-                throw ApiError.forbidden(
-                    'You do not have permission to restore this child record'
-                )
-            }
         }
         const restored = await this.children_repository.restore(public_id)
         if (!restored)

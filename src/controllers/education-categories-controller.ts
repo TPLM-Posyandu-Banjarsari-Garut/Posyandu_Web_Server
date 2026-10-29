@@ -13,7 +13,7 @@ export class EducationCategoryController {
     constructor(private readonly categoryService: EducationCategoryService) {}
 
     createCategory = async (req: Request, res: Response) => {
-        logger.info({ body: req.body }, 'Incoming request: Create Category')
+        logger.info('Incoming request: Create Category')
 
         const category = await this.categoryService.createCategory(req.body)
 
@@ -30,7 +30,7 @@ export class EducationCategoryController {
 
     getCategories = async (req: Request, res: Response) => {
         const query = req.query as unknown as EducationCategoryQueryFilters
-        logger.info({ query }, 'Incoming request: Get Categories')
+        logger.info('Incoming request: Get Categories')
 
         const result = await this.categoryService.getCategories(query)
         return ApiResponse.ok(res, 'Categories retrieved successfully', result)
@@ -48,7 +48,7 @@ export class EducationCategoryController {
     updateCategory = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Category'
         )
 

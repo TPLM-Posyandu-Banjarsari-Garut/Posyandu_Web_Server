@@ -15,13 +15,12 @@ export class VitaminRecordController {
     ) {}
 
     createVitaminRecord = async (req: Request, res: Response) => {
-        logger.info(
-            { body: req.body },
-            'Incoming request: Create Vitamin Record'
-        )
+        const user = res.locals.user
+        logger.info('Incoming request: Create Vitamin Record')
 
         const record = await this.vitamin_record_service.createVitaminRecord(
-            req.body
+            req.body,
+            user
         )
 
         logger.info(
@@ -37,10 +36,13 @@ export class VitaminRecordController {
 
     getVitaminRecords = async (req: Request, res: Response) => {
         const query = req.query as unknown as VitaminRecordQueryFilters
-        logger.info({ query }, 'Incoming request: Get Vitamin Records')
+        logger.info('Incoming request: Get Vitamin Records')
 
         const result =
-            await this.vitamin_record_service.getVitaminRecords(query)
+            await this.vitamin_record_service.getVitaminRecords(
+                query,
+                res.locals.user
+            )
         return ApiResponse.ok(
             res,
             'Vitamin Records retrieved successfully',
@@ -62,13 +64,14 @@ export class VitaminRecordController {
     updateVitaminRecord = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Vitamin Record'
         )
 
         const record = await this.vitamin_record_service.updateVitaminRecord(
             public_id,
-            req.body
+            req.body,
+            res.locals.user
         )
         return ApiResponse.ok(
             res,

@@ -1,11 +1,26 @@
-import { NewKipiDetail, KipiDetail, kipiDetails } from '@/db'
-import { and, eq, sql, asc, desc, getTableColumns } from 'drizzle-orm'
+import {
+    NewKipiDetail,
+    KipiDetail,
+    kipiDetails,
+    immunizationRecords,
+    childrens
+} from '@/db'
+import {
+    and,
+    eq,
+    sql,
+    asc,
+    desc,
+    getTableColumns,
+    inArray
+} from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface KipiDetailQueryFilters {
     immunization_record_id?: string
     severity?: KipiDetail['severity']
     referred?: boolean
+    posyandu_ids?: string[]
     page?: number
     limit?: number
     includeDeleted?: boolean
@@ -28,6 +43,7 @@ export class KipiDetailRepository {
             immunization_record_id,
             severity,
             referred,
+            posyandu_ids,
             page = 1,
             limit = 10,
             includeDeleted = false,
@@ -55,6 +71,36 @@ export class KipiDetailRepository {
 
         if (referred !== undefined) {
             conditions.push(eq(kipiDetails.referred, referred))
+        }
+
+        if (posyandu_ids !== undefined) {
+            conditions.push(
+                posyandu_ids.length > 0
+                    ? inArray(
+                          kipiDetails.immunization_record_id,
+                          this.db
+                              .select({ id: immunizationRecords.id })
+                              .from(immunizationRecords)
+                              .innerJoin(
+                                  childrens,
+                                  eq(
+                                      immunizationRecords.children_id,
+                                      childrens.id
+                                  )
+                              )
+                              .where(
+                                  and(
+                                      inArray(
+                                          childrens.posyandu_id,
+                                          posyandu_ids
+                                      ),
+                                      sql`${childrens.deleted_at} IS NULL`,
+                                      sql`${immunizationRecords.deleted_at} IS NULL`
+                                  )
+                              )
+                      )
+                    : sql`false`
+            )
         }
 
         const whereClause = and(...conditions)
@@ -93,18 +139,42 @@ export class KipiDetailRepository {
         }
     }
 
-    async findById(public_id: string): Promise<KipiDetail | undefined> {
+    async findById(
+        public_id: string,
+        includeDeleted = false
+    ): Promise<KipiDetail | undefined> {
         const [kipi] = await this.db
             .select()
             .from(kipiDetails)
             .where(
-                and(
-                    eq(kipiDetails.id, public_id),
-                    sql`${kipiDetails.deleted_at} IS NULL`
-                )
+                includeDeleted
+                    ? eq(kipiDetails.id, public_id)
+                    : and(
+                          eq(kipiDetails.id, public_id),
+                          sql`${kipiDetails.deleted_at} IS NULL`
+                      )
             )
             .limit(1)
         return kipi
+    }
+
+    async findImmunizationRecordById(
+        public_id: string,
+        includeDeleted = false
+    ) {
+        const [record] = await this.db
+            .select()
+            .from(immunizationRecords)
+            .where(
+                includeDeleted
+                    ? eq(immunizationRecords.id, public_id)
+                    : and(
+                          eq(immunizationRecords.id, public_id),
+                          sql`${immunizationRecords.deleted_at} IS NULL`
+                      )
+            )
+            .limit(1)
+        return record
     }
 
     async findByImmunizationRecordId(

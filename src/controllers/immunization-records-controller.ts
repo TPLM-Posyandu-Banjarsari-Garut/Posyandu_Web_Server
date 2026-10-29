@@ -15,14 +15,13 @@ export class ImmunizationRecordController {
     ) {}
 
     createImmunizationRecord = async (req: Request, res: Response) => {
-        logger.info(
-            { body: req.body },
-            'Incoming request: Create Immunization Record'
-        )
+        const user = res.locals.user
+        logger.info('Incoming request: Create Immunization Record')
 
         const record =
             await this.immunization_record_service.createImmunizationRecord(
-                req.body
+                req.body,
+                user
             )
 
         logger.info(
@@ -38,7 +37,7 @@ export class ImmunizationRecordController {
 
     getImmunizationRecords = async (req: Request, res: Response) => {
         const query = req.query as unknown as ImmunizationRecordQueryFilters
-        logger.info({ query }, 'Incoming request: Get Immunization Records')
+        logger.info('Incoming request: Get Immunization Records')
 
         const result =
             await this.immunization_record_service.getImmunizationRecords(
@@ -74,14 +73,15 @@ export class ImmunizationRecordController {
     updateImmunizationRecord = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Immunization Record'
         )
 
         const record =
             await this.immunization_record_service.updateImmunizationRecord(
                 public_id,
-                req.body
+                req.body,
+                res.locals.user
             )
         return ApiResponse.ok(
             res,

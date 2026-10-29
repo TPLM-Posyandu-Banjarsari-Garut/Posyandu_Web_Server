@@ -1,5 +1,6 @@
 import { accountStatusEnum } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
+import { encryptedText } from '@/db/helpers/encrypted-field'
 import { timestamps } from '@/db/helpers/timestamps'
 import { posyandus } from '@/db/schemas/posyandus-schema'
 import { users } from '@/db/schemas/users-schema'
@@ -8,9 +9,9 @@ import {
     pgTable,
     text,
     uniqueIndex,
-    varchar,
     index
 } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
 
 export const midwifes = pgTable(
     'midwifes',
@@ -24,9 +25,18 @@ export const midwifes = pgTable(
             .notNull()
             .references(() => posyandus.id),
 
-        identity_number: varchar('identity_number', { length: 16 }).notNull(),
-        employee_number: varchar('employee_number', { length: 32 }),
-        license_number: varchar('license_number', { length: 50 }),
+        identity_number: encryptedText(
+            'identity_number',
+            'midwifes.identity_number'
+        ).notNull(),
+        employee_number: encryptedText(
+            'employee_number',
+            'midwifes.employee_number'
+        ),
+        license_number: encryptedText(
+            'license_number',
+            'midwifes.license_number'
+        ),
 
         is_mtbs_trained: boolean('is_mtbs_trained').notNull().default(false),
         is_kelas_ibu_balita_facilitator: boolean(
@@ -54,6 +64,12 @@ export const midwifes = pgTable(
             table.posyandu_id
         ),
         uniqueIndex('midwives_str_number_unique').on(table.license_number),
+        uniqueIndex('midwives_license_blind_unique')
+            .on(sql`split_part(${table.license_number}::text, ':', 6)`)
+            .where(sql`${table.license_number} LIKE 'enc:v1:%'`),
+        index('midwifes_identity_blind_idx')
+            .on(sql`split_part(${table.identity_number}::text, ':', 6)`)
+            .where(sql`${table.identity_number} LIKE 'enc:v1:%'`),
         index('midwifes_posyandu_id_idx').on(table.posyandu_id),
         index('midwifes_is_deleted_idx').on(table.is_deleted)
     ]

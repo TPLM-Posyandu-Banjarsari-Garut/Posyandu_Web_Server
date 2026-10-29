@@ -13,7 +13,7 @@ export class InventoryController {
     constructor(private readonly inventory_service: InventoryService) {}
 
     createInventory = async (req: Request, res: Response) => {
-        logger.info({ body: req.body }, 'Incoming request: Create Inventory')
+        logger.info('Incoming request: Create Inventory')
 
         const inventory = await this.inventory_service.createInventory(req.body)
 
@@ -30,7 +30,7 @@ export class InventoryController {
 
     getInventories = async (req: Request, res: Response) => {
         const query = req.query as unknown as InventoryQueryFilters
-        logger.info({ query }, 'Incoming request: Get Inventories')
+        logger.info('Incoming request: Get Inventories')
 
         const result = await this.inventory_service.getInventories(query)
         return ApiResponse.ok(res, 'Inventories retrieved successfully', result)
@@ -48,7 +48,7 @@ export class InventoryController {
     updateInventory = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Inventory'
         )
 

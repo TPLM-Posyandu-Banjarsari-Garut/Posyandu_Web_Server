@@ -38,13 +38,15 @@ export class EmailService {
                 subject,
                 html
             })
-            logger.info(
-                `Email successfully sent to ${to} [Subject: ${subject}]`
-            )
+            logger.info({ subject }, 'Email sent successfully')
         } catch (error) {
             logger.error(
-                error,
-                `Failed to send email to ${to} [Subject: ${subject}]`
+                {
+                    errorType:
+                        error instanceof Error ? error.name : 'UnknownError',
+                    subject
+                },
+                'Failed to send email'
             )
             throw error
         }

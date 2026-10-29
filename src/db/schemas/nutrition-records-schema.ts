@@ -1,5 +1,6 @@
 import { nutritionStatusEnum } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
+import { encryptedText } from '@/db/helpers/encrypted-field'
 import { timestamps } from '@/db/helpers/timestamps'
 import { cadres } from '@/db/schemas/cadres-schema'
 import { childrens } from '@/db/schemas/childrens-schema'
@@ -34,7 +35,7 @@ export const nutritionRecords = pgTable(
 
         cadre_id: text('cadre_id').references(() => cadres.id),
         midwife_id: text('midwife_id').references(() => midwifes.id),
-        notes: text('notes'),
+        notes: encryptedText('notes', 'nutrition_records.notes'),
 
         ...timestamps
     },

@@ -5,6 +5,7 @@ import {
     vitaminRecordStatusEnum
 } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
+import { encryptedText } from '@/db/helpers/encrypted-field'
 import { timestamps } from '@/db/helpers/timestamps'
 import { cadres } from '@/db/schemas/cadres-schema'
 import { childrens } from '@/db/schemas/childrens-schema'
@@ -49,8 +50,11 @@ export const vitaminRecords = pgTable(
         location_type: serviceLocationTypeEnum('location_type'),
         sync_status: syncStatusEnum('sync_status').notNull().default('pending'),
         external_ref_id: varchar('external_ref_id', { length: 100 }),
-        special_condition_notes: text('special_condition_notes'),
-        notes: text('notes'),
+        special_condition_notes: encryptedText(
+            'special_condition_notes',
+            'vitamin_records.special_condition_notes'
+        ),
+        notes: encryptedText('notes', 'vitamin_records.notes'),
 
         ...timestamps
     },

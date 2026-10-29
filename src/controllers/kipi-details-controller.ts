@@ -13,9 +13,13 @@ export class KipiDetailController {
     constructor(private readonly kipi_detail_service: KipiDetailService) {}
 
     createKipiDetail = async (req: Request, res: Response) => {
-        logger.info({ body: req.body }, 'Incoming request: Create KIPI Detail')
+        const user = res.locals.user
+        logger.info('Incoming request: Create KIPI Detail')
 
-        const kipi = await this.kipi_detail_service.createKipiDetail(req.body)
+        const kipi = await this.kipi_detail_service.createKipiDetail(
+            req.body,
+            user
+        )
 
         logger.info({ kipiId: kipi.id }, 'KIPI Detail created successfully')
         return ApiResponse.created(
@@ -27,7 +31,7 @@ export class KipiDetailController {
 
     getKipiDetails = async (req: Request, res: Response) => {
         const query = req.query as unknown as KipiDetailQueryFilters
-        logger.info({ query }, 'Incoming request: Get KIPI Details')
+        logger.info('Incoming request: Get KIPI Details')
 
         const result = await this.kipi_detail_service.getKipiDetails(query)
         return ApiResponse.ok(
@@ -51,13 +55,14 @@ export class KipiDetailController {
     updateKipiDetail = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update KIPI Detail'
         )
 
         const kipi = await this.kipi_detail_service.updateKipiDetail(
             public_id,
-            req.body
+            req.body,
+            res.locals.user
         )
         return ApiResponse.ok(res, 'KIPI Detail updated successfully', kipi)
     }

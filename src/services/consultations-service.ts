@@ -33,6 +33,7 @@ import {
 import { WsManager } from '@/utils/ws-manager'
 import { NotificationsService } from '@/services/notifications-service'
 import { NotificationsRepository } from '@/repositories/notifications-repository'
+import type { AuthenticatedUser } from '@/services/auth-service'
 
 type ConsultationType = 'pregnancy' | 'child_development' | 'general'
 
@@ -66,7 +67,10 @@ export class ConsultationsService {
             .where(
                 and(
                     eq(pregnancyRecords.id, pregnancy_record_id),
-                    eq(pregnancyRecords.parent_id, parent_id)
+                    eq(pregnancyRecords.parent_id, parent_id),
+                    eq(pregnancyRecords.is_active, true),
+                    eq(pregnancyRecords.is_deleted, false),
+                    sql`${pregnancyRecords.deleted_at} IS NULL`
                 )
             )
             .limit(1)
@@ -94,7 +98,9 @@ export class ConsultationsService {
             .where(
                 and(
                     eq(relationChildrens.parent_id, parent_id),
-                    eq(relationChildrens.children_id, children_id)
+                    eq(relationChildrens.children_id, children_id),
+                    eq(relationChildrens.is_deleted, false),
+                    sql`${relationChildrens.deleted_at} IS NULL`
                 )
             )
             .limit(1)
@@ -108,7 +114,13 @@ export class ConsultationsService {
         const [child] = await this.dbInstance
             .select({ posyandu_id: childrens.posyandu_id })
             .from(childrens)
-            .where(eq(childrens.id, children_id))
+            .where(
+                and(
+                    eq(childrens.id, children_id),
+                    eq(childrens.is_deleted, false),
+                    sql`${childrens.deleted_at} IS NULL`
+                )
+            )
             .limit(1)
 
         if (!child) {
@@ -131,7 +143,15 @@ export class ConsultationsService {
                 childrens,
                 eq(relationChildrens.children_id, childrens.id)
             )
-            .where(eq(relationChildrens.parent_id, parent_id))
+            .where(
+                and(
+                    eq(relationChildrens.parent_id, parent_id),
+                    eq(relationChildrens.is_deleted, false),
+                    sql`${relationChildrens.deleted_at} IS NULL`,
+                    eq(childrens.is_deleted, false),
+                    sql`${childrens.deleted_at} IS NULL`
+                )
+            )
             .limit(1)
 
         if (childRel) {
@@ -141,7 +161,14 @@ export class ConsultationsService {
         const [pregRec] = await this.dbInstance
             .select({ posyandu_id: pregnancyRecords.posyandu_id })
             .from(pregnancyRecords)
-            .where(eq(pregnancyRecords.parent_id, parent_id))
+            .where(
+                and(
+                    eq(pregnancyRecords.parent_id, parent_id),
+                    eq(pregnancyRecords.is_active, true),
+                    eq(pregnancyRecords.is_deleted, false),
+                    sql`${pregnancyRecords.deleted_at} IS NULL`
+                )
+            )
             .limit(1)
 
         if (pregRec) {
@@ -529,11 +556,34 @@ export class ConsultationsService {
             notes?: string | null
             posyandu_id?: string | null
             midwife_id?: string | null
-        }
+        },
+        currentUser: AuthenticatedUser
     ): Promise<
         | (Consultation & { queue_number: number })
         | (Consultation & { queue_number: number })[]
     > {
+        if (
+            currentUser.role === 'parent' &&
+            currentUser.parent_id !== parent_id
+        ) {
+            throw ApiError.forbidden('You can only create bookings for yourself')
+        }
+
+        const [activeParent] = await this.dbInstance
+            .select({ id: parents.id })
+            .from(parents)
+            .where(
+                and(
+                    eq(parents.id, parent_id),
+                    eq(parents.status, 'active'),
+                    eq(parents.is_deleted, false)
+                )
+            )
+            .limit(1)
+        if (!activeParent) {
+            throw ApiError.notFound('Active parent profile not found')
+        }
+
         const dates = Array.isArray(payload.scheduled_at)
             ? payload.scheduled_at
             : [payload.scheduled_at]
@@ -568,6 +618,28 @@ export class ConsultationsService {
 
         const finalPosyanduId = derivedPosyanduId
 
+        const finalMidwifeId = payload.midwife_id ?? null
+
+        if (finalMidwifeId) {
+            const [midwifeAtPosyandu] = await this.dbInstance
+                .select({ id: midwifes.id })
+                .from(midwifes)
+                .where(
+                    and(
+                        eq(midwifes.id, finalMidwifeId),
+                        eq(midwifes.posyandu_id, finalPosyanduId),
+                        eq(midwifes.status, 'active'),
+                        eq(midwifes.is_deleted, false)
+                    )
+                )
+                .limit(1)
+            if (!midwifeAtPosyandu) {
+                throw ApiError.forbidden(
+                    'The selected midwife is not assigned to this Posyandu'
+                )
+            }
+        }
+
         const results = await this.dbInstance.transaction(async tx => {
             const createdBookings = []
             for (const schedDate of dates) {
@@ -577,9 +649,9 @@ export class ConsultationsService {
                     ne(consultations.status, 'cancelled')
                 ]
 
-                if (payload.midwife_id) {
+                if (finalMidwifeId) {
                     conditions.push(
-                        eq(consultations.midwife_id, payload.midwife_id)
+                        eq(consultations.midwife_id, finalMidwifeId)
                     )
                 } else {
                     conditions.push(
@@ -611,7 +683,15 @@ export class ConsultationsService {
                     pregnancy_record_id: payload.pregnancy_record_id || null,
                     children_id: payload.children_id || null,
                     notes: payload.notes || null,
-                    midwife_id: payload.midwife_id || null,
+                    cadre_id:
+                        currentUser.role === 'cadre'
+                            ? currentUser.posyandu_assignments?.find(
+                                  assignment =>
+                                      assignment.posyandu_id ===
+                                      finalPosyanduId
+                              )?.id ?? currentUser.cadre_id ?? null
+                            : null,
+                    midwife_id: finalMidwifeId,
                     status: 'pending'
                 }
 
@@ -633,7 +713,7 @@ export class ConsultationsService {
                 finalPosyanduId,
                 payload.consultation_type,
                 created.scheduled_at,
-                payload.midwife_id
+                finalMidwifeId
             )
 
             try {
@@ -842,6 +922,66 @@ export class ConsultationsService {
             )
         }
 
+        if (payload.pregnancy_record_id !== undefined) {
+            if (
+                payload.pregnancy_record_id &&
+                consultation.consultation_type !== 'pregnancy'
+            ) {
+                throw ApiError.badRequest(
+                    'Pregnancy records can only be attached to pregnancy consultations'
+                )
+            }
+            if (
+                consultation.consultation_type === 'pregnancy' &&
+                !payload.pregnancy_record_id
+            ) {
+                throw ApiError.badRequest(
+                    'Pregnancy record is required for this booking'
+                )
+            }
+            if (payload.pregnancy_record_id) {
+                const posyanduId = await this.resolvePregnancyPosyandu(
+                    consultation.parent_id,
+                    payload.pregnancy_record_id
+                )
+                if (posyanduId !== consultation.posyandu_id) {
+                    throw ApiError.forbidden(
+                        'The pregnancy record must belong to the booking Posyandu'
+                    )
+                }
+            }
+        }
+
+        if (payload.children_id !== undefined) {
+            if (
+                payload.children_id &&
+                consultation.consultation_type !== 'child_development'
+            ) {
+                throw ApiError.badRequest(
+                    'Children can only be attached to child development consultations'
+                )
+            }
+            if (
+                consultation.consultation_type === 'child_development' &&
+                !payload.children_id
+            ) {
+                throw ApiError.badRequest(
+                    'Child record is required for this booking'
+                )
+            }
+            if (payload.children_id) {
+                const posyanduId = await this.resolveChildDevelopmentPosyandu(
+                    consultation.parent_id,
+                    payload.children_id
+                )
+                if (posyanduId !== consultation.posyandu_id) {
+                    throw ApiError.forbidden(
+                        'The child must belong to the booking Posyandu'
+                    )
+                }
+            }
+        }
+
         const updatedData: Partial<NewConsultation> = {}
         const oldScheduledAt = new Date(consultation.scheduled_at)
         const oldPosyanduId = consultation.posyandu_id
@@ -1036,6 +1176,13 @@ export class ConsultationsService {
         }
     ): Promise<Consultation & { queue_number: number }> {
         const consultation = await this.getConsultationById(public_id)
+
+        if (actor.role === 'cadre' && !actor.cadre_id) {
+            throw ApiError.forbidden('Active cadre assignment is required')
+        }
+        if (actor.role === 'midwife' && !actor.midwife_id) {
+            throw ApiError.forbidden('Active midwife assignment is required')
+        }
 
         this.validateStatusTransitionActor(consultation, actor, payload.status)
 

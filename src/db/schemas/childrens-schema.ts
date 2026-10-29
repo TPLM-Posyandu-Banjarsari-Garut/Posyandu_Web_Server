@@ -1,5 +1,6 @@
 import { bloodTypeEnum, childCategoryEnum, genderEnum } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
+import { encryptedText } from '@/db/helpers/encrypted-field'
 import { timestamps } from '@/db/helpers/timestamps'
 import { posyandus } from '@/db/schemas/posyandus-schema'
 import {
@@ -9,8 +10,10 @@ import {
     pgTable,
     text,
     varchar,
-    index
+    index,
+    uniqueIndex
 } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
 
 export const childrens = pgTable(
     'childrens',
@@ -22,7 +25,10 @@ export const childrens = pgTable(
             .references(() => posyandus.id),
 
         name: varchar('name', { length: 100 }).notNull(),
-        identity_number: varchar('identity_number', { length: 16 })
+        identity_number: encryptedText(
+            'identity_number',
+            'childrens.identity_number'
+        )
             .notNull()
             .unique(),
 
@@ -53,7 +59,10 @@ export const childrens = pgTable(
             table.gender,
             table.child_category,
             table.deleted_at
-        )
+        ),
+        uniqueIndex('childrens_identity_blind_unique')
+            .on(sql`split_part(${table.identity_number}::text, ':', 6)`)
+            .where(sql`${table.identity_number} LIKE 'enc:v1:%'`)
     ]
 )
 

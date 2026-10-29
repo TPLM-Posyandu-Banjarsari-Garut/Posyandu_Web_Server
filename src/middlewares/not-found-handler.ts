@@ -6,5 +6,5 @@ export const notFoundHandler = (
     res: Response,
     next: NextFunction
 ) => {
-    throw ApiError.notFound(`Route ${req.method} ${req.originalUrl} not found`)
+    throw ApiError.notFound(`Route ${req.method} ${req.path} not found`)
 }

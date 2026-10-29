@@ -21,7 +21,7 @@ export class UserController {
     constructor(private readonly user_service: UserService) {}
 
     createUser = async (req: Request, res: Response) => {
-        logger.info({ body: req.body }, 'Incoming request: Create User')
+        logger.info('Incoming request: Create User')
 
         const { role } = req.body
         let validatedData
@@ -47,7 +47,7 @@ export class UserController {
 
     getUsers = async (req: Request, res: Response) => {
         const query = req.query as unknown as UserQueryFilters
-        logger.info({ query }, 'Incoming request: Get Users')
+        logger.info('Incoming request: Get Users')
 
         const result = await this.user_service.getUsers(query)
         return ApiResponse.ok(res, 'Users retrieved successfully', result)
@@ -66,7 +66,7 @@ export class UserController {
         const public_id = req.params.public_id as string
         const currentUser = res.locals.user
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update User'
         )
 

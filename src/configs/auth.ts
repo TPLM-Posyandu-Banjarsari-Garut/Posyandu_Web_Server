@@ -88,15 +88,23 @@ export const auth = betterAuth({
             updatedAt: 'updated_at'
         },
         additionalFields: {
-            role: { type: 'string', defaultValue: 'parent' },
-            status: { type: 'string', defaultValue: 'active' }
+            role: {
+                type: 'string',
+                defaultValue: 'parent',
+                input: false
+            },
+            status: {
+                type: 'string',
+                defaultValue: 'active',
+                input: false
+            }
         }
     },
     session: {
         expiresIn: env.SESSION_EXPIRES_IN,
         updateAge: env.SESSION_UPDATE_AGE,
         cookieCache: {
-            enabled: env.SESSION_COOKIE_CACHE_ENABLED,
+            enabled: false,
             maxAge: env.SESSION_COOKIE_CACHE_MAX_AGE
         },
         fields: {

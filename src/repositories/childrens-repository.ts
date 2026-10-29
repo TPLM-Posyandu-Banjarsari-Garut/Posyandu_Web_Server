@@ -11,6 +11,7 @@ import {
 } from '@/db'
 import { BaseRepository } from '@/repositories/base-repository'
 import { sanitizeSearchTerm } from '@/utils/sanitize'
+import { encryptedFieldEquals } from '@/db/helpers/encrypted-field'
 import {
     and,
     eq,
@@ -48,6 +49,7 @@ function applyMotherJoins<T extends AnyPgSelectQueryBuilder>(
 export interface ChildrenQueryFilters {
     search?: string
     posyandu_id?: string
+    posyandu_ids?: string[]
     parent_id?: string
     gender?: Children['gender']
     child_category?: Children['child_category']
@@ -61,6 +63,7 @@ export interface NewbornReportFilters {
     month: number
     year: number
     posyandu_id?: string
+    posyandu_ids?: string[]
     search?: string
     page?: number
     limit?: number
@@ -113,6 +116,7 @@ export class ChildrenRepository extends BaseRepository<
         const {
             search,
             posyandu_id,
+            posyandu_ids,
             parent_id,
             gender,
             child_category,
@@ -134,11 +138,28 @@ export class ChildrenRepository extends BaseRepository<
         }
 
         if (escapedSearch) {
-            conditions.push(ilike(childrens.name, `%${escapedSearch}%`))
+            conditions.push(
+                or(
+                    ilike(childrens.name, `%${escapedSearch}%`),
+                    encryptedFieldEquals(
+                        childrens.identity_number,
+                        search!,
+                        'childrens.identity_number'
+                    )
+                )!
+            )
         }
 
         if (posyandu_id) {
             conditions.push(eq(childrens.posyandu_id, posyandu_id))
+        }
+
+        if (posyandu_ids !== undefined) {
+            conditions.push(
+                posyandu_ids.length > 0
+                    ? inArray(childrens.posyandu_id, posyandu_ids)
+                    : sql`false`
+            )
         }
 
         if (gender) {
@@ -149,11 +170,17 @@ export class ChildrenRepository extends BaseRepository<
             conditions.push(eq(childrens.child_category, child_category))
         }
 
-        if (parent_id) {
+        if (parent_id !== undefined) {
             const parentChildSubquery = this.db
                 .select({ children_id: relationChildrens.children_id })
                 .from(relationChildrens)
-                .where(eq(relationChildrens.parent_id, parent_id))
+                .where(
+                    and(
+                        eq(relationChildrens.parent_id, parent_id),
+                        eq(relationChildrens.is_deleted, false),
+                        sql`${relationChildrens.deleted_at} IS NULL`
+                    )
+                )
             conditions.push(inArray(childrens.id, parentChildSubquery))
         }
 
@@ -276,7 +303,11 @@ export class ChildrenRepository extends BaseRepository<
             .from(childrens)
             .where(
                 and(
-                    eq(childrens.identity_number, identity_number),
+                    encryptedFieldEquals(
+                        childrens.identity_number,
+                        identity_number,
+                        'childrens.identity_number'
+                    ),
                     sql`${childrens.deleted_at} IS NULL`
                 )
             )
@@ -322,7 +353,13 @@ export class ChildrenRepository extends BaseRepository<
         const [child] = await this.db
             .select({ id: childrens.id })
             .from(childrens)
-            .where(eq(childrens.identity_number, identity_number))
+            .where(
+                encryptedFieldEquals(
+                    childrens.identity_number,
+                    identity_number,
+                    'childrens.identity_number'
+                )
+            )
             .limit(1)
         return !!child
     }
@@ -363,6 +400,7 @@ export class ChildrenRepository extends BaseRepository<
             month,
             year,
             posyandu_id,
+            posyandu_ids,
             search,
             page = 1,
             limit = 10
@@ -388,12 +426,24 @@ export class ChildrenRepository extends BaseRepository<
             conditions.push(eq(childrens.posyandu_id, posyandu_id))
         }
 
+        if (posyandu_ids !== undefined) {
+            conditions.push(
+                posyandu_ids.length > 0
+                    ? inArray(childrens.posyandu_id, posyandu_ids)
+                    : sql`false`
+            )
+        }
+
         const escapedSearch = search ? sanitizeSearchTerm(search) : undefined
         if (escapedSearch) {
             conditions.push(
                 or(
                     ilike(childrens.name, `%${escapedSearch}%`),
-                    ilike(childrens.identity_number, `%${escapedSearch}%`)
+                    encryptedFieldEquals(
+                        childrens.identity_number,
+                        search!,
+                        'childrens.identity_number'
+                    )
                 )!
             )
         }

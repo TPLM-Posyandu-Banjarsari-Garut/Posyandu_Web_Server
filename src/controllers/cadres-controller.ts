@@ -13,7 +13,7 @@ export class CadreController {
     constructor(private readonly cadre_service: CadreService) {}
 
     createCadre = async (req: Request, res: Response) => {
-        logger.info({ body: req.body }, 'Incoming request: Create Cadre')
+        logger.info('Incoming request: Create Cadre')
 
         const cadre = await this.cadre_service.createCadre(req.body)
 
@@ -23,7 +23,7 @@ export class CadreController {
 
     getCadres = async (req: Request, res: Response) => {
         const query = req.query as unknown as CadreQueryFilters
-        logger.info({ query }, 'Incoming request: Get Cadres')
+        logger.info('Incoming request: Get Cadres')
 
         const result = await this.cadre_service.getCadres(query)
         return ApiResponse.ok(res, 'Cadres retrieved successfully', result)
@@ -41,7 +41,7 @@ export class CadreController {
     updateCadre = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Cadre'
         )
 

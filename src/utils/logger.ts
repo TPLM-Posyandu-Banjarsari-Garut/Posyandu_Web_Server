@@ -4,8 +4,16 @@ import env from '@/configs/env'
 const { NODE_ENV, LOG_LEVEL } = env
 const isDev = NODE_ENV === 'development' && !process.env.VERCEL
 
+const safeErrorSerializer = (error: unknown) => ({
+    type: error instanceof Error ? error.name : 'UnknownError'
+})
+
 const devOptions: LoggerOptions = {
     level: LOG_LEVEL,
+    serializers: {
+        err: safeErrorSerializer,
+        error: safeErrorSerializer
+    },
     transport: {
         target: 'pino-pretty',
         options: {
@@ -40,13 +48,30 @@ const prodOptions: LoggerOptions = {
         }
     },
     serializers: {
-        err: pino.stdSerializers.err,
+        err: safeErrorSerializer,
+        error: safeErrorSerializer,
         req: pino.stdSerializers.req,
         res: pino.stdSerializers.res
     },
 
     redact: {
         paths: [
+            'email',
+            'phone_number',
+            'identity_number',
+            'address_line',
+            'employee_number',
+            'license_number',
+            'nik',
+            'notes',
+            'result_summary',
+            'cancellation_reason',
+            'symptoms',
+            'action_taken',
+            'special_condition_notes',
+            'payload',
+            'oldValue',
+            'newValue',
             '*.password',
             '*.passwordHash',
             '*.token',
@@ -54,6 +79,22 @@ const prodOptions: LoggerOptions = {
             '*.refreshToken',
             '*.secret',
             '*.authorization',
+            '*.email',
+            '*.phone_number',
+            '*.identity_number',
+            '*.address_line',
+            '*.employee_number',
+            '*.license_number',
+            '*.nik',
+            '*.notes',
+            '*.result_summary',
+            '*.cancellation_reason',
+            '*.symptoms',
+            '*.action_taken',
+            '*.special_condition_notes',
+            '*.payload',
+            '*.oldValue',
+            '*.newValue',
             'req.headers.cookie',
             'req.headers.authorization'
         ],

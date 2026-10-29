@@ -1,5 +1,10 @@
-import { NewNutritionRecord, NutritionRecord, nutritionRecords } from '@/db'
-import { and, eq, sql, asc, desc, getTableColumns } from 'drizzle-orm'
+import {
+    NewNutritionRecord,
+    NutritionRecord,
+    nutritionRecords,
+    childrens
+} from '@/db'
+import { and, eq, sql, asc, desc, getTableColumns, inArray } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface NutritionRecordQueryFilters {
@@ -9,6 +14,7 @@ export interface NutritionRecordQueryFilters {
     nutrition_status?: NutritionRecord['nutrition_status']
     parent_id?: string
     posyandu_id?: string
+    posyandu_ids?: string[]
     page?: number
     limit?: number
     includeDeleted?: boolean
@@ -34,6 +40,7 @@ export class NutritionRecordRepository {
             nutrition_status,
             parent_id,
             posyandu_id,
+            posyandu_ids,
             page = 1,
             limit = 10,
             includeDeleted = false,
@@ -67,7 +74,7 @@ export class NutritionRecordRepository {
             )
         }
 
-        if (parent_id) {
+        if (parent_id !== undefined) {
             conditions.push(
                 sql`${nutritionRecords.children_id} IN (
                     SELECT children_id FROM relation_childrens WHERE parent_id = ${parent_id} AND deleted_at IS NULL
@@ -80,6 +87,28 @@ export class NutritionRecordRepository {
                 sql`${nutritionRecords.children_id} IN (
                     SELECT id FROM childrens WHERE posyandu_id = ${posyandu_id} AND deleted_at IS NULL
                 )`
+            )
+        }
+
+        if (posyandu_ids !== undefined) {
+            conditions.push(
+                posyandu_ids.length > 0
+                    ? inArray(
+                          nutritionRecords.children_id,
+                          this.db
+                              .select({ id: childrens.id })
+                              .from(childrens)
+                              .where(
+                                  and(
+                                      inArray(
+                                          childrens.posyandu_id,
+                                          posyandu_ids
+                                      ),
+                                      sql`${childrens.deleted_at} IS NULL`
+                                  )
+                              )
+                      )
+                    : sql`false`
             )
         }
 
@@ -119,15 +148,20 @@ export class NutritionRecordRepository {
         }
     }
 
-    async findById(public_id: string): Promise<NutritionRecord | undefined> {
+    async findById(
+        public_id: string,
+        includeDeleted = false
+    ): Promise<NutritionRecord | undefined> {
         const [record] = await this.db
             .select()
             .from(nutritionRecords)
             .where(
-                and(
-                    eq(nutritionRecords.id, public_id),
-                    sql`${nutritionRecords.deleted_at} IS NULL`
-                )
+                includeDeleted
+                    ? eq(nutritionRecords.id, public_id)
+                    : and(
+                          eq(nutritionRecords.id, public_id),
+                          sql`${nutritionRecords.deleted_at} IS NULL`
+                      )
             )
             .limit(1)
         return record

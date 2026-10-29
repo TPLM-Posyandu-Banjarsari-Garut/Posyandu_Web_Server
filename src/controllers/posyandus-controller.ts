@@ -13,7 +13,7 @@ export class PosyanduController {
     constructor(private readonly posyandu_service: PosyanduService) {}
 
     createPosyandu = async (req: Request, res: Response) => {
-        logger.info({ body: req.body }, 'Incoming request: Create Posyandu')
+        logger.info('Incoming request: Create Posyandu')
 
         const posyandu = await this.posyandu_service.createPosyandu(req.body)
 
@@ -30,7 +30,7 @@ export class PosyanduController {
 
     getPosyandus = async (req: Request, res: Response) => {
         const query = req.query as unknown as PosyanduQueryFilters
-        logger.info({ query }, 'Incoming request: Get Posyandus')
+        logger.info('Incoming request: Get Posyandus')
 
         const result = await this.posyandu_service.getPosyandus(query)
         return ApiResponse.ok(res, 'Posyandus retrieved successfully', result)
@@ -48,7 +48,7 @@ export class PosyanduController {
     updatePosyandu = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Posyandu'
         )
 

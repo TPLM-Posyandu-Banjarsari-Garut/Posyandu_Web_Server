@@ -118,6 +118,8 @@ Proyek ini dilengkapi dengan `makefile` untuk mempercepat eksekusi perintah deve
 
 ## Struktur Folder Proyek
 
+Enkripsi data sensitif, pengelolaan key Infisical, dan prosedur backfill dijelaskan di [SECURITY_ENCRYPTION.md](./SECURITY_ENCRYPTION.md).
+
 Berikut adalah struktur folder keseluruhan di dalam proyek ini:
 
 ```text

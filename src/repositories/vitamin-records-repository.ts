@@ -1,11 +1,28 @@
-import { NewVitaminRecord, VitaminRecord, vitaminRecords } from '@/db'
-import { and, eq, sql, asc, desc, getTableColumns } from 'drizzle-orm'
+import {
+    NewVitaminRecord,
+    VitaminRecord,
+    vitaminRecords,
+    childrens,
+    parents,
+    relationChildrens
+} from '@/db'
+import {
+    and,
+    eq,
+    sql,
+    asc,
+    desc,
+    getTableColumns,
+    inArray
+} from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface VitaminRecordQueryFilters {
     children_id?: string
     vitamin_id?: string
     posyandu_id?: string
+    posyandu_ids?: string[]
+    parent_user_id?: string
     cadre_id?: string
     midwife_id?: string
     status?: VitaminRecord['status']
@@ -33,6 +50,8 @@ export class VitaminRecordRepository {
             children_id,
             vitamin_id,
             posyandu_id,
+            posyandu_ids,
+            parent_user_id,
             cadre_id,
             midwife_id,
             status,
@@ -63,6 +82,37 @@ export class VitaminRecordRepository {
 
         if (posyandu_id) {
             conditions.push(eq(vitaminRecords.posyandu_id, posyandu_id))
+        }
+
+        if (posyandu_ids !== undefined) {
+            conditions.push(
+                posyandu_ids.length > 0
+                    ? inArray(
+                          vitaminRecords.children_id,
+                          this.db
+                              .select({ id: childrens.id })
+                              .from(childrens)
+                              .where(
+                                  and(
+                                      inArray(
+                                          childrens.posyandu_id,
+                                          posyandu_ids
+                                      ),
+                                      sql`${childrens.deleted_at} IS NULL`
+                                  )
+                              )
+                      )
+                    : sql`false`
+            )
+        }
+
+        if (parent_user_id !== undefined) {
+            const parentChildrenSubquery = this.db
+                .select({ children_id: relationChildrens.children_id })
+                .from(relationChildrens)
+                .innerJoin(parents, eq(relationChildrens.parent_id, parents.id))
+                .where(eq(parents.user_id, parent_user_id))
+            conditions.push(inArray(vitaminRecords.children_id, parentChildrenSubquery))
         }
 
         if (cadre_id) {
@@ -125,15 +175,20 @@ export class VitaminRecordRepository {
         }
     }
 
-    async findById(public_id: string): Promise<VitaminRecord | undefined> {
+    async findById(
+        public_id: string,
+        includeDeleted = false
+    ): Promise<VitaminRecord | undefined> {
         const [record] = await this.db
             .select()
             .from(vitaminRecords)
             .where(
-                and(
-                    eq(vitaminRecords.id, public_id),
-                    sql`${vitaminRecords.deleted_at} IS NULL`
-                )
+                includeDeleted
+                    ? eq(vitaminRecords.id, public_id)
+                    : and(
+                          eq(vitaminRecords.id, public_id),
+                          sql`${vitaminRecords.deleted_at} IS NULL`
+                      )
             )
             .limit(1)
         return record

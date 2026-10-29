@@ -1,7 +1,8 @@
-import { User, childrens, relationChildrens } from '@/db'
-import { eq, and } from 'drizzle-orm'
+import { User, childrens, relationChildrens, parents } from '@/db'
+import { eq, and, sql } from 'drizzle-orm'
 import db from '@/configs/db'
-import { AuthenticatedUser } from '@/services/auth-service'
+import type { AuthenticatedUser } from '@/services/auth-service'
+import { ApiError } from '@/utils/api-error'
 
 export class AuthorizationService {
     canAccessUser(currentUser: User, targetUserId: string): boolean {
@@ -36,7 +37,13 @@ export class AuthorizationService {
             const child = await db
                 .select()
                 .from(childrens)
-                .where(eq(childrens.id, childId))
+                .where(
+                    and(
+                        eq(childrens.id, childId),
+                        eq(childrens.is_deleted, false),
+                        sql`${childrens.deleted_at} IS NULL`
+                    )
+                )
                 .limit(1)
 
             if (child.length === 0 || !child[0]) {
@@ -61,10 +68,15 @@ export class AuthorizationService {
             const relation = await db
                 .select()
                 .from(relationChildrens)
+                .innerJoin(parents, eq(relationChildrens.parent_id, parents.id))
                 .where(
                     and(
                         eq(relationChildrens.children_id, childId),
-                        eq(relationChildrens.parent_id, currentUser.parent_id)
+                        eq(relationChildrens.parent_id, currentUser.parent_id),
+                        eq(relationChildrens.is_deleted, false),
+                        sql`${relationChildrens.deleted_at} IS NULL`,
+                        eq(parents.status, 'active'),
+                        eq(parents.is_deleted, false)
                     )
                 )
                 .limit(1)
@@ -73,5 +85,76 @@ export class AuthorizationService {
         }
 
         return false
+    }
+
+    async requireChildAccess(
+        currentUser: AuthenticatedUser,
+        childId: string
+    ): Promise<string> {
+        if (!(await this.canAccessChild(currentUser, childId))) {
+            throw ApiError.forbidden(
+                'You do not have permission to access this child record'
+            )
+        }
+
+        const [child] = await db
+            .select({ posyandu_id: childrens.posyandu_id })
+            .from(childrens)
+            .where(eq(childrens.id, childId))
+            .limit(1)
+
+        if (!child) {
+            throw ApiError.notFound('Child record not found')
+        }
+
+        return child.posyandu_id
+    }
+
+    async getChildPosyanduId(childId: string): Promise<string> {
+        const [child] = await db
+            .select({ posyandu_id: childrens.posyandu_id })
+            .from(childrens)
+            .where(
+                and(
+                    eq(childrens.id, childId),
+                    eq(childrens.is_deleted, false),
+                    sql`${childrens.deleted_at} IS NULL`
+                )
+            )
+            .limit(1)
+
+        if (!child) throw ApiError.notFound('Child record not found')
+        return child.posyandu_id
+    }
+
+    requireAssignedPosyandu(
+        currentUser: AuthenticatedUser,
+        posyanduId: string | null | undefined
+    ): void {
+        if (
+            (currentUser.role === 'cadre' || currentUser.role === 'midwife') &&
+            (!posyanduId ||
+                !(currentUser.posyandu_ids ?? []).includes(posyanduId))
+        ) {
+            throw ApiError.forbidden(
+                'You do not have access to this Posyandu'
+            )
+        }
+    }
+
+    getAssignmentId(
+        currentUser: AuthenticatedUser,
+        posyanduId: string
+    ): string | undefined {
+        if (
+            currentUser.role !== 'cadre' &&
+            currentUser.role !== 'midwife'
+        ) {
+            return undefined
+        }
+
+        return currentUser.posyandu_assignments?.find(
+            assignment => assignment.posyandu_id === posyanduId
+        )?.id
     }
 }

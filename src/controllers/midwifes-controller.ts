@@ -13,7 +13,7 @@ export class MidwifeController {
     constructor(private readonly midwife_service: MidwifeService) {}
 
     createMidwife = async (req: Request, res: Response) => {
-        logger.info({ body: req.body }, 'Incoming request: Create Midwife')
+        logger.info('Incoming request: Create Midwife')
 
         const midwife = await this.midwife_service.createMidwife(req.body)
 
@@ -23,7 +23,7 @@ export class MidwifeController {
 
     getmidwifes = async (req: Request, res: Response) => {
         const query = req.query as unknown as MidwifeQueryFilters
-        logger.info({ query }, 'Incoming request: Get midwifes')
+        logger.info('Incoming request: Get midwifes')
 
         const result = await this.midwife_service.getMidwifes(query)
         return ApiResponse.ok(res, 'midwifes retrieved successfully', result)
@@ -41,7 +41,7 @@ export class MidwifeController {
     updateMidwife = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Midwife'
         )
 

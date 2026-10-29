@@ -13,6 +13,7 @@ import {
     or,
     eq,
     ilike,
+    inArray,
     sql,
     SQL,
     asc,
@@ -30,6 +31,7 @@ export interface ConsultationsQueryFilters {
     midwife_id?: string
     cadre_id?: string
     posyandu_id?: string
+    posyandu_ids?: string[]
     status?: Consultation['status']
     consultation_type?: Consultation['consultation_type']
     page?: number
@@ -58,6 +60,7 @@ export class ConsultationsRepository {
             midwife_id,
             cadre_id,
             posyandu_id,
+            posyandu_ids,
             status,
             consultation_type,
             page = 1,
@@ -108,6 +111,14 @@ export class ConsultationsRepository {
             conditions.push(eq(consultations.posyandu_id, posyandu_id))
         }
 
+        if (posyandu_ids !== undefined) {
+            conditions.push(
+                posyandu_ids.length > 0
+                    ? inArray(consultations.posyandu_id, posyandu_ids)
+                    : sql`false`
+            )
+        }
+
         if (status) {
             conditions.push(eq(consultations.status, status))
         }
@@ -121,7 +132,6 @@ export class ConsultationsRepository {
         if (escapedSearch) {
             conditions.push(
                 or(
-                    ilike(consultations.notes, `%${escapedSearch}%`),
                     ilike(parentUsers.name, `%${escapedSearch}%`),
                     ilike(childrens.name, `%${escapedSearch}%`)
                 )

@@ -3,17 +3,6 @@ import db from '@/configs/db'
 import { auditLogs } from '@/db/schemas/audit-logs-schema'
 import { logger } from '@/utils/logger'
 
-const SENSITIVE_KEYS = [
-    'password',
-    'passwordHash',
-    'token',
-    'accessToken',
-    'refreshToken',
-    'secret',
-    'authorization',
-    'cookie'
-]
-
 const ENTITY_TYPE_MAP: Record<string, string> = {
     consultations: 'consultation',
     users: 'user',
@@ -47,27 +36,6 @@ function extractEntityId(req: Request): string | null {
     )
 }
 
-const censorPayload = (data: unknown): unknown => {
-    if (!data || typeof data !== 'object') return data
-
-    const censored = { ...(data as Record<string, unknown>) }
-    for (const key of Object.keys(censored)) {
-        if (
-            SENSITIVE_KEYS.some(sensitiveKey =>
-                key.toLowerCase().includes(sensitiveKey.toLowerCase())
-            )
-        ) {
-            censored[key] = '[REDACTED]'
-        } else if (
-            typeof censored[key] === 'object' &&
-            censored[key] !== null
-        ) {
-            censored[key] = censorPayload(censored[key])
-        }
-    }
-    return censored
-}
-
 export const autoAuditMiddleware = (
     req: Request,
     res: Response,
@@ -79,23 +47,11 @@ export const autoAuditMiddleware = (
         return next()
     }
 
-    const payload = req.body ? censorPayload(req.body) : null
     const ipAddress = (req.headers['x-forwarded-for'] as string) || req.ip || ''
     const userAgent = req.headers['user-agent'] || ''
-    const action = `${req.method} ${req.originalUrl || req.url}`
-    const entityType = extractEntityType(req.originalUrl || req.url)
+    const action = `${req.method} ${req.path}`
+    const entityType = extractEntityType(req.path)
     const entityId = extractEntityId(req)
-
-    let capturedNewValue: unknown = null
-    const originalJson = res.json.bind(res)
-    res.json = (body: unknown) => {
-        const parsed =
-            body && typeof body === 'object'
-                ? (body as Record<string, unknown>)
-                : null
-        capturedNewValue = parsed?.data ?? null
-        return originalJson(body)
-    }
 
     res.on('finish', () => {
         const isSuccess = res.statusCode >= 200 && res.statusCode < 300
@@ -109,10 +65,8 @@ export const autoAuditMiddleware = (
                     action,
                     entityType,
                     entityId,
-                    newValue: capturedNewValue,
                     ipAddress,
                     userAgent,
-                    payload,
                     statusCode: res.statusCode
                 })
                 .then(() => {
@@ -123,7 +77,14 @@ export const autoAuditMiddleware = (
                 })
                 .catch((error: unknown) => {
                     logger.error(
-                        { error, action, userId },
+                        {
+                            errorType:
+                                error instanceof Error
+                                    ? error.name
+                                    : 'UnknownError',
+                            action,
+                            userId
+                        },
                         'Failed to save audit log'
                     )
                 })

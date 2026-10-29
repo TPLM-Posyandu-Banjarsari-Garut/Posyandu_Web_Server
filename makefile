@@ -1,7 +1,7 @@
 BUN := bun
 DOCKER_COMPOSE := docker compose
 
-.PHONY: help dev build start typecheck lint format db-gen db-mig db-studio clean dc-up dc-down dc-restart
+.PHONY: help dev build start typecheck lint format db-gen db-mig db-studio data-encrypt-preview data-encrypt-apply clean dc-up dc-down dc-restart
 
 help:
 	@echo "=============================================================================="
@@ -21,6 +21,8 @@ help:
 	@echo "  make db-gen      : Membuat file migrasi database berdasarkan skema"
 	@echo "  make db-mig      : Mengeksekusi file migrasi ke dalam database"
 	@echo "  make db-studio   : Membuka GUI dashboard Drizzle Studio"
+	@echo "  make data-encrypt-preview : Melihat jumlah data lama yang belum terenkripsi"
+	@echo "  make data-encrypt-apply   : Mengenkripsi data lama (setelah backup)"
 	@echo "------------------------------------------------------------------------------"
 	@echo "Docker Compose Environment:"
 	@echo "  make dc-up       : Menjalankan semua container di latar belakang (-d)"
@@ -58,16 +60,20 @@ db-mig:
 db-studio:
 	infisical run -- $(BUN) run db:studio
 
+data-encrypt-preview:
+	infisical run -- $(BUN) run data:encrypt-sensitive
+
+data-encrypt-apply:
+	infisical run -- $(BUN) run data:encrypt-sensitive -- --apply
+
 dc-up:
-	infisical export --output=dotenv > .env
-	DOCKER_BUILDKIT=1 $(DOCKER_COMPOSE) up --build app-dev postgres
+	infisical run -- env DOCKER_BUILDKIT=1 $(DOCKER_COMPOSE) --env-file /dev/null up --build app-dev postgres
  
 dc-bg:
-	infisical export --output=dotenv > .env
-	DOCKER_BUILDKIT=1 $(DOCKER_COMPOSE) up -d
+	infisical run -- env DOCKER_BUILDKIT=1 $(DOCKER_COMPOSE) --env-file /dev/null up -d
 	
 dc-down:
-	$(DOCKER_COMPOSE) down --remove-orphans
+	infisical run -- $(DOCKER_COMPOSE) --env-file /dev/null down --remove-orphans
 
 dc-restart:
-	$(DOCKER_COMPOSE) restart 
+	infisical run -- $(DOCKER_COMPOSE) --env-file /dev/null restart

@@ -15,10 +15,7 @@ export class ExaminationSchedulesController {
 
     createSchedule = async (req: Request, res: Response) => {
         const user = res.locals.user
-        logger.info(
-            { body: req.body },
-            'Incoming request: Create Examination Schedule'
-        )
+        logger.info('Incoming request: Create Examination Schedule')
 
         if (user?.posyandu_id && req.body.posyandu_id !== user.posyandu_id) {
             throw ApiError.forbidden(
@@ -41,7 +38,7 @@ export class ExaminationSchedulesController {
     getSchedules = async (req: Request, res: Response) => {
         const user = res.locals.user
         const query = req.query as unknown as ExaminationSchedulesQueryFilters
-        logger.info({ query }, 'Incoming request: Get Examination Schedules')
+        logger.info('Incoming request: Get Examination Schedules')
 
         if (user?.posyandu_id) {
             query.posyandu_id = user.posyandu_id
@@ -80,7 +77,7 @@ export class ExaminationSchedulesController {
         const user = res.locals.user
         const public_id = (req.params.public_id || req.params.id) as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Examination Schedule'
         )
 
@@ -155,7 +152,7 @@ export class ExaminationSchedulesController {
         const user = res.locals.user
         const public_id = (req.params.public_id || req.params.id) as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Broadcast Schedule Notification'
         )
 

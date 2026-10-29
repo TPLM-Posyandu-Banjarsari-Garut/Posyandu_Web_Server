@@ -52,6 +52,14 @@ app.use(
     })
 )
 
+// Health and identity data must not be stored by browsers or intermediary caches.
+app.use('/api', (_req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, private')
+    res.setHeader('Pragma', 'no-cache')
+    res.setHeader('Expires', '0')
+    next()
+})
+
 // ─── Body Parsers ─────────────────────────────────────────────────────────────
 app.use(
     express.json({
@@ -227,13 +235,14 @@ app.use((req: Request, res: Response, next) => {
 // ─── Logger ───────────────────────────────────────────────────────────────────
 morgan.token('user', (req: Request, res: Response) => {
     const user = res.locals?.user
-    return user ? `${user.email} (${user.id})` : 'anonymous'
+    return user ? user.id : 'anonymous'
 })
+morgan.token('path', (req: Request) => req.path)
 
 const morganFormat =
     env.NODE_ENV === 'development'
-        ? '[:date[iso]] :method :url :status :response-time ms - :res[content-length] | User: :user'
-        : ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" | User: :user'
+        ? '[:date[iso]] :method :path :status :response-time ms - :res[content-length] | User: :user'
+        : ':remote-addr [:date[clf]] ":method :path HTTP/:http-version" :status :res[content-length] | User: :user'
 
 app.use(morgan(morganFormat))
 app.use(autoAuditMiddleware)

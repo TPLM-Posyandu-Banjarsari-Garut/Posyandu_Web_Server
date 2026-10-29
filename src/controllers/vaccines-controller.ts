@@ -13,7 +13,7 @@ export class VaccineController {
     constructor(private readonly vaccine_service: VaccineService) {}
 
     createVaccine = async (req: Request, res: Response) => {
-        logger.info({ body: req.body }, 'Incoming request: Create Vaccine')
+        logger.info('Incoming request: Create Vaccine')
 
         const vaccine = await this.vaccine_service.createVaccine(req.body)
 
@@ -23,7 +23,7 @@ export class VaccineController {
 
     getVaccines = async (req: Request, res: Response) => {
         const query = req.query as unknown as VaccineQueryFilters
-        logger.info({ query }, 'Incoming request: Get Vaccines')
+        logger.info('Incoming request: Get Vaccines')
 
         const result = await this.vaccine_service.getVaccines(query)
         return ApiResponse.ok(res, 'Vaccines retrieved successfully', result)
@@ -41,7 +41,7 @@ export class VaccineController {
     updateVaccine = async (req: Request, res: Response) => {
         const public_id = req.params.public_id as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Vaccine'
         )
 

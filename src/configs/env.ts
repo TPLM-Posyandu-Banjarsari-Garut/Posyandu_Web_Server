@@ -27,6 +27,19 @@ export const envSchema = z.object({
 
     DATABASE_URL: z.url('Invalid Database URL format'),
 
+    DATA_ENCRYPTION_KEY: z
+        .string()
+        .refine(value => {
+            if (/^[\da-f]{64}$/i.test(value)) return true
+            const base64 = value.replace(/-/g, '+').replace(/_/g, '/')
+            const decoded = Buffer.from(base64, 'base64')
+            return (
+                decoded.length === 32 &&
+                decoded.toString('base64').replace(/=+$/, '') ===
+                    base64.replace(/=+$/, '')
+            )
+        }, 'DATA_ENCRYPTION_KEY must encode exactly 32 random bytes as 64 hex characters or base64'),
+
     BETTER_AUTH_SECRET: z.string().min(1, 'BETTER_AUTH_SECRET is required'),
 
     BETTER_AUTH_URL: z.url('Invalid BETTER_AUTH_URL format'),

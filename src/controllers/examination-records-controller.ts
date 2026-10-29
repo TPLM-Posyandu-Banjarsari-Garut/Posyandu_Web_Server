@@ -2,7 +2,6 @@ import { Request, Response } from 'express'
 import { ExaminationRecordsService } from '@/services/examination-records-service'
 import { ExaminationRecordsQueryFilters } from '@/repositories/examination-records-repository'
 import { ApiResponse } from '@/utils/api-response'
-import { ApiError } from '@/utils/api-error'
 import { logger } from '@/utils/logger'
 import {
     handleDeleteRequest,
@@ -15,18 +14,9 @@ export class ExaminationRecordsController {
 
     createRecord = async (req: Request, res: Response) => {
         const user = res.locals.user
-        logger.info(
-            { body: req.body },
-            'Incoming request: Create Examination Record'
-        )
+        logger.info('Incoming request: Create Examination Record')
 
-        if (user?.posyandu_id && req.body.posyandu_id !== user.posyandu_id) {
-            throw ApiError.forbidden(
-                'Cannot create examination record for a different Posyandu'
-            )
-        }
-
-        const record = await this.service.createRecord(req.body)
+        const record = await this.service.createRecord(req.body, user)
         logger.info(
             { id: record.id },
             'Examination record created successfully'
@@ -41,18 +31,9 @@ export class ExaminationRecordsController {
     getRecords = async (req: Request, res: Response) => {
         const user = res.locals.user
         const query = req.query as unknown as ExaminationRecordsQueryFilters
-        logger.info({ query }, 'Incoming request: Get Examination Records')
+        logger.info('Incoming request: Get Examination Records')
 
-        if (user?.role === 'parent') {
-            query.parent_id = user.parent_id
-        } else if (
-            (user?.role === 'cadre' || user?.role === 'midwife') &&
-            user.posyandu_id
-        ) {
-            query.posyandu_id = user.posyandu_id
-        }
-
-        const result = await this.service.getRecords(query)
+        const result = await this.service.getRecords(query, user)
         return ApiResponse.ok(
             res,
             'Examination records retrieved successfully',
@@ -60,66 +41,26 @@ export class ExaminationRecordsController {
         )
     }
 
-    getRecordById = async (req: Request, res: Response) => {
-        const user = res.locals.user
-        return handleGetByIdRequest(req, res, 'ExaminationRecord', async id => {
-            const record = await this.service.getRecordById(id)
-            if (
-                user?.role === 'parent' &&
-                record.parent_id !== user.parent_id
-            ) {
-                throw ApiError.forbidden(
-                    'Access denied. You do not own this record.'
-                )
-            }
-            if (
-                (user?.role === 'cadre' || user?.role === 'midwife') &&
-                user.posyandu_id
-            ) {
-                if (record.posyandu_id !== user.posyandu_id) {
-                    throw ApiError.forbidden(
-                        'Access denied. Record belongs to a different Posyandu.'
-                    )
-                }
-            }
-            return record
-        })
-    }
+    getRecordById = async (req: Request, res: Response) =>
+        handleGetByIdRequest(
+            req,
+            res,
+            'ExaminationRecord',
+            (id, currentUser) => this.service.getRecordById(id, currentUser)
+        )
 
     updateRecord = async (req: Request, res: Response) => {
-        const user = res.locals.user
         const public_id = (req.params.public_id || req.params.id) as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Examination Record'
         )
 
-        const existing = await this.service.getRecordById(public_id)
-        if (user?.role === 'parent' && existing.parent_id !== user.parent_id) {
-            throw ApiError.forbidden(
-                'Access denied. You do not own this record.'
-            )
-        }
-        if (
-            (user?.role === 'cadre' || user?.role === 'midwife') &&
-            user.posyandu_id
-        ) {
-            if (existing.posyandu_id !== user.posyandu_id) {
-                throw ApiError.forbidden(
-                    'Access denied. Record belongs to a different Posyandu.'
-                )
-            }
-            if (
-                req.body.posyandu_id &&
-                req.body.posyandu_id !== user.posyandu_id
-            ) {
-                throw ApiError.forbidden(
-                    'Cannot assign record to a different Posyandu'
-                )
-            }
-        }
-
-        const record = await this.service.updateRecord(public_id, req.body)
+        const record = await this.service.updateRecord(
+            public_id,
+            req.body,
+            res.locals.user
+        )
         return ApiResponse.ok(
             res,
             'Examination record updated successfully',
@@ -127,60 +68,17 @@ export class ExaminationRecordsController {
         )
     }
 
-    deleteRecord = async (req: Request, res: Response) => {
-        const user = res.locals.user
-        return handleDeleteRequest(
+    deleteRecord = async (req: Request, res: Response) =>
+        handleDeleteRequest(
             req,
             res,
             'ExaminationRecord',
-            async (id, isPermanent) => {
-                const existing = await this.service.getRecordById(id)
-                if (
-                    user?.role === 'parent' &&
-                    existing.parent_id !== user.parent_id
-                ) {
-                    throw ApiError.forbidden(
-                        'Access denied. You do not own this record.'
-                    )
-                }
-                if (
-                    (user?.role === 'cadre' || user?.role === 'midwife') &&
-                    user.posyandu_id
-                ) {
-                    if (existing.posyandu_id !== user.posyandu_id) {
-                        throw ApiError.forbidden(
-                            'Access denied. Record belongs to a different Posyandu.'
-                        )
-                    }
-                }
-                return this.service.deleteRecord(id, isPermanent)
-            }
+            (id, isPermanent, currentUser) =>
+                this.service.deleteRecord(id, isPermanent, currentUser)
         )
-    }
 
-    restoreRecord = async (req: Request, res: Response) => {
-        const user = res.locals.user
-        return handleRestoreRequest(req, res, 'ExaminationRecord', async id => {
-            const existing = await this.service.getRecordById(id)
-            if (
-                user?.role === 'parent' &&
-                existing.parent_id !== user.parent_id
-            ) {
-                throw ApiError.forbidden(
-                    'Access denied. You do not own this record.'
-                )
-            }
-            if (
-                (user?.role === 'cadre' || user?.role === 'midwife') &&
-                user.posyandu_id
-            ) {
-                if (existing.posyandu_id !== user.posyandu_id) {
-                    throw ApiError.forbidden(
-                        'Access denied. Record belongs to a different Posyandu.'
-                    )
-                }
-            }
-            return this.service.restoreRecord(id)
-        })
-    }
+    restoreRecord = async (req: Request, res: Response) =>
+        handleRestoreRequest(req, res, 'ExaminationRecord', (id, currentUser) =>
+            this.service.restoreRecord(id, currentUser)
+        )
 }

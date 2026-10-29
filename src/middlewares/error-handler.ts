@@ -42,8 +42,13 @@ export const errorHandler = (
     }
 
     logger.error(
-        err,
-        `Error: ${message} | Status: ${statusCode} | Path: ${req.method} ${req.originalUrl}`
+        {
+            errorType: err instanceof Error ? err.name : 'UnknownError',
+            statusCode,
+            method: req.method,
+            path: req.path
+        },
+        'Request failed'
     )
 
     const isProduction = env.NODE_ENV === 'production'

@@ -1,13 +1,13 @@
 import { Request, Response } from 'express'
 import { ApiResponse } from '@/utils/api-response'
 import { logger } from '@/utils/logger'
-import { User } from '@/db'
+import type { AuthenticatedUser } from '@/services/auth-service'
 
 export async function handleGetByIdRequest<T>(
     req: Request,
     res: Response,
     entityName: string,
-    getByIdFn: (id: string, currentUser?: User) => Promise<T>
+    getByIdFn: (id: string, currentUser: AuthenticatedUser) => Promise<T>
 ) {
     const public_id = req.params.public_id as string
     const currentUser = res.locals.user
@@ -24,7 +24,7 @@ export async function handleDeleteRequest<T>(
     deleteFn: (
         id: string,
         isPermanent: boolean,
-        currentUser?: User
+        currentUser: AuthenticatedUser
     ) => Promise<T>
 ) {
     const public_id = req.params.public_id as string
@@ -44,7 +44,7 @@ export async function handleRestoreRequest<T>(
     req: Request,
     res: Response,
     entityName: string,
-    restoreFn: (id: string, currentUser?: User) => Promise<T>
+    restoreFn: (id: string, currentUser: AuthenticatedUser) => Promise<T>
 ) {
     const public_id = req.params.public_id as string
     const currentUser = res.locals.user

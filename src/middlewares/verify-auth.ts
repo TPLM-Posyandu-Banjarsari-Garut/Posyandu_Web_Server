@@ -31,6 +31,12 @@ export const verifyAuth = async (
             )
         }
 
+        if (currentUser.role === 'parent' && !currentUser.parent_id) {
+            throw ApiError.forbidden(
+                'No active parent profile is associated with this account'
+            )
+        }
+
         res.locals.user = currentUser
         next()
     } catch (error: unknown) {

@@ -14,9 +14,10 @@ export class ParentController {
     constructor(private readonly parent_service: ParentService) {}
 
     createParent = async (req: Request, res: Response) => {
-        logger.info({ body: req.body }, 'Incoming request: Create Parent')
+        const user = res.locals.user
+        logger.info('Incoming request: Create Parent')
 
-        const parent = await this.parent_service.createParent(req.body)
+        const parent = await this.parent_service.createParent(req.body, user)
 
         logger.info({ parentId: parent.id }, 'Parent created successfully')
         return ApiResponse.created(res, 'Parent created successfully', parent)
@@ -24,9 +25,12 @@ export class ParentController {
 
     getParents = async (req: Request, res: Response) => {
         const query = req.query as unknown as ParentQueryFilters
-        logger.info({ query }, 'Incoming request: Get Parents')
+        logger.info('Incoming request: Get Parents')
 
-        const result = await this.parent_service.getParents(query)
+        const result = await this.parent_service.getParents(
+            query,
+            res.locals.user
+        )
         return ApiResponse.ok(res, 'Parents retrieved successfully', result)
     }
 
@@ -50,7 +54,7 @@ export class ParentController {
         const user = res.locals.user
         const public_id = req.params.public_id as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Parent'
         )
 
@@ -60,7 +64,8 @@ export class ParentController {
 
         const parent = await this.parent_service.updateParent(
             public_id,
-            req.body
+            req.body,
+            user
         )
         return ApiResponse.ok(res, 'Parent updated successfully', parent)
     }

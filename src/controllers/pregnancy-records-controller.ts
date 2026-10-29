@@ -13,11 +13,9 @@ export class PregnancyRecordsController {
     constructor(private readonly service: PregnancyRecordsService) {}
 
     createPregnancyRecord = async (req: Request, res: Response) => {
-        logger.info(
-            { body: req.body },
-            'Incoming request: Create Pregnancy Record'
-        )
-        const record = await this.service.createPregnancyRecord(req.body)
+        const user = res.locals.user
+        logger.info('Incoming request: Create Pregnancy Record')
+        const record = await this.service.createPregnancyRecord(req.body, user)
         logger.info({ id: record.id }, 'Pregnancy record created successfully')
         return ApiResponse.created(
             res,
@@ -28,8 +26,11 @@ export class PregnancyRecordsController {
 
     getPregnancyRecords = async (req: Request, res: Response) => {
         const query = req.query as unknown as PregnancyRecordQueryFilters
-        logger.info({ query }, 'Incoming request: Get Pregnancy Records')
-        const result = await this.service.getPregnancyRecords(query)
+        logger.info('Incoming request: Get Pregnancy Records')
+        const result = await this.service.getPregnancyRecords(
+            query,
+            res.locals.user
+        )
         return ApiResponse.ok(
             res,
             'Pregnancy records retrieved successfully',
@@ -49,12 +50,13 @@ export class PregnancyRecordsController {
     updatePregnancyRecord = async (req: Request, res: Response) => {
         const public_id = (req.params.public_id || req.params.id) as string
         logger.info(
-            { public_id, body: req.body },
+            { public_id },
             'Incoming request: Update Pregnancy Record'
         )
         const record = await this.service.updatePregnancyRecord(
             public_id,
-            req.body
+            req.body,
+            res.locals.user
         )
         return ApiResponse.ok(
             res,

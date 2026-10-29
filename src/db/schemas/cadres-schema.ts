@@ -1,14 +1,15 @@
 import { accountStatusEnum, cadrePositionEnum } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
+import { encryptedText } from '@/db/helpers/encrypted-field'
 import { timestamps } from '@/db/helpers/timestamps'
 import { posyandus } from '@/db/schemas/posyandus-schema'
 import { users } from '@/db/schemas/users-schema'
+import { sql } from 'drizzle-orm'
 import {
     boolean,
     pgTable,
     text,
     uniqueIndex,
-    varchar,
     index
 } from 'drizzle-orm/pg-core'
 
@@ -24,7 +25,10 @@ export const cadres = pgTable(
             .notNull()
             .references(() => posyandus.id),
 
-        identity_number: varchar('identity_number', { length: 16 }),
+        identity_number: encryptedText(
+            'identity_number',
+            'cadres.identity_number'
+        ),
 
         position: cadrePositionEnum('position').notNull().default('member'),
 
@@ -43,7 +47,10 @@ export const cadres = pgTable(
             table.posyandu_id
         ),
         index('cadres_is_deleted_idx').on(table.is_deleted),
-        index('cadres_posyandu_id_idx').on(table.posyandu_id)
+        index('cadres_posyandu_id_idx').on(table.posyandu_id),
+        index('cadres_identity_blind_idx')
+            .on(sql`split_part(${table.identity_number}::text, ':', 6)`)
+            .where(sql`${table.identity_number} LIKE 'enc:v1:%'`)
     ]
 )
 

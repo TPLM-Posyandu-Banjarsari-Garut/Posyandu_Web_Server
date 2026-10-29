@@ -3,15 +3,25 @@ import {
     ImmunizationRecord,
     immunizationRecords,
     parents,
-    relationChildrens
+    relationChildrens,
+    childrens
 } from '@/db'
-import { and, eq, sql, asc, desc, getTableColumns } from 'drizzle-orm'
+import {
+    and,
+    eq,
+    sql,
+    asc,
+    desc,
+    getTableColumns,
+    inArray
+} from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export interface ImmunizationRecordQueryFilters {
     children_id?: string
     vaccine_id?: string
     posyandu_id?: string
+    posyandu_ids?: string[]
     cadre_id?: string
     midwife_id?: string
     parent_user_id?: string
@@ -40,6 +50,7 @@ export class ImmunizationRecordRepository {
             children_id,
             vaccine_id,
             posyandu_id,
+            posyandu_ids,
             cadre_id,
             midwife_id,
             parent_user_id,
@@ -71,6 +82,28 @@ export class ImmunizationRecordRepository {
             conditions.push(eq(immunizationRecords.posyandu_id, posyandu_id))
         }
 
+        if (posyandu_ids !== undefined) {
+            conditions.push(
+                posyandu_ids.length > 0
+                    ? inArray(
+                          immunizationRecords.children_id,
+                          this.db
+                              .select({ id: childrens.id })
+                              .from(childrens)
+                              .where(
+                                  and(
+                                      inArray(
+                                          childrens.posyandu_id,
+                                          posyandu_ids
+                                      ),
+                                      sql`${childrens.deleted_at} IS NULL`
+                                  )
+                              )
+                      )
+                    : sql`false`
+            )
+        }
+
         if (cadre_id) {
             conditions.push(eq(immunizationRecords.cadre_id, cadre_id))
         }
@@ -79,7 +112,7 @@ export class ImmunizationRecordRepository {
             conditions.push(eq(immunizationRecords.midwife_id, midwife_id))
         }
 
-        if (parent_user_id) {
+        if (parent_user_id !== undefined) {
             const parentChildrenSubquery = this.db
                 .select({ id: relationChildrens.children_id })
                 .from(relationChildrens)
@@ -131,15 +164,20 @@ export class ImmunizationRecordRepository {
         }
     }
 
-    async findById(public_id: string): Promise<ImmunizationRecord | undefined> {
+    async findById(
+        public_id: string,
+        includeDeleted = false
+    ): Promise<ImmunizationRecord | undefined> {
         const [record] = await this.db
             .select()
             .from(immunizationRecords)
             .where(
-                and(
-                    eq(immunizationRecords.id, public_id),
-                    sql`${immunizationRecords.deleted_at} IS NULL`
-                )
+                includeDeleted
+                    ? eq(immunizationRecords.id, public_id)
+                    : and(
+                          eq(immunizationRecords.id, public_id),
+                          sql`${immunizationRecords.deleted_at} IS NULL`
+                      )
             )
             .limit(1)
         return record

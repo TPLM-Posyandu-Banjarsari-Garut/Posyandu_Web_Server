@@ -1,4 +1,5 @@
 import { NewCadre, Cadre, cadres } from '@/db'
+import { encryptedFieldEquals } from '@/db/helpers/encrypted-field'
 import {
     and,
     eq,
@@ -69,7 +70,11 @@ export class CadreRepository {
         const whereClause = and(
             escapedSearch
                 ? or(
-                      ilike(cadres.identity_number, `%${escapedSearch}%`),
+                      encryptedFieldEquals(
+                          cadres.identity_number,
+                          search!,
+                          'cadres.identity_number'
+                      ),
                       ilike(cadres.duty_area_notes, `%${escapedSearch}%`)
                   )
                 : undefined,

@@ -5,6 +5,7 @@ import {
     syncStatusEnum
 } from '@/constants/enum'
 import { createBaseColumns } from '@/db/helpers/base-columns'
+import { encryptedText } from '@/db/helpers/encrypted-field'
 import { timestamps } from '@/db/helpers/timestamps'
 import { cadres } from '@/db/schemas/cadres-schema'
 import { childrens } from '@/db/schemas/childrens-schema'
@@ -49,7 +50,7 @@ export const immunizationRecords = pgTable(
         sync_status: syncStatusEnum('sync_status').notNull().default('pending'),
         external_ref_id: varchar('external_ref_id', { length: 100 }),
         location_type: serviceLocationTypeEnum('location_type'),
-        notes: text('notes'),
+        notes: encryptedText('notes', 'immunization_records.notes'),
 
         ...timestamps
     },
